@@ -8,7 +8,7 @@ const SignInScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <ImageBackground 
-        source={require('../../../assets/images/background.jpg')}
+        source={require('../../assets/images/background.jpg')}
         style={styles.backgroundImage}
         resizeMode="cover"
       >
