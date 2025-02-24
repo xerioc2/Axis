@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignInScreen from './app/screens/SignInScreen';
-import SignUpScreen from './app/screens/SignUpScreen';
+//import SignUpScreen from './app/screens/SignUpScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,7 +14,7 @@ export default function App() {
         screenOptions={{ headerTitle: 'Axis' }}
       >
         <Stack.Screen name="SignIn" component={SignInScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
