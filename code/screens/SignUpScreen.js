@@ -10,7 +10,7 @@ const SignUpScreen = ({ navigation }) => {
     const [password, setPassword] = useState('');  
     const [confirmPassword, setConfirmPassword] = useState('');//Need to make sure password is correct probably need to remember a checker
     const [schoolOrganization, setSchoolOrganization] = useState('');
-    const [schoolType, setSchoolType] = useState(''); //for the user's school when signing up     
+    const [schoolType, setSchoolType] = useState(''); //for the user's school when signing up (HS, MS, College/University)    
 
 return(
     <View style={styles.container}>
