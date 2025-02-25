@@ -8,10 +8,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator 
-        initialRouteName="SignIn" 
-        screenOptions={{ headerTitle: 'Axis' }}>
-          
-        <Stack.Screen name="SignIn" component={SignInScreen} />
+        >
+        <Stack.Screen name="SignIn" component={SignInScreen}
+        options={{headerShown : false}} />
 
       </Stack.Navigator>
     </NavigationContainer>
