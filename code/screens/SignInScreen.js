@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   inputContainer: {
-    width: '100%',
+    width: '80%',
     marginBottom: 20,
   },
   input: {
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2E7D32',
     padding: 15,
     borderRadius: 25,
-    width: '100%',
+    width: '80%',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
