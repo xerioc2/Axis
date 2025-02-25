@@ -29,7 +29,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   /* 
   SUPABASE Documentation Notes
 
-  User Sign up Docs: https://supabase.com/docs/reference/javascript/auth-signup
+  User Sign Uep Docs: https://supabase.com/docs/reference/javascript/auth-signup
 
   const { data, error } = await supabase.auth.signUp({
    email: 'example@email.com',
@@ -57,7 +57,9 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         ^^--Best practice is to extract access token and store it in memory for Authorization header of later requests
   
 
-  User session Docs: https://supabase.com/docs/guides/auth/sessions
+  User Session Docs: https://supabase.com/docs/guides/auth/sessions
+
+
   
   
   */
