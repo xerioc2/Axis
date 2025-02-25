@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../utils/supabase'
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ImageBackground } from 'react-native';
 
 const SignInScreen = ({ navigation }) => {  
