@@ -2,6 +2,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignUpScreen from './code/screens/SignUpScreen';
 
+/*
+{} are used to import NAMED exports. the name inside brackets must match the name of export variable
+ No {} are used when importing a DEFAULT export, so it can be named whatever you want.
+*/
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {

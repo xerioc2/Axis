@@ -12,7 +12,7 @@ type RadioButtonProps = {
 //value here is the data that THIS RadioButton represents.
 //selectedValue is the value that is selected amongst the radio buttons in this group
 //if value === selectedValue then THIS RadioButton is selected.
-const RadioButton = ({ label, value, selectedValue, onSelect }: RadioButtonProps) => {
+const RadioButton: React.FC<RadioButtonProps> = ({ label, value, selectedValue, onSelect }) => {
     return (
         <TouchableOpacity
          style={styles.radioButtonContainer}

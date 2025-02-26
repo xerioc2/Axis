@@ -1,20 +1,20 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import RadioGroup from '../buttons/RadioGroup';
+import type { UserRole } from './StepManager'
 
-type UserRole = 'Student' | 'Teacher';
+
 
 type Props = {
-    setUserRole: (role: UserRole) => void;
-};
+    setUserRole: (role: UserRole) => void; 
+}
 
 const UserRoleSelection: React.FC<Props> = ({ setUserRole }) => {
 
     const handleValueChange = (value: string | number) => {
         if (typeof value === 'string' && (value === 'Student' || value === 'Teacher')) {
             setUserRole(value);
-        }
-        
+        } 
     }
 
     return (

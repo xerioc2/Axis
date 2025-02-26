@@ -1,11 +1,31 @@
 import React, { useState } from 'react';
-import { View,Text, ImageBackground, StyleSheet } from 'react-native';
-import Step1RoleSelection from '../components/signup/Step1RoleSelection';
+import { View, ImageBackground, StyleSheet } from 'react-native';
+import  StepManager from '../components/signup/StepManager';
+import type { UserRole, BasicInfo, SchoolInfo } from '../components/signup/StepManager';
 
+
+export type NewUser = {
+    role: UserRole;
+    basicInfo: BasicInfo;
+    schoolInfo: SchoolInfo;
+}
 
 
 const SignUpScreen: React.FC = () => {
-    const [userRole, setUserRole] = useState<'Student' | 'Teacher' | null>(null);
+    let newUserBase: NewUser = {
+        role: null,
+        basicInfo: {
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: ''
+        },
+        schoolInfo: {
+            schoolType: 'College',
+            schoolName: ''
+        }
+    }
+    const [newUser, setNewUser] = useState<NewUser>(newUserBase);
 
     return (
         <View style={styles.container}>
@@ -14,11 +34,9 @@ const SignUpScreen: React.FC = () => {
                 style={styles.backgroundImage}
                 resizeMode="cover"
             >
-                <View style={styles.logoContainer}>
-
-                </View>
-                <Step1RoleSelection setUserRole={setUserRole} />
-                {userRole && <Text>Selected User Type: {userRole}</Text>}
+                <StepManager setNewUser={setNewUser} />
+                
+                
             </ImageBackground>
         </View>
     );
@@ -36,18 +54,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
       },
-    logoContainer: {
-        alignItems: 'center',
-        marginTop: 40,
-        marginBottom: 30, 
-    },
-    stepContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-        paddingTop: 120,
-    }
 
 })
 

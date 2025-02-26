@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import RadioButton from './RadioButton';
-import UserRole from '../signup/Step1RoleSelection'
+
 
 type RadioGroupProps = {
     options: { label: string, value: string | number }[];
@@ -9,16 +9,16 @@ type RadioGroupProps = {
     onValueChange: (value: string | number) => void;
 };
 
-const RadioGroup = ({ options, initialValue, onValueChange}: RadioGroupProps) => {
+const RadioGroup: React.FC<RadioGroupProps> = ({ options, initialValue, onValueChange}) => {
     const [selectedValue, setSelectedValue] = useState(initialValue);
 
     const handleSelect = (value: string | number) => {
-        setSelectedValue(value);
-        onValueChange(value);
+        setSelectedValue(value); //updates the state of this radio group with newly selected value
+        onValueChange(value); //calls parent component function to notify that selected value has changed
     };
 
     return (
-        <View>
+        <View style={styles.radioGroupContainer}>
             {options.map((option) => (
                 <RadioButton
                     key={option.value}
@@ -31,5 +31,13 @@ const RadioGroup = ({ options, initialValue, onValueChange}: RadioGroupProps) =>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    radioGroupContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly'
+    }
+})
 
 export default RadioGroup;
