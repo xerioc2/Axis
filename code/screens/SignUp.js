@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../utils/supabase'
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ImageBackground, ScrollView} from 'react-native';
 
-const SignUpScreen = ({ navigation }) => {
+const SignUp = ({ navigation }) => {
     const [userType, setUserType] = useState(''); //to set for student or teacher default is null to try and prevent accidental misclicks
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState(''); // these are for the username fields for the user's name when signing up
@@ -519,4 +519,4 @@ const styles = StyleSheet.create({
       backgroundColor: '#CCCCCC',
     },
 });
-export default SignUpScreen;
+export default SignUp;
