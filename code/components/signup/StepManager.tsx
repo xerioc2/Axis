@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import type { NewUser } from '../../screens/SignUpScreen'; 
 import Step1RoleSelection from './Step1RoleSelection';
 
+/*
+StepManager is responsible for managing what step of the sign up process a user is on 
+and rendering the corresponding Step component, and updating the StepTracker
+*/
 
 export type UserRole = 'Student' | 'Teacher' | null;
 export type BasicInfo = {
@@ -10,30 +14,30 @@ export type BasicInfo = {
     lastName: string;
     email: string;
     password: string;
-}
+};
 type SchoolType = 'Middle School' | 'High School' | 'College';
 export type SchoolInfo = {
     schoolType: SchoolType;
     schoolName: string;
-}
-
+};
 type StepManagerProps = {
     setNewUser: (user: NewUser) => void;
-}
+};
 
 const StepManager: React.FC<StepManagerProps> = ({ setNewUser }) => {
-    const [userRole, setUserRole] = useState<UserRole>(null)
-    const [basicInfo, setBasicInfo] = useState<BasicInfo>({firstName:'', lastName:'', email:'', password:''})
-    const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>({schoolType: 'College', schoolName: ''})
-    //const [currentStep, setCurrentStep] = 
+    const [currentStep, setCurrentStep] = useState(1);
+    const [userRole, setUserRole] = useState<UserRole>(null);
+    const [basicInfo, setBasicInfo] = useState<BasicInfo>({firstName:'', lastName:'', email:'', password:''});
+    const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>({schoolType: 'College', schoolName: ''});
+    
 
     return (
         <View style={styles.stepContainer}>
-            <Step1RoleSelection setUserRole={setUserRole} />
-
+            { currentStep === 1 && <Step1RoleSelection setUserRole={setUserRole} />}
+            
         </View>
     )
-}
+};
 
 const styles = StyleSheet.create({
     stepContainer: {
@@ -41,7 +45,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         alignItems: 'center'
     }
-})
+});
 
 
 export default StepManager;

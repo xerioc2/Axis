@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import RadioGroup from '../buttons/RadioGroup';
-import type { UserRole } from './StepManager'
-
+import StepTitle from './StepTitle';
+import type { UserRole } from './StepManager';
 
 type Props = {
     setUserRole: (role: UserRole) => void; 
-}
+};
 
 const UserRoleSelection: React.FC<Props> = ({ setUserRole }) => {
 
@@ -18,7 +18,7 @@ const UserRoleSelection: React.FC<Props> = ({ setUserRole }) => {
 
     return (
         <View >
-            <Text style={styles.stepTitle}>Select Role</Text>
+            <StepTitle title="Select Role"/>
             <RadioGroup
                 options={[
                     {label: 'Student', value: 'Student'},
@@ -28,7 +28,7 @@ const UserRoleSelection: React.FC<Props> = ({ setUserRole }) => {
             />
         </View>
     )
-}
+};
 
 const styles = StyleSheet.create({
     stepTitle: {
@@ -38,6 +38,6 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     }
-})
+});
 
 export default UserRoleSelection;
