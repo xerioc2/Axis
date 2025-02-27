@@ -4,7 +4,6 @@ import RadioGroup from '../buttons/RadioGroup';
 import type { UserRole } from './StepManager'
 
 
-
 type Props = {
     setUserRole: (role: UserRole) => void; 
 }

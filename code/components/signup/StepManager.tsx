@@ -25,6 +25,7 @@ const StepManager: React.FC<StepManagerProps> = ({ setNewUser }) => {
     const [userRole, setUserRole] = useState<UserRole>(null)
     const [basicInfo, setBasicInfo] = useState<BasicInfo>({firstName:'', lastName:'', email:'', password:''})
     const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>({schoolType: 'College', schoolName: ''})
+    //const [currentStep, setCurrentStep] = 
 
     return (
         <View style={styles.stepContainer}>
