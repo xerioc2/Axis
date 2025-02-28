@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import type { NewUser } from '../../screens/SignUpScreen'; 
 import Step1RoleSelection from './Step1RoleSelection';
+import Step2BasicInfo from './Step2BasicInfo';
 
 /*
 StepManager is responsible for managing what step of the sign up process a user is on 
@@ -33,7 +34,8 @@ const StepManager: React.FC<StepManagerProps> = ({ setNewUser }) => {
 
     return (
         <View style={styles.stepContainer}>
-            { currentStep === 1 && <Step1RoleSelection setUserRole={setUserRole} />}
+            { currentStep === 1 && <Step1RoleSelection setUserRole={setUserRole} /> }
+            { currentStep === 2 && <Step2BasicInfo setBasicInfo={setBasicInfo} /> }
             
         </View>
     )

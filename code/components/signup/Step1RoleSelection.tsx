@@ -4,11 +4,16 @@ import RadioGroup from '../buttons/RadioGroup';
 import StepTitle from './StepTitle';
 import type { UserRole } from './StepManager';
 
-type Props = {
+/*
+Step1RoleSelection is responsible for collecting the role of the user
+and using that role to update the state of StepManager
+*/
+
+type Step1Props = {
     setUserRole: (role: UserRole) => void; 
 };
 
-const UserRoleSelection: React.FC<Props> = ({ setUserRole }) => {
+const UserRoleSelection: React.FC<Step1Props> = ({ setUserRole }) => {
 
     const handleValueChange = (value: string | number) => {
         if (typeof value === 'string' && (value === 'Student' || value === 'Teacher')) {
@@ -17,7 +22,7 @@ const UserRoleSelection: React.FC<Props> = ({ setUserRole }) => {
     }
 
     return (
-        <View >
+        <View>
             <StepTitle title="Select Role"/>
             <RadioGroup
                 options={[
