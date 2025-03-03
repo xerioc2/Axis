@@ -36,7 +36,8 @@ const styles = StyleSheet.create({
     radioGroupContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-evenly'
+        justifyContent: 'center',
+
     }
 })
 

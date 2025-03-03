@@ -1,8 +1,9 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, {useState} from 'react';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import RadioGroup from '../buttons/RadioGroup';
 import StepTitle from './StepTitle';
 import type { UserRole } from './StepManager';
+import type { NewUser } from '../../screens/SignUpScreen';
 
 /*
 Step1RoleSelection is responsible for collecting the role of the user
@@ -10,16 +11,18 @@ and using that role to update the state of StepManager
 */
 
 type Step1Props = {
-    setUserRole: (role: UserRole) => void; 
+    setUserRole: (role: UserRole) => void;
 };
 
-const UserRoleSelection: React.FC<Step1Props> = ({ setUserRole }) => {
+const Step1RoleSelection: React.FC<Step1Props> = ({ setUserRole }) => {
+    
 
     const handleValueChange = (value: string | number) => {
         if (typeof value === 'string' && (value === 'Student' || value === 'Teacher')) {
             setUserRole(value);
         } 
     }
+   
 
     return (
         <View>
@@ -31,6 +34,7 @@ const UserRoleSelection: React.FC<Step1Props> = ({ setUserRole }) => {
                 initialValue={null}
                 onValueChange={handleValueChange}
             />
+            
         </View>
     )
 };
@@ -42,7 +46,8 @@ const styles = StyleSheet.create({
         color: '#2E7D32',
         marginBottom: 20,
         textAlign: 'center',
-    }
+    },
+    
 });
 
-export default UserRoleSelection;
+export default Step1RoleSelection;

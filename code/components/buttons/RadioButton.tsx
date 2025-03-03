@@ -37,7 +37,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         marginBottom: 30,
-        width: '80%',
+        marginLeft: 20,
+        marginRight: 20
     },
     radioButton: {
         height: 24,

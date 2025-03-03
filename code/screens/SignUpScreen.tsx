@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, ImageBackground, StyleSheet } from 'react-native';
+import { View, Text, ImageBackground, StyleSheet } from 'react-native';
 import  StepManager from '../components/signup/StepManager';
-import type { UserRole, BasicInfo, SchoolInfo } from '../components/signup/StepManager';
+import type { UserRole, BasicInfo } from '../components/signup/StepManager';
 
 /*
 The SignUpScreen is responsible for filling in data about a NewUser.
@@ -20,7 +20,6 @@ when they click the link, they'll be redirected to their Dashboard
 export type NewUser = {
     role: UserRole;
     basicInfo: BasicInfo;
-    schoolInfo: SchoolInfo;
 }
 
 //creating the SignUpScreen component. 
@@ -29,38 +28,31 @@ export type NewUser = {
 //This component has StepManager as a child component
 const SignUpScreen: React.FC = () => {
 
-    //initializing the base newUser object with no data.
-    let newUserBase: NewUser = {
+    //setting the state of the component and initializing the value to newUserBase
+    const [newUser, setNewUser] = useState<NewUser>({
         role: null,
         basicInfo: {
             firstName: '',
             lastName: '',
             email: '',
-            password: ''
-        },
-        schoolInfo: {
+            password: '',
             schoolType: 'College',
             schoolName: ''
-        }
-    }
-
-    //setting the state of the component and initializing the value to newUserBase
-    const [newUser, setNewUser] = useState<NewUser>(newUserBase);
-
+        },
+    });
 
     return (
         <View style={styles.container}>
-            <ImageBackground 
-                source={require('../assets/images/axis-bg.png')}
-                style={styles.backgroundImage}
-                resizeMode="cover"
-            >
-                <StepManager setNewUser={setNewUser} //passing the function that sets this components state
-                                                    //down to the child component.
-                />
-                
-                
+            <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
+                <StepManager newUser={newUser} setNewUser={setNewUser} />
             </ImageBackground>
+            <Text>TEST: The users role is: {newUser.role}</Text>
+            <Text>TEST: The users first name is: {newUser.basicInfo.firstName}</Text>
+            <Text>TEST: The users last name is: {newUser.basicInfo.lastName}</Text>
+            <Text>TEST: The users email name is: {newUser.basicInfo.email}</Text>
+            <Text>TEST: The users password name is: {newUser.basicInfo.password}</Text>
+            <Text>TEST: The users schoolType name is: {newUser.basicInfo.schoolType}</Text>
+            <Text>TEST: The users schoolName is: {newUser.basicInfo.schoolName}</Text>
         </View>
     );
 };

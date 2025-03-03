@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
 import { BasicInfo } from '../signup/StepManager';
 import StepTitle from './StepTitle';
 import BasicInfoForm from './BasicInfoForm';
@@ -12,16 +12,19 @@ and using it to update the state of StepManager
 
 type Step2Props = {
     setBasicInfo: (basicInfo: BasicInfo) => void;
+    setCurrentStep: (currentStep: number) => void;
 }
 
 
-const Step2BasicInfo: React.FC<Step2Props> = ({ setBasicInfo }) => {
+const Step2BasicInfo: React.FC<Step2Props> = ({ setBasicInfo, setCurrentStep }) => {
 
     const basicInfoBase: BasicInfo = {
         firstName: '',
         lastName: '',
         email: '',
-        password: ''
+        password: '',
+        schoolType: 'College',
+        schoolName: ''
     }
 
     const [userBasicInfo, setUserBasicInfo] = useState(basicInfoBase);
@@ -30,10 +33,14 @@ const Step2BasicInfo: React.FC<Step2Props> = ({ setBasicInfo }) => {
     return (
         <View>
             <StepTitle title="Basic Information" />
-            <BasicInfoForm />
+            <BasicInfoForm basicInfo={basicInfoBase} setBasicInfo={setBasicInfo} />
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    
+})
 
 
 
