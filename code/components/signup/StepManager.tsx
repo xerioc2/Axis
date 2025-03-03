@@ -4,6 +4,7 @@ import type { NewUser } from '../../screens/SignUpScreen';
 import Step1RoleSelection from './Step1RoleSelection';
 import Step2BasicInfo from './Step2BasicInfo';
 import Step3EmailConfirmation from './Step3EmailConfirmation';
+import supabase from '../../utils/supabase';
 
 
 /*
@@ -49,6 +50,7 @@ const StepManager: React.FC<StepManagerProps> = ({ newUser, setNewUser }) => {
     };
 
     const handleSignUpSubmission = () => {
+        //supabase.signup(newUser); //<-- not right just placeholding for now
         setCurrentStep(3);
     }
 

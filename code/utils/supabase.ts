@@ -29,7 +29,7 @@ const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   /* 
   SUPABASE Documentation Notes
 
-  User Sign Uep Docs: https://supabase.com/docs/reference/javascript/auth-signup
+  User Sign Up Docs: https://supabase.com/docs/reference/javascript/auth-signup
 
   const { data, error } = await supabase.auth.signUp({
    email: 'example@email.com',

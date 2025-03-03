@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, ImageBackground, StyleSheet } from 'react-native';
 import  StepManager from '../components/signup/StepManager';
 import type { UserRole, BasicInfo } from '../components/signup/StepManager';
+import supabase from '../utils/supabase';
 
 /*
 The SignUpScreen is responsible for filling in data about a NewUser.
-It displays the BackgroundImage and uses a StepManager to gather the data in 3 steps.
+It displays the BackgroundImage and uses a StepManager to gather the data in 2 steps.
 It has the newUser as its state, and it passes the setNewUser function to the StepManager as a prop,
 so that StepManager can update the SignUpScreen's state when the User completes a step.
-When the 3 steps are complete, the newUser object has all the data it needs. 
-Uses Supabase client to send the newUser object to Supabase,
+When the 2 steps are complete, the newUser object has all the data it needs. 
+Supabase client then sends the newUser object to Supabase,
 Supabase sends an email to the user to confirm their email address,
 when they click the link, they'll be redirected to their Dashboard
 */
@@ -36,7 +37,7 @@ const SignUpScreen: React.FC = () => {
             lastName: '',
             email: '',
             password: '',
-            schoolType: 'College',
+            schoolType: '',
             schoolName: ''
         },
     });
