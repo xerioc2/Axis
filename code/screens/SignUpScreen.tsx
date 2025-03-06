@@ -1,59 +1,29 @@
 import React, { useState } from 'react';
-import { View, Text, ImageBackground, StyleSheet } from 'react-native';
-import  StepManager from '../components/signup/StepManager';
-import type { UserRole, BasicInfo } from '../components/signup/StepManager';
+import { View, Text, ImageBackground, TouchableOpacity,  StyleSheet } from 'react-native';
+import  SignUpManager from '../components/signup/SignUpManager';
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../utils/navigation.types";
 import supabase from '../utils/supabase';
 
-/*
-The SignUpScreen is responsible for filling in data about a NewUser.
-It displays the BackgroundImage and uses a StepManager to gather the data in 2 steps.
-It has the newUser as its state, and it passes the setNewUser function to the StepManager as a prop,
-so that StepManager can update the SignUpScreen's state when the User completes a step.
-When the 2 steps are complete, the newUser object has all the data it needs. 
-Supabase client then sends the newUser object to Supabase,
-Supabase sends an email to the user to confirm their email address,
-when they click the link, they'll be redirected to their Dashboard
-*/
+type SignUpScreenNavigationProp = StackNavigationProp<RootStackParamList, "SignUp">;
 
-//declaring the type of NewUser. UserRole, BasicInfo, and SchoolInfo are each defined
-//  in the StepManager. We export this type because
-//  the StepManager needs it to update the newUser state  
-export type NewUser = {
-    role: UserRole;
-    basicInfo: BasicInfo;
+type SignUpScreenProps = {
+    navigation: SignUpScreenNavigationProp;
 }
 
-//creating the SignUpScreen component. 
-//This component takes no props
-//This component has a newUser state
-//This component has StepManager as a child component
-const SignUpScreen: React.FC = () => {
+const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
 
-    //setting the state of the component and initializing the value to newUserBase
-    const [newUser, setNewUser] = useState<NewUser>({
-        role: null,
-        basicInfo: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            password: '',
-            schoolType: '',
-            schoolName: ''
-        },
-    });
+
 
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
-                <StepManager newUser={newUser} setNewUser={setNewUser} />
+                <Text>Sign Up</Text>
+                <SignUpManager />
+                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                    <Text>Already have an account?</Text><Text style={styles.link}>Login instead</Text>
+                </TouchableOpacity>
             </ImageBackground>
-            <Text>TEST: The users role is: {newUser.role}</Text>
-            <Text>TEST: The users first name is: {newUser.basicInfo.firstName}</Text>
-            <Text>TEST: The users last name is: {newUser.basicInfo.lastName}</Text>
-            <Text>TEST: The users email name is: {newUser.basicInfo.email}</Text>
-            <Text>TEST: The users password name is: {newUser.basicInfo.password}</Text>
-            <Text>TEST: The users schoolType name is: {newUser.basicInfo.schoolType}</Text>
-            <Text>TEST: The users schoolName is: {newUser.basicInfo.schoolName}</Text>
         </View>
     );
 };
@@ -66,12 +36,17 @@ const styles = StyleSheet.create({
         padding: 2,
         alignItems: 'center',
         justifyContent: 'center',
+        marginTop: 0,
+        paddingVertical: 0
     },
     backgroundImage: {
         flex: 1,
         width: '100%',
         height: '100%',
-      }, 
+      },
+      link: {
+        textDecorationLine: 'underline'
+      } 
 
 })
 

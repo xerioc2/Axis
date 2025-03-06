@@ -4,9 +4,9 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 type RadioButtonProps = {
     label: string;
-    value: string | number;
-    selectedValue: string | number | null;
-    onSelect: (value: string | number) => void;
+    value: string;
+    selectedValue: string | null;
+    onSelect: (value: string) => void;
 }
 
 //value here is the data that THIS RadioButton represents.
