@@ -4,15 +4,15 @@ import RadioButton from './RadioButton';
 
 
 type RadioGroupProps = {
-    options: { label: string, value: string | number }[];
-    initialValue: string | number | null;
-    onValueChange: (value: string | number) => void;
+    options: { label: string, value: string }[];
+    initialValue: string | null;
+    onValueChange: (value: string) => void;
 };
 
 const RadioGroup: React.FC<RadioGroupProps> = ({ options, initialValue, onValueChange}) => {
     const [selectedValue, setSelectedValue] = useState(initialValue);
 
-    const handleSelect = (value: string | number) => {
+    const handleSelect = (value: string) => {
         setSelectedValue(value); //updates the state of this radio group with newly selected value
         onValueChange(value); //calls parent component function to notify that selected value has changed
     };
