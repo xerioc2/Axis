@@ -77,8 +77,10 @@ const StepManager: React.FC<SignUpManagerProps> = () => {
 
 const styles = StyleSheet.create({
     stepContainer: {
-        marginTop: 250,
-        marginHorizontal: 25
+        flex: 1, 
+        marginTop: 300,
+        marginHorizontal: 25,
+        alignItems: 'center', 
     },
     button: {
         backgroundColor: '#2E7D32',

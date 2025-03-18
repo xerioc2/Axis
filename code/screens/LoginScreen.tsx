@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from "@react-navigation/native"; 
 import supabase from '../utils/supabase';
 
 
@@ -9,6 +10,7 @@ type LoginScreenProps = {
 
 
 const LoginScreen: React.FC<LoginScreenProps> = () => {
+    const navigation = useNavigation();
     const [formData, setFormData] = useState({email: "", password: ""});
     const [buttonEnabled, setButtonEnabled] = useState(false);
 
@@ -36,12 +38,21 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
                 <TextInput style={styles.input}  placeholder='Email' value={formData.email} onChangeText={(text) => handleChange("email", text)} />
                 <TextInput style={styles.input}   placeholder='Password' value={formData.password} onChangeText={(text) => handleChange("password", text)}  secureTextEntry />
                 </View>
+
+                {/* Login Button */}
                 <TouchableOpacity 
                     style={buttonEnabled ? styles.button : styles.disabledButton}
                     onPress={() => handleSubmit()}    
                 >
                     <Text>Login</Text>
                 </TouchableOpacity>
+                {/* Sign Up Screen Button */}
+                    <TouchableOpacity 
+                        style={styles.signUpButton}
+                        onPress={() => navigation.navigate("SignUp")} 
+                    >
+                        <Text style={styles.signUpText}>Sign Up</Text>
+                    </TouchableOpacity>
   
             </View>
             </ImageBackground>
@@ -121,6 +132,21 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
         marginVertical: 15
+    },
+    signUpButton: {
+        marginTop: 10,
+        padding: 10,
+        borderRadius: 5,
+        backgroundColor: "transparent",
+        borderWidth: 1,
+        borderColor: "#007BFF",
+        alignItems: "center",
+        width: "100%",
+    },
+    signUpText: {
+        color: "#007BFF",
+        fontSize: 16,
+        fontWeight: "bold",
     }
 });
 
