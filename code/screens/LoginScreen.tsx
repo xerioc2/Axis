@@ -32,14 +32,17 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
             <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
             <View style={styles.loginForm}>
                 <Text style={styles.title}>Login</Text>
-                <TextInput  placeholder='Email' value={formData.email} onChangeText={(text) => handleChange("email", text)} />
-                <TextInput  placeholder='Password' value={formData.password} onChangeText={(text) => handleChange("password", text)} />
+                <View style={styles.inputContainer}>
+                <TextInput style={styles.input}  placeholder='Email' value={formData.email} onChangeText={(text) => handleChange("email", text)} />
+                <TextInput style={styles.input}   placeholder='Password' value={formData.password} onChangeText={(text) => handleChange("password", text)}  secureTextEntry />
+                </View>
                 <TouchableOpacity 
                     style={buttonEnabled ? styles.button : styles.disabledButton}
                     onPress={() => handleSubmit()}    
                 >
                     <Text>Login</Text>
                 </TouchableOpacity>
+  
             </View>
             </ImageBackground>
             
@@ -71,6 +74,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: '100%',
         justifyContent: 'center',
+    },
+    inputContainer: {
+        width: "80%",
+    },
+    input: {
+        width: "100%",
+        padding: 10,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 5,
+        backgroundColor: "#fff",
     },
     title: {
         fontSize: 30,
