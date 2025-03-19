@@ -1,0 +1,10 @@
+1. Create test screen to test if teacher/student account can create and 
+ log in to accounts successfully and send to correct screens
+
+2. Insert code to grab the user's role from the database
+
+3. Insert code for once info is grabbed from supabase to log them into user account
+
+4. for teacher role, create method for them to test creating a class
+
+5. once teacher role creates class, create student role screens and methods to test joining a class
