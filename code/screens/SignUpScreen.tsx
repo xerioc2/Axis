@@ -20,9 +20,15 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
             <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
                 <Text>Sign Up</Text>
                 <SignUpManager />
-                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-                    <Text>Already have an account?</Text><Text style={styles.link}>Login instead</Text>
-                </TouchableOpacity>
+                <View style={styles.loginContainer}>
+    <TouchableOpacity 
+        style={styles.loginButton} 
+        onPress={() => navigation.navigate("Login")}
+    >
+        <Text style={styles.loginText}>Already have an account?</Text>
+        <Text style={styles.link}>Login instead</Text>
+    </TouchableOpacity>
+</View>
             </ImageBackground>
         </View>
     );
@@ -46,7 +52,21 @@ const styles = StyleSheet.create({
       },
       link: {
         textDecorationLine: 'underline'
-      } 
+      },
+      loginContainer: {
+        position: 'absolute',
+        bottom: 40,
+        width: '100%',
+        alignItems: 'center',
+    },
+    loginButton: {
+        alignItems: 'center',
+        padding: 10,
+    },
+    loginText: {
+        fontSize: 16,
+        marginBottom: 5,
+    } 
 
 })
 
