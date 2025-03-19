@@ -3,12 +3,9 @@ import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } 
 import supabase from '../utils/supabase';
 
 
-type LoginScreenProps = {
-
-};
 
 
-const LoginScreen: React.FC<LoginScreenProps> = () => {
+const LoginScreen: React.FC = () => {
     const [formData, setFormData] = useState({email: "", password: ""});
     const [buttonEnabled, setButtonEnabled] = useState(false);
 
