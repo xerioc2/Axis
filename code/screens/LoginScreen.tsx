@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
 import supabase from '../utils/supabase';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../utils/navigation.types';
 
 
@@ -8,9 +10,11 @@ type LoginScreenProps = {
 
 };
 
+type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+
 
 const LoginScreen: React.FC<LoginScreenProps> = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProps>();
     const [formData, setFormData] = useState({email: "", password: ""});
     const [buttonEnabled, setButtonEnabled] = useState(false);
 
