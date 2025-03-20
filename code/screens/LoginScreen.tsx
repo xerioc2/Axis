@@ -3,7 +3,8 @@ import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } 
 import supabase from '../utils/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../utils/navigation.types';
+import type { RootStackParamList, User } from '../utils/navigation.types';
+import ErrorNotification from '../components/errorNotification';
 
 
 type LoginScreenProps = {
@@ -17,6 +18,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
     const navigation = useNavigation<NavigationProps>();
     const [formData, setFormData] = useState({email: "", password: ""});
     const [buttonEnabled, setButtonEnabled] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
             if (formData.email !== "" && formData.password !== ""){
@@ -29,8 +31,44 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
         setFormData((prev: any) => ({ ...prev, [key]: value }));
     };
 
-    const handleSubmit = () => {
-
+    const handleLoginSubmission = async () => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password
+        });
+        if (error){
+            if (error.code === "invalid_credentials"){
+                setErrorMessage("Invalid credentials. Please check your email and password and try again.");
+            }
+            else{
+                setErrorMessage("Unable to login. Please make sure you have an account and double check your credentials.");
+            }
+            return;  
+        }
+        else if (data){
+            const { data: userDataArray, error: userError } = await supabase.from('users').select("*").eq("user_id", data.user.id);
+            if (userError){
+                setErrorMessage(`Unable to find that user in public.users... yet the user with email ${data.user.email} exists in auth.users...`);
+                return;
+            }
+            else if (userDataArray && userDataArray.length > 0){
+                const userData: User = userDataArray[0];
+                //user_types = {1: 'Student', 2: 'Teacher'}
+                if (userData.user_type_id === 1){
+                    navigation.navigate("StudentDashboard", userData);
+                }
+                else if (userData.user_type_id === 2){
+                    navigation.navigate("TeacherDashboard", userData);
+                }
+            }
+            else{
+                setErrorMessage("Unexpected error occured while pulling the user from public.users... please contact support.")
+            }
+        }
+        else{
+            setErrorMessage("Unexpected error occured while logging in. Please contact support.");
+            return;
+        }
     }
 
     return <>
@@ -42,14 +80,14 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
                 <TextInput style={styles.input}  placeholder='Email' value={formData.email} onChangeText={(text) => handleChange("email", text)} />
                 <TextInput style={styles.input}   placeholder='Password' value={formData.password} onChangeText={(text) => handleChange("password", text)}  secureTextEntry />
                 </View>
-
                 {/* Login Button */}
                 <TouchableOpacity 
                     style={buttonEnabled ? styles.button : styles.disabledButton}
-                    onPress={() => handleSubmit()}    
+                    onPress={() => handleLoginSubmission()}    
                 >
                     <Text>Login</Text>
                 </TouchableOpacity>
+                {errorMessage !== "" && <ErrorNotification message={errorMessage} />}
                 {/* Sign Up Screen Button */}
                     <TouchableOpacity 
                         style={styles.signUpButton}
@@ -147,6 +185,9 @@ const styles = StyleSheet.create({
         color: "#2E7D32",
         fontSize: 16,
         fontWeight: "bold",
+    },
+    errorText: {
+        color: 'red'
     }
 });
 
