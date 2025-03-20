@@ -2,3 +2,4 @@
 Radio buttons layout - Fixed in Step1.tsx
 Next button centering - Suggested changes in SignUpManager.tsx
 "Already have an account?" text - Located in SignUpScreen.tsx
+Back button for signup screens is in signup manager
