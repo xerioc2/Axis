@@ -21,7 +21,8 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />       
         <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
         <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{ headerShown: false}} />
-        <Stack.Screen name="StudentDashboard" component={StudentDashboard} options={{ headerShown: false}} />
+        <Stack.Screen name="StudentDashboard" component={StudentDashboard} options={{ 
+          title: 'Student Dashboard'}} />
         
 
       </Stack.Navigator>

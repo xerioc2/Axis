@@ -4,9 +4,10 @@ import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } 
 
 
 export default function Header() {
-  const [showClass, setShowClass] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
+  const [showCourses, setShowCourses] = useState(false);
   const [showCheckPoints, setShowCheckPoints] = useState(false);
+  const [showAddClass, setShowAddClass] = useState(false);
+  const [showSemester, setShowSemester] = useState(false);
 
   };
 

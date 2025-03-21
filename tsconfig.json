@@ -13,5 +13,5 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
-, "code/screens/test"  ]
+, "code/screens/test", "code/components/headers/StudentDropDown.js"  ]
 }

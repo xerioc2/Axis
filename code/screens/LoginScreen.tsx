@@ -73,7 +73,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 
     return <>
         <View style={styles.container}>
-            <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
+            <ImageBackground source={require('../assets/images/sign_in.png')} style={styles.backgroundImage} resizeMode="cover">
             <View style={styles.loginForm}>
                 <Text style={styles.title}>Login</Text>
                 <View style={styles.inputContainer}>
