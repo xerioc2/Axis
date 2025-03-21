@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
 
-const StudentDashboard: React.FC = () => {
 
 
+export default function Header() {
+  const [showClass, setShowClass] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showCheckPoints, setShowCheckPoints] = useState(false);
+
+  };
+
+
+const StudentHeader: React.FC = () => {
     return<>      
      <View style={styles.container}>
                     <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
-            <Text>Student Dashboard</Text>
+            <Text>Student Header</Text>
 
             </ImageBackground>
             </View>
         </>
-    
 }
 const styles = StyleSheet.create({
     container: {
@@ -30,5 +37,3 @@ const styles = StyleSheet.create({
         height: '100%',
     }
 });
-
-export default StudentDashboard;
