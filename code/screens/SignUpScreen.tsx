@@ -18,7 +18,6 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
-                <Text>Sign Up</Text>
                 <SignUpManager />
                 <View style={styles.loginContainer}>
     <TouchableOpacity 
