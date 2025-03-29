@@ -1,153 +1,155 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
+import { StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import supabase from '../utils/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../utils/navigation.types';
-
-
-type LoginScreenProps = {
-
-};
+import { useFonts } from 'expo-font';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
-
-const LoginScreen: React.FC<LoginScreenProps> = () => {
+const LoginScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProps>();
-    const [formData, setFormData] = useState({email: "", password: ""});
+    const [formData, setFormData] = useState({ email: "", password: "" });
     const [buttonEnabled, setButtonEnabled] = useState(false);
+    const [fontsLoaded] = useFonts({
+        'Rexton Bold': require('../assets/fonts/rexton_bold.otf'),
+        'Inter': require('../assets/fonts/antonio_semibold.ttf'),
+        'SF Pro': require('../assets/fonts/sf_pro.ttf'),
+    });
 
     useEffect(() => {
-            if (formData.email !== "" && formData.password !== ""){
-                setButtonEnabled(true);
-            }
-        }, [formData]);
-
+        setButtonEnabled(formData.email !== "" && formData.password !== "");
+    }, [formData]);
 
     const handleChange = (key: string, value: string) => {
-        setFormData((prev: any) => ({ ...prev, [key]: value }));
+        setFormData(prev => ({ ...prev, [key]: value }));
     };
 
     const handleSubmit = () => {
+    };
 
-    }
-
-    return <>
+    return (
         <View style={styles.container}>
-            <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
-            <View style={styles.loginForm}>
-                <Text style={styles.title}>Login</Text>
-                <View style={styles.inputContainer}>
-                <TextInput style={styles.input}  placeholder='Email' value={formData.email} onChangeText={(text) => handleChange("email", text)} />
-                <TextInput style={styles.input}   placeholder='Password' value={formData.password} onChangeText={(text) => handleChange("password", text)}  secureTextEntry />
-                </View>
-
-                {/* Login Button */}
-                <TouchableOpacity 
-                    style={buttonEnabled ? styles.button : styles.disabledButton}
-                    onPress={() => handleSubmit()}    
-                >
-                    <Text>Login</Text>
-                </TouchableOpacity>
-                {/* Sign Up Screen Button */}
-                    <TouchableOpacity 
-                        style={styles.signUpButton}
-                        onPress={() => navigation.navigate("SignUp")} 
-                    >
-                        <Text style={styles.signUpText}>Sign Up</Text>
-                    </TouchableOpacity>
-  
+          <View>
+            <Image
+              source={require('../assets/images/axis_lettering.png')}
+              style={styles.logo}
+            />
+            <Image
+              source={require('../assets/images/graph_line.png')}
+              style={styles.graphLine}
+            />
+            <Text style={styles.slogan}>WHERE LEARNING {"\n"}MEETS MASTERY</Text>
+      
+            <View style={styles.emailInput}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Email"
+                value={formData.email}
+                onChangeText={(text) => handleChange("email", text)}
+                placeholderTextColor="#4F4F4F"
+                autoCapitalize="none"
+              />
             </View>
-            </ImageBackground>
+      
+            <View style={styles.passwordInput}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Password"
+                value={formData.password}
+                onChangeText={(text) => handleChange("password", text)}
+                secureTextEntry
+                placeholderTextColor="#4F4F4F"
+              />
+            </View>
+      
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleSubmit}
+              disabled={!buttonEnabled}
+            >
+              <Text style={styles.buttonText}>SIGN IN</Text>
+            </TouchableOpacity>
+
+            <Text style={[styles.text, {marginTop: 285, fontSize: 12, fontWeight: '600'}]}>DONT HAVE AN ACCOUNT?</Text>
             
-
+            <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+              <Text style={[styles.text, {marginTop: -1, color: '#005824', fontSize: 16, fontWeight: '600'}]}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-    </>
-
-
+      );      
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#E8F5E9',
-        padding: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 0,
-        paddingVertical: 0
+        backgroundColor: '#F1FFED',
     },
-    backgroundImage: {
-        flex: 1,
-        width: '100%',
-        height: '100%',
+    logo: {
+        alignSelf: 'center',
+        marginTop: 67,
     },
-    loginForm: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        height: '100%',
-        justifyContent: 'center',
-    },
-    inputContainer: {
-        width: "80%",
-    },
-    input: {
-        width: "100%",
-        padding: 10,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 5,
-        backgroundColor: "#fff",
-    },
-    title: {
-        fontSize: 30,
+    slogan: {
+        color: '#005824',
+        textAlign: 'center',
+        fontFamily: 'Rexton Bold',
+        fontSize: 12,
+        lineHeight: 22,
+        marginTop: -30,
     },
     button: {
-        backgroundColor: '#2E7D32',
-        padding: 15,
-        borderRadius: 25,
-        width: '80%',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        marginVertical: 15
+        backgroundColor: '#2F7D32',
+        alignSelf: 'center',
+        width: 255,
+        height:43,
+        borderRadius: 30,
+        marginTop: 5
     },
-    disabledButton: {
-        backgroundColor: '#BBB',
-        padding: 15,
-        borderRadius: 25,
-        width: '80%',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        marginVertical: 15
-    },
-    signUpButton: {
-        marginTop: 10,
-        padding: 10,
-        alignItems: "center",
-        width: "100%",
-    },
-    signUpText: {
-        color: "#2E7D32",
+    buttonText: {
+        color: '#FFF',
+        fontFamily: 'Inter',
+        fontWeight: '600',
+        textAlign: 'center',
         fontSize: 16,
-        fontWeight: "bold",
+        lineHeight: 22,
+        padding: 10,
+    },
+    emailInput: {
+        marginTop: 65,
+        marginHorizontal: 40,
+        marginBottom: 10,
+    },
+    passwordInput: {
+        marginTop: 20,
+        marginHorizontal: 40,
+        marginBottom: 20,
+    },
+    textInput: {
+        color: '#000',
+        borderBottomColor: '#358F4B',
+        fontFamily: 'Inter',
+        fontSize: 16,
+        borderBottomWidth: 1,
+        paddingVertical: 10,
+    },
+    graphLine: {
+      position: 'absolute',
+      left: -45,
+      top: 395,
+      width: 485,
+      height: 485,
+      alignSelf: 'center',
+      resizeMode: 'contain',
+    },
+    text: {
+      color: '#808080',
+      textAlign: 'center',
+      fontFamily: 'SF Pro',
+      lineHeight: 22,
     }
 });
-
 export default LoginScreen;
