@@ -49,11 +49,11 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         height: '100%',
-      },
-      link: {
+    },
+    link: {
         textDecorationLine: 'underline'
-      },
-      loginContainer: {
+    },
+    loginContainer: {
         position: 'absolute',
         bottom: 40,
         width: '100%',
