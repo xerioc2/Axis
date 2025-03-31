@@ -31,13 +31,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
         WHERE LEARNING{'\n'}MEETS MASTERY
       </Text>
 
-      <SignUpManager />
-
-      <View style={styles.loginContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.backPrompt}>ALREADY HAVE AN ACCOUNT?</Text>
-        </TouchableOpacity>
-      </View>
+      <SignUpManager navigation={navigation} />
+      
     </View>
   );
 };
@@ -60,17 +55,6 @@ const styles = StyleSheet.create({
     color: '#005824',
     textAlign: 'center',
     marginTop: 230,
-  },
-  loginContainer: {
-    marginTop: 'auto',
-    marginBottom: 335,
-    alignItems: 'center',
-  },
-  backPrompt: {
-    fontSize: 12,
-    color: '#808080',
-    fontFamily: 'SF Pro',
-    textDecorationLine: 'underline',
   },
   link: {
     color: '#005824',
