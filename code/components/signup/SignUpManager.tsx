@@ -49,6 +49,7 @@ const StepManager: React.FC<SignUpManagerProps> = () => {
 
     return <>
         <View style={styles.stepContainer}>
+            
             {currentStep !== 1 && <TouchableOpacity style={styles.backButton} onPress={() => setCurrentStep(currentStep-1)}><Text>Back</Text></TouchableOpacity>}
 
             {currentStep === 1 && <Step1 setRole={setRole} setIsRoleSelected={setIsRoleSelected}/>}
@@ -72,48 +73,39 @@ const StepManager: React.FC<SignUpManagerProps> = () => {
             }
         </View>
     </>
-
 };
 
 const styles = StyleSheet.create({
     stepContainer: {
         flex: 1, 
-        marginTop: 300,
+        marginTop: 100,
         marginHorizontal: 25,
         alignItems: 'center', 
     },
     button: {
         backgroundColor: '#2E7D32',
         padding: 15,
-        borderRadius: 25,
-        width: '80%',
+        borderRadius: 30,
+        width: 255,
+        height: 43,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
-        marginVertical: 15
-    },
-    disabledButton: {
+        marginTop: -20,
+        marginBottom: 15,
+      },
+      
+      disabledButton: {
         backgroundColor: '#BBB',
         padding: 15,
         borderRadius: 25,
-        width: '80%',
+        width: 255,
+        height: 43,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
         elevation: 5,
-        marginVertical: 15
-    },
+        marginTop: -20,
+        marginBottom: 15,
+      },
     backButton: {
         backgroundColor: '#2E7D32',
         padding: 10,
@@ -121,8 +113,6 @@ const styles = StyleSheet.create({
         width: "20%",
         alignItems: "center",
     }
-    
 });
-
 
 export default StepManager;

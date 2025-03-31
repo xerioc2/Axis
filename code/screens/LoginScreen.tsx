@@ -77,7 +77,8 @@ const LoginScreen: React.FC = () => {
             <Text style={[styles.text, {marginTop: 285, fontSize: 12, fontWeight: '600'}]}>DONT HAVE AN ACCOUNT?</Text>
             
             <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-              <Text style={[styles.text, {marginTop: -1, color: '#005824', fontSize: 16, fontWeight: '600'}]}>Sign Up</Text>
+              <Text 
+              style={[styles.text, {marginTop: -1, color: '#005824', fontSize: 16, fontWeight: '600'}]}>Sign Up</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -152,4 +153,5 @@ const styles = StyleSheet.create({
       lineHeight: 22,
     }
 });
+
 export default LoginScreen;
