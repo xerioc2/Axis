@@ -64,7 +64,7 @@ const StepManager: React.FC<SignUpManagerProps> = ({ navigation }) => {
           disabled={!isRoleSelected}
           onPress={() => setCurrentStep(2)}
         >
-          <Text>Next</Text>
+          <Text style={styles.buttonText}>NEXT</Text>
         </TouchableOpacity>
       )}
 
@@ -111,6 +111,16 @@ const styles = StyleSheet.create({
     marginTop: -20,
     marginBottom: 15,
   },
+  buttonText: {
+    position: 'absolute',
+    color: '#FFF',
+    fontFamily: 'Inter',
+    fontWeight: '600',
+    textAlign: 'center',
+    fontSize: 16,
+    lineHeight: 22,
+    padding: 10,
+},
   disabledButton: {
     backgroundColor: '#BBB',
     padding: 15,
