@@ -43,7 +43,7 @@ export type Course = {
   course_id: number,
   course_subject: string | null,
   course_code: number | null,
-  course_name: string | null,
+  course_name: string,
   creator_id: string,
   school_id: number,
   date_created: string
@@ -51,7 +51,7 @@ export type Course = {
 export type CourseInsertDto = {
   course_subject: string | null,
   course_code: number | null,
-  course_name: string | null,
+  course_name: string,
   creator_id: string,
   school_id: number
 }
@@ -72,5 +72,29 @@ export type SectionInsertDto = {
   course_id: number,
   start_date: string
   //insert start date as '2024-01-01'
+}
+
+export type Topic = {
+  topic_id: number,
+  topic_title: string,
+  topic_description: string | null,
+  course_id: number
+}
+export type TopicInsertDto = {
+  topic_title: string,
+  topic_description: string | null,
+  course_id: number
+}
+
+export type Concept = {
+  concept_id: number,
+  concept_title: string,
+  concept_description: string | null,
+  topic_id: number
+}
+export type ConceptInsertDto = {
+  concept_title: string,
+  concept_description: string | null,
+  topic_id: number
 }
 
