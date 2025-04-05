@@ -74,6 +74,16 @@ export type SectionInsertDto = {
   //insert start date as '2024-01-01'
 }
 
+export type SectionTeacher = {
+  section_teacher_id: number,
+  teacher_id: string,
+  section_id: number,
+}
+export type SectionTeacherInsertDto = {
+  teacher_id: string,
+  section_id: number
+}
+
 export type Topic = {
   topic_id: number,
   topic_title: string,

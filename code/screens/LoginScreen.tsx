@@ -5,18 +5,15 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../utils/navigation.types';
 import type { User } from "@/App";
-import ErrorNotification from '../components/errorNotification';
+import ErrorMessage from '../components/ErrorMessage';
 import { login } from '../utils/supabaseService';
+import { Colors } from '../theme';
 
 
-type LoginScreenProps = {
-
-};
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
-
-const LoginScreen: React.FC<LoginScreenProps> = () => {
+const LoginScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProps>();
     const [formData, setFormData] = useState({email: "", password: ""});
     const [buttonEnabled, setButtonEnabled] = useState(false);
@@ -68,7 +65,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
                 >
                     <Text>Login</Text>
                 </TouchableOpacity>
-                {errorMessage !== "" && <ErrorNotification message={errorMessage} />}
+                {errorMessage !== "" && <ErrorMessage message={errorMessage} />}
                 {/* Sign Up Screen Button */}
                     <TouchableOpacity 
                         style={styles.signUpButton}
@@ -86,11 +83,12 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 
 
 };
+export default LoginScreen;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#E8F5E9',
+        backgroundColor: Colors.background,
         padding: 2,
         alignItems: 'center',
         justifyContent: 'center',
@@ -117,20 +115,20 @@ const styles = StyleSheet.create({
         padding: 10,
         marginBottom: 10,
         borderWidth: 1,
-        borderColor: "#ccc",
+        borderColor: Colors.grey,
         borderRadius: 5,
-        backgroundColor: "#fff",
+        backgroundColor: Colors.white,
     },
     title: {
         fontSize: 30,
     },
     button: {
-        backgroundColor: '#2E7D32',
+        backgroundColor: Colors.secondary,
         padding: 15,
         borderRadius: 25,
         width: '80%',
         alignItems: 'center',
-        shadowColor: '#000',
+        shadowColor: Colors.black,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -141,12 +139,12 @@ const styles = StyleSheet.create({
         marginVertical: 15
     },
     disabledButton: {
-        backgroundColor: '#BBB',
+        backgroundColor: Colors.grey,
         padding: 15,
         borderRadius: 25,
         width: '80%',
         alignItems: 'center',
-        shadowColor: '#000',
+        shadowColor: Colors.black,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -163,7 +161,7 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     signUpText: {
-        color: "#2E7D32",
+        color: Colors.secondary,
         fontSize: 16,
         fontWeight: "bold",
     },
@@ -172,4 +170,3 @@ const styles = StyleSheet.create({
     }
 });
 
-export default LoginScreen;

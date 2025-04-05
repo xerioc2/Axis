@@ -3,20 +3,16 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Step1 from './Step1';
 import Step2 from './Step2';
-import ErrorNotification from '../errorNotification';
-import supabase from '@/code/utils/supabase';
+import ErrorMessage from '../ErrorMessage';
 import { RootStackParamList } from '@/code/utils/navigation.types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { signup } from '@/code/utils/supabaseService';
 
 
-type SignUpManagerProps = {
-    
-};
+
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
 
-
-const StepManager: React.FC<SignUpManagerProps> = () => {
+const StepManager: React.FC = () => {
     const navigation = useNavigation<NavigationProps>();
     const [currentStep, setCurrentStep] = useState(1);
     const [role, setRole] = useState("");
@@ -47,9 +43,8 @@ const StepManager: React.FC<SignUpManagerProps> = () => {
             formData.password !== "" && 
             formData.confirmPassword !== "" && 
             formData.schoolType !== "" && 
-            formData.schoolName !== ""){
-                setAreAllFieldsEdited(true);
-        }
+            formData.schoolName !== "")
+            setAreAllFieldsEdited(true);
     }, [formData]);
 
     const handleSignUpSubmission = async () => {
@@ -107,7 +102,7 @@ const StepManager: React.FC<SignUpManagerProps> = () => {
                     <Text>Sign Up</Text>    
                 </TouchableOpacity>
             }
-            {currentStep === 2 && errorMessage !== "" && <ErrorNotification message={errorMessage}/>}
+            {currentStep === 2 && errorMessage !== "" && <ErrorMessage message={errorMessage}/>}
         </View>
     </>
 
