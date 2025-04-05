@@ -4,10 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 import Step1 from './Step1';
 import Step2 from './Step2';
 import ErrorNotification from '../errorNotification';
-import supabase from '../../utils/supabase';
+import supabase from '@/code/utils/supabase';
 import { RootStackParamList } from '@/code/utils/navigation.types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
+import { signup } from '@/code/utils/supabaseService';
 
 
 type SignUpManagerProps = {
@@ -69,35 +69,14 @@ const StepManager: React.FC<SignUpManagerProps> = () => {
             return;
         }
 
-        try{
-            const { data, error } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                    data: {
-                        first_name: formData.firstName,
-                        last_name: formData.lastName,
-                        user_type_id: userTypeId,
-                        school_id: 1
-                        //need school_id
-                    }
-                }
-            });
-            if (error){
-                setErrorMessage(`Error while signing up: ${error.code}, ${error.message}, ${error.cause}`);
-                return;
-            }
-            else if(data){
-                navigation.navigate("Login");
-            }
-            else{
-                setErrorMessage("Unexpected error while signing up. Please contact support.");
-            }
-        }
-        catch (err) {
-            setErrorMessage(`Unexpected error while signing up: ${err}`);
+        const singupResponse: {user: any, session: any} | null = await signup(formData.email, formData.password, formData.firstName, formData.lastName, userTypeId, 1); //change this school id
+        if (!singupResponse){
+            setErrorMessage("There was an error signing up, please close the app and try again.");
             return;
         }
+        //redirect to login, so they can log in to there new account
+    
+        navigation.navigate("Login");
 
     }
 

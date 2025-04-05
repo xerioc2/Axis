@@ -3,8 +3,10 @@ import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } 
 import supabase from '../utils/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList, User } from '../utils/navigation.types';
+import type { RootStackParamList } from '../utils/navigation.types';
+import type { User } from "@/App";
 import ErrorNotification from '../components/errorNotification';
+import { login } from '../utils/supabaseService';
 
 
 type LoginScreenProps = {
@@ -32,43 +34,22 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
     };
 
     const handleLoginSubmission = async () => {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: formData.email,
-            password: formData.password
-        });
-        if (error){
-            if (error.code === "invalid_credentials"){
-                setErrorMessage("Invalid credentials. Please check your email and password and try again.");
-            }
-            else{
-                setErrorMessage("Unable to login. Please make sure you have an account and double check your credentials.");
-            }
-            return;  
-        }
-        else if (data){
-            const { data: userDataArray, error: userError } = await supabase.from('users').select("*").eq("user_id", data.user.id);
-            if (userError){
-                setErrorMessage(`Unable to find that user in public.users... yet the user with email ${data.user.email} exists in auth.users...`);
-                return;
-            }
-            else if (userDataArray && userDataArray.length > 0){
-                const userData: User = userDataArray[0];
+        
+                const user: User | null = await login(formData.email, formData.password);
+                
+                if (!user){
+                    setErrorMessage("Unable to login with those credentials. Double check your info and try again, or sign up instead if you don't have an account.");
+                    return;
+                }
+
                 //user_types = {1: 'Student', 2: 'Teacher'}
-                if (userData.user_type_id === 1){
-                    navigation.navigate("StudentDashboard", userData);
+                if (user.user_type_id === 1){
+                    navigation.navigate("StudentDashboard", user);
                 }
-                else if (userData.user_type_id === 2){
-                    navigation.navigate("TeacherDashboard", userData);
+                else if (user.user_type_id === 2){
+                    navigation.navigate("TeacherDashboard", user);
                 }
-            }
-            else{
-                setErrorMessage("Unexpected error occured while pulling the user from public.users... please contact support.")
-            }
-        }
-        else{
-            setErrorMessage("Unexpected error occured while logging in. Please contact support.");
-            return;
-        }
+                
     }
 
     return <>
