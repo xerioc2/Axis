@@ -8,6 +8,8 @@ const TeacherDashboard: React.FC = () => {
     return (
         <>
             <Text>TEACHER DASHBOARD</Text>
+
+            
         </>
     )
 }

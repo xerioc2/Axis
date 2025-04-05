@@ -39,3 +39,38 @@ export type User = {
   school_id: number,
   user_type_id: number
 }
+export type Course = {
+  course_id: number,
+  course_subject: string | null,
+  course_code: number | null,
+  course_name: string | null,
+  creator_id: string,
+  school_id: number,
+  date_created: string
+}
+export type CourseInsertDto = {
+  course_subject: string | null,
+  course_code: number | null,
+  course_name: string | null,
+  creator_id: string,
+  school_id: number
+}
+
+export type Section = {
+  section_id: number,
+  section_number: number,
+  enrollment_code: string,
+  semester_id: number,
+  course_id: number,
+  date_created: string,
+  start_date: string
+}
+export type SectionInsertDto = {
+  section_number: number,
+  enrollment_code: string,
+  semester_id: number,
+  course_id: number,
+  start_date: string
+  //insert start date as '2024-01-01'
+}
+
