@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
+import { StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import supabase from '../utils/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,20 +15,23 @@ import { Colors } from '../theme';
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
 const LoginScreen: React.FC = () => {
+const LoginScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProps>();
-    const [formData, setFormData] = useState({email: "", password: ""});
+    const [formData, setFormData] = useState({ email: "", password: "" });
     const [buttonEnabled, setButtonEnabled] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [fontsLoaded] = useFonts({
+        'Rexton Bold': require('../assets/fonts/rexton_bold.otf'),
+        'Inter': require('../assets/fonts/antonio_semibold.ttf'),
+        'SF Pro': require('../assets/fonts/sf_pro.ttf'),
+    });
 
     useEffect(() => {
-            if (formData.email !== "" && formData.password !== ""){
-                setButtonEnabled(true);
-            }
-        }, [formData]);
-
+        setButtonEnabled(formData.email !== "" && formData.password !== "");
+    }, [formData]);
 
     const handleChange = (key: string, value: string) => {
-        setFormData((prev: any) => ({ ...prev, [key]: value }));
+        setFormData(prev => ({ ...prev, [key]: value }));
     };
 
     const handleLoginSubmission = async () => {
@@ -79,9 +83,7 @@ const LoginScreen: React.FC = () => {
             
 
         </View>
-    </>
-
-
+      );      
 };
 export default LoginScreen;
 
@@ -113,7 +115,16 @@ const styles = StyleSheet.create({
     input: {
         width: "100%",
         padding: 10,
+    },
+    emailInput: {
+        marginTop: 65,
+        marginHorizontal: 40,
         marginBottom: 10,
+    },
+    passwordInput: {
+        marginTop: 20,
+        marginHorizontal: 40,
+        marginBottom: 20,
         borderWidth: 1,
         borderColor: Colors.grey,
         borderRadius: 5,
@@ -122,6 +133,28 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 30,
     },
+    textInput: {
+        color: '#000',
+        borderBottomColor: '#358F4B',
+        fontFamily: 'Inter',
+        fontSize: 16,
+        borderBottomWidth: 1,
+        paddingVertical: 10,
+    },
+    graphLine: {
+      position: 'absolute',
+      left: -45,
+      top: 395,
+      width: 485,
+      height: 485,
+      alignSelf: 'center',
+      resizeMode: 'contain',
+    },
+    text: {
+      color: '#808080',
+      textAlign: 'center',
+      fontFamily: 'SF Pro',
+      lineHeight: 22,
     button: {
         backgroundColor: Colors.secondary,
         padding: 15,

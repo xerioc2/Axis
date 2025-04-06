@@ -109,53 +109,62 @@ const StepManager: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    stepContainer: {
-        flex: 1, 
-        marginTop: 300,
-        marginHorizontal: 25,
-        alignItems: 'center', 
-    },
-    button: {
-        backgroundColor: '#2E7D32',
-        padding: 15,
-        borderRadius: 25,
-        width: '80%',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        marginVertical: 15
-    },
-    disabledButton: {
-        backgroundColor: '#BBB',
-        padding: 15,
-        borderRadius: 25,
-        width: '80%',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        marginVertical: 15
-    },
-    backButton: {
-        backgroundColor: '#2E7D32',
-        padding: 10,
-        borderRadius: 25,
-        width: "20%",
-        alignItems: "center",
-    }
-    
+  stepContainer: {
+    flex: 1,
+    marginTop: 100,
+    marginHorizontal: 25,
+    alignItems: 'center',
+  },
+  button: {
+    backgroundColor: '#2E7D32',
+    padding: 15,
+    borderRadius: 30,
+    width: 255,
+    height: 43,
+    alignItems: 'center',
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginTop: -20,
+    marginBottom: 15,
+  },
+  buttonText: {
+    position: 'absolute',
+    color: '#FFF',
+    fontFamily: 'Inter',
+    fontWeight: '600',
+    textAlign: 'center',
+    fontSize: 16,
+    lineHeight: 22,
+    padding: 10,
+},
+  disabledButton: {
+    backgroundColor: '#BBB',
+    padding: 15,
+    borderRadius: 25,
+    width: 255,
+    height: 43,
+    alignItems: 'center',
+    elevation: 5,
+    marginTop: -20,
+    marginBottom: 15,
+  },
+  backButton: {
+    backgroundColor: '#2E7D32',
+    padding: 10,
+    borderRadius: 25,
+    width: "20%",
+    alignItems: "center",
+  },
+  loginContainer: {
+    marginBottom: 335,
+    alignItems: 'center',
+  },
+  loginText: {
+    fontSize: 12,
+    color: '#808080',
+    fontFamily: 'SF Pro',
+    textDecorationLine: 'underline',
+  },
 });
-
 
 export default StepManager;
