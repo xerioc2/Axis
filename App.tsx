@@ -114,4 +114,14 @@ export type Semester = {
   year: number
 }
 
+/*TeacherData is used to collect all info
+for a teacher when they login. 
+*/
+export type TeacherDataDto = {
+  sections: Section[], //all sections a teacher has taught
+  courses_taught: Course[], //all courses this teacher has taught a section of
+  semesters: Semester[], //all semesters in which this teach has taught at least one section
+  courses_created: Course[], //all courses this teacher has created
+}
+
 

@@ -1,5 +1,5 @@
 import supabase from "./supabase";
-import type { User, SectionTeacher, Section, Course, Semester } from "@/App";
+import type { User, SectionTeacher, Section, Course, Semester, TeacherDataDto } from "@/App";
 
 
 export async function signup(email: string, password: string, firstName: string, lastName: string, userTypeId: number, schoolId: number) {
@@ -69,12 +69,15 @@ export async function login(email: string, password: string){
     return null;
 }
 
+//runs when a teacher logs in
 export async function getTeacherData(teacherId: string){
     //first query section_teachers, 
     try{
         let sections: Section[] = [];
-        let courses: Course[] = [];
+        let courses_taught: Course[] = [];
         let semesters: Semester[] = [];
+        let courses_created: Course[] = [];
+
         const { data: sectionTeacherData, error: sectionTeacherError } = await supabase
             .from("section_teachers")
             .select("*")
@@ -96,18 +99,18 @@ export async function getTeacherData(teacherId: string){
             }
             else if (sectionData && sectionData.length > 0){
                 sections = sectionData as Section[];
-                //now get courses using the course id
+                //now query the courses they've taught using the course id
                 const course_ids: number[] = sections.map(section => section.course_id);
-                const { data: courseData, error: courseError} = await supabase
+                const { data: courseTaughtData, error: courseTaughtError} = await supabase
                     .from("courses")
                     .select("*")
                     .in('course_id', course_ids);
                 
-                if (courseError){
+                if (courseTaughtError){
                     console.log("");
                 }
-                else if (courseData){
-                    courses = courseData as Course[];
+                else if (courseTaughtData){
+                    courses_taught = courseTaughtData as Course[];
                 }
                 else{
                     console.log("Unexpected error getting courses");
@@ -131,7 +134,32 @@ export async function getTeacherData(teacherId: string){
             else{
                 console.log("Unexpected error getting sections");
             }
-            //RIGHT HERE, FIGURE OUT HOW TO RETURN ALL THREE DATA ENTITIES
+            
+            //now get courses this teacher has created
+            //the course ids will be different here, we can use the teacher_id to query those
+            const { data: courseCreatedData, error: courseCreatedError } = await supabase
+                .from("courses")
+                .select("*")
+                .eq("creator_id", teacherId);
+            
+            if (courseCreatedError){
+                console.log("Error getting created courses: ", courseCreatedError.name, courseCreatedError.message);
+            }
+            else if (courseCreatedData){
+                courses_created = courseCreatedData as Course[];
+            }
+            else {
+                console.log("Unexpected error getting created courses");
+            }
+
+            //Use the TeacherData data transfer object to pass all 4 lists back
+            const teacherData: TeacherDataDto = {
+                sections: sections,
+                courses_taught: courses_taught,
+                semesters: semesters,
+                courses_created: courses_created
+            }
+            return teacherData;
         }
         else{
             console.log("Unexpected error getting section_teachers");
