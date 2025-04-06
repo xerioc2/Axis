@@ -1,5 +1,5 @@
 import supabase from "./supabase";
-import type { User, SectionTeacher, Section } from "@/App";
+import type { User, SectionTeacher, Section, Course, Semester } from "@/App";
 
 
 export async function signup(email: string, password: string, firstName: string, lastName: string, userTypeId: number, schoolId: number) {
@@ -69,9 +69,12 @@ export async function login(email: string, password: string){
     return null;
 }
 
-export async function getSectionsByTeacherId(teacherId: string){
+export async function getTeacherData(teacherId: string){
     //first query section_teachers, 
     try{
+        let sections: Section[] = [];
+        let courses: Course[] = [];
+        let semesters: Semester[] = [];
         const { data: sectionTeacherData, error: sectionTeacherError } = await supabase
             .from("section_teachers")
             .select("*")
@@ -82,30 +85,57 @@ export async function getSectionsByTeacherId(teacherId: string){
         }
         else if (sectionTeacherData && sectionTeacherData.length > 0){
             const sectionTeachers: SectionTeacher[] = sectionTeacherData as SectionTeacher[];
-            //now query the sections themselves
-            let sections: Section[] = []
-            for(let sectionTeacher of sectionTeachers){
-                const { data: sectionData, error: sectionError } = await supabase
-                    .from("sections")
+            //now query the sections themselves using the section ids
+            const section_ids: number[] = sectionTeachers.map(section => section.section_id); 
+            const { data: sectionData, error: sectionError } = await supabase
+                .from("sections")
+                .select("*")
+                .in("section_id", section_ids);
+            if (sectionError){
+                console.log("Error getting sections: ", sectionError);
+            }
+            else if (sectionData && sectionData.length > 0){
+                sections = sectionData as Section[];
+                //now get courses using the course id
+                const course_ids: number[] = sections.map(section => section.course_id);
+                const { data: courseData, error: courseError} = await supabase
+                    .from("courses")
                     .select("*")
-                    .eq("section_id", sectionTeacher.section_id);
-                if (sectionError){
-                    console.log("Error getting sections: ", sectionError);
+                    .in('course_id', course_ids);
+                
+                if (courseError){
+                    console.log("");
                 }
-                else if (sectionData && sectionData.length > 0){
-                    const section: Section = sectionData[0];
-                    sections.push(section);
+                else if (courseData){
+                    courses = courseData as Course[];
                 }
                 else{
-                    console.log("Unexpected error getting sections");
+                    console.log("Unexpected error getting courses");
+                }
+                
+                const semester_ids: number[] = sections.map(section => section.semester_id);
+                const { data: semesterData, error: semesterError } = await supabase
+                    .from("semesters")
+                    .select("*")
+                    .in("semester_id", semester_ids);
+                if (semesterError){
+                    console.log("Error getting semesters: ", semesterError);
+                }
+                else if (semesterData){
+                    semesters = semesterData as Semester[];
+                }
+                else{
+                    console.log("Unexpected error getting semesters");
                 }
             }
-            return sections;
+            else{
+                console.log("Unexpected error getting sections");
+            }
+            //RIGHT HERE, FIGURE OUT HOW TO RETURN ALL THREE DATA ENTITIES
         }
         else{
             console.log("Unexpected error getting section_teachers");
         }
-
     } catch(err) {
         console.log("Error getting sections by teacher id: ", err);
     }

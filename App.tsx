@@ -58,7 +58,7 @@ export type CourseInsertDto = {
 
 export type Section = {
   section_id: number,
-  section_number: number,
+  section_identifier: string,
   enrollment_code: string,
   semester_id: number,
   course_id: number,
@@ -66,7 +66,7 @@ export type Section = {
   start_date: string
 }
 export type SectionInsertDto = {
-  section_number: number,
+  section_identifier: string,
   enrollment_code: string,
   semester_id: number,
   course_id: number,
@@ -107,4 +107,11 @@ export type ConceptInsertDto = {
   concept_description: string | null,
   topic_id: number
 }
+
+export type Semester = {
+  semester_id: number,
+  season: string,
+  year: number
+}
+
 
