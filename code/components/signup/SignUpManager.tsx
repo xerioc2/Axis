@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Step1 from './Step1';
 import Step2 from './Step2';
-import supabase from '../../utils/supabase';
+import ErrorMessage from '../ErrorMessage';
+import { RootStackParamList } from '@/code/utils/navigation.types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { signup } from '@/code/utils/supabaseService';
 
 
 
+type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
 
-type SignUpManagerProps = {
-    
-};
-
-
-const StepManager: React.FC<SignUpManagerProps> = () => {
+const StepManager: React.FC = () => {
+    const navigation = useNavigation<NavigationProps>();
     const [currentStep, setCurrentStep] = useState(1);
     const [role, setRole] = useState("");
     const [isRoleSelected, setIsRoleSelected] = useState(false);
@@ -26,6 +27,7 @@ const StepManager: React.FC<SignUpManagerProps> = () => {
             schoolType: "",
             schoolName: ""
         });
+    const [errorMessage, setErrorMessage] = useState("");
     
     useEffect(() => {
         if (currentStep === 1) {
@@ -41,10 +43,39 @@ const StepManager: React.FC<SignUpManagerProps> = () => {
             formData.password !== "" && 
             formData.confirmPassword !== "" && 
             formData.schoolType !== "" && 
-            formData.schoolName !== ""){
-                setAreAllFieldsEdited(true);
-        }
+            formData.schoolName !== "")
+            setAreAllFieldsEdited(true);
     }, [formData]);
+
+    const handleSignUpSubmission = async () => {
+        if (formData.password !== formData.confirmPassword){
+            setErrorMessage("Password and confirmation do not match. Double check your password and try again.");
+            return;
+        }
+        let userTypeId = 0
+        if (role === "Student"){
+            userTypeId = 1;
+        }
+        else if (role === "Teacher"){
+            userTypeId = 2;
+        }
+        else{
+            setErrorMessage("No role selected. Please go back and select your role and try again.");
+            return;
+        }
+
+        const singupResponse: {user: any, session: any} | null = await signup(formData.email, formData.password, formData.firstName, formData.lastName, userTypeId, 1); //change this school id
+        if (!singupResponse){
+            setErrorMessage("There was an error signing up, please close the app and try again.");
+            return;
+        }
+        //redirect to login, so they can log in to there new account
+    
+        navigation.navigate("Login");
+
+    }
+
+
     
 
     return <>
@@ -66,10 +97,12 @@ const StepManager: React.FC<SignUpManagerProps> = () => {
                 <TouchableOpacity 
                     style={areAllFieldsEdited ? styles.button : styles.disabledButton}
                     disabled={!areAllFieldsEdited}
+                    onPress={handleSignUpSubmission}
                 >
                     <Text>Sign Up</Text>    
                 </TouchableOpacity>
             }
+            {currentStep === 2 && errorMessage !== "" && <ErrorMessage message={errorMessage}/>}
         </View>
     </>
 
