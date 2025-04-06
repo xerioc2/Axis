@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Image } from 'react-native';
+import { StyleSheet, Image, ImageBackground } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import supabase from '../utils/supabase';
 import { useNavigation } from '@react-navigation/native';
@@ -8,13 +8,13 @@ import type { RootStackParamList } from '../utils/navigation.types';
 import type { User } from "@/App";
 import ErrorMessage from '../components/ErrorMessage';
 import { login } from '../utils/supabaseService';
+import { useFonts } from 'expo-font';
 import { Colors } from '../theme';
 
 
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
-const LoginScreen: React.FC = () => {
 const LoginScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProps>();
     const [formData, setFormData] = useState({ email: "", password: "" });
@@ -53,7 +53,8 @@ const LoginScreen: React.FC = () => {
                 
     }
 
-    return <>
+    return (
+    <>
         <View style={styles.container}>
             <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
             <View style={styles.loginForm}>
@@ -83,7 +84,8 @@ const LoginScreen: React.FC = () => {
             
 
         </View>
-      );      
+    </>
+    );      
 };
 export default LoginScreen;
 
@@ -155,6 +157,7 @@ const styles = StyleSheet.create({
       textAlign: 'center',
       fontFamily: 'SF Pro',
       lineHeight: 22,
+    },
     button: {
         backgroundColor: Colors.secondary,
         padding: 15,
