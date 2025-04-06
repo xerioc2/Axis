@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../utils/navigation.types';
 import { useFonts } from 'expo-font';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
