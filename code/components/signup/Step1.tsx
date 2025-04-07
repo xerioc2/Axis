@@ -1,6 +1,6 @@
 import RadioGroup from '../buttons/RadioGroup';
 import React, { Dispatch, SetStateAction } from 'react';
-import { View, Text, StyleSheet,  } from 'react-native';
+import { View, Text, StyleSheet, Image} from 'react-native';
 import { useFonts } from 'expo-font';
 
 type Step1Props = {
@@ -52,7 +52,8 @@ const styles = StyleSheet.create({
   radioContainer: {
     width: '100%',
     paddingHorizontal: 10,
-  }
+  },
+  
 })
 
 export default Step1;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Step1 from './Step1';
 import Step2 from './Step2';
@@ -125,8 +125,21 @@ const StepManager: React.FC = () => {
                 <ErrorMessage message={errorMessage}/>
             }
         </View>
-    </>
-
+      )}
+      {currentStep === 1 && (
+        <Image
+        source={require('../../assets/images/stepper_bar1.png')}
+        style={styles.stepper}
+      />
+      )}
+      {currentStep === 2 && (
+        <Image
+        source={require('../../assets/images/stepper_bar2.png')}
+        style={styles.stepper}
+        />
+      )}
+    </View>
+  );
 };
 export default StepManager;
 
@@ -150,14 +163,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   buttonText: {
-    position: 'absolute',
-    color: Colors.white,
+    marginTop: -5,
+    color: '#FFF',
     fontFamily: 'Inter',
     fontWeight: '600',
     textAlign: 'center',
     fontSize: 16,
     lineHeight: 22,
-    padding: 10,
 },
   disabledButton: {
     backgroundColor: Colors.grey,
@@ -171,15 +183,18 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   backButton: {
-    backgroundColor: Colors.secondary,
-    padding: 10,
-    borderRadius: 25,
-    width: "20%",
-    alignItems: "center",
+    fontSize: 12,
+    fontWeight: 600,
+    color: '#808080',
+    fontFamily: 'SF Pro',
+    textDecorationLine: 'underline',
   },
   loginContainer: {
-    marginBottom: 335,
+    marginBottom: 100,
     alignItems: 'center',
+  },
+  stepper: {
+    marginTop: 175,
   }
 });
 
