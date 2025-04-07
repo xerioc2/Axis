@@ -26,10 +26,6 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
         source={require('../assets/images/axis_lettering.png')}
         style={styles.logo}
       />
-      <Image
-        source={require('../assets/images/stepper_bar1.png')}
-        style={styles.stepper}
-      />
 
       <Text style={styles.slogan}>
         WHERE LEARNING{'\n'}MEETS MASTERY
@@ -66,10 +62,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'SF Pro',
     marginTop: 2,
-  },
-  stepper: {
-    position: 'absolute',
-    marginTop: 815,
   }
 });
 

@@ -1,6 +1,6 @@
 import RadioGroup from '../buttons/RadioGroup';
 import React, { Dispatch, SetStateAction } from 'react';
-import { View, Text, StyleSheet,  } from 'react-native';
+import { View, Text, StyleSheet, Image} from 'react-native';
 import { useFonts } from 'expo-font';
 
 type Step1Props = {
@@ -20,6 +20,10 @@ const Step1: React.FC<Step1Props> = ({ setRole, setIsRoleSelected }) => {
   
   return (
     <View style={styles.container}>
+      <Image
+              source={require('../../assets/images/stepper_bar1.png')}
+              style={styles.stepper}
+            />
       <Text style={styles.title}>Select Role</Text>
       <View style={styles.radioContainer}>
         <RadioGroup 
@@ -52,6 +56,10 @@ const styles = StyleSheet.create({
   radioContainer: {
     width: '100%',
     paddingHorizontal: 10,
+  },
+  stepper: {
+    position: 'absolute',
+    marginTop: 815,
   }
 })
 

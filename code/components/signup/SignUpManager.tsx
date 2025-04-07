@@ -49,9 +49,9 @@ const StepManager: React.FC<SignUpManagerProps> = ({ navigation }) => {
   return (
     <View style={styles.stepContainer}>
       {currentStep !== 1 && (
-        <TouchableOpacity style={styles.backButton} onPress={() => setCurrentStep(currentStep - 1)}>
-          <Text>Back</Text>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+          <Text style={styles.backButton}>ALREADY HAVE AN ACCOUNT?</Text>
+      </TouchableOpacity>
       )}
 
       {currentStep === 1 && (
@@ -84,7 +84,7 @@ const StepManager: React.FC<SignUpManagerProps> = ({ navigation }) => {
       {currentStep === 1 && (
         <View style={styles.loginContainer}>
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-            <Text style={styles.loginText}>ALREADY HAVE AN ACCOUNT?</Text>
+            <Text style={styles.backButton}>ALREADY HAVE AN ACCOUNT?</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -133,22 +133,16 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   backButton: {
-    backgroundColor: '#2E7D32',
-    padding: 10,
-    borderRadius: 25,
-    width: "20%",
-    alignItems: "center",
-  },
-  loginContainer: {
-    marginBottom: 335,
-    alignItems: 'center',
-  },
-  loginText: {
     fontSize: 12,
+    fontWeight: 600,
     color: '#808080',
     fontFamily: 'SF Pro',
     textDecorationLine: 'underline',
   },
+  loginContainer: {
+    marginBottom: 335,
+    alignItems: 'center',
+  }
 });
 
 export default StepManager;
