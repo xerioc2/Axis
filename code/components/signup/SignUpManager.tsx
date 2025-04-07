@@ -80,10 +80,11 @@ const StepManager: React.FC = () => {
         <View style={styles.stepContainer}>
             {currentStep !== 1 && 
                 <TouchableOpacity 
-                    style={styles.backButton} 
                     onPress={() => setCurrentStep(currentStep-1)}
                 >
-                    <Text>Back</Text>
+                    <Text
+                        style={styles.backButton}
+                    >Back</Text>
                 </TouchableOpacity>
             }
 
@@ -124,8 +125,8 @@ const StepManager: React.FC = () => {
              errorMessage !== "" && 
                 <ErrorMessage message={errorMessage}/>
             }
-        </View>
-      )}
+        
+        
       {currentStep === 1 && (
         <Image
         source={require('../../assets/images/stepper_bar1.png')}
@@ -139,8 +140,8 @@ const StepManager: React.FC = () => {
         />
       )}
     </View>
-  );
-};
+  </>
+}
 export default StepManager;
 
 const styles = StyleSheet.create({
