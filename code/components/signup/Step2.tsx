@@ -97,7 +97,6 @@ const styles = StyleSheet.create({
       fontFamily: 'Inter',
       fontSize: 16,
       borderBottomWidth: 1,
-      paddingVertical: 10,
   },
     firstNameInput: {
       marginTop: 65,

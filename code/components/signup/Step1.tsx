@@ -20,10 +20,6 @@ const Step1: React.FC<Step1Props> = ({ setRole, setIsRoleSelected }) => {
   
   return (
     <View style={styles.container}>
-      <Image
-              source={require('../../assets/images/stepper_bar1.png')}
-              style={styles.stepper}
-            />
       <Text style={styles.title}>Select Role</Text>
       <View style={styles.radioContainer}>
         <RadioGroup 
@@ -57,10 +53,7 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 10,
   },
-  stepper: {
-    position: 'absolute',
-    marginTop: 815,
-  }
+  
 })
 
 export default Step1;

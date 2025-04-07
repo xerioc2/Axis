@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import Step1 from './Step1';
 import Step2 from './Step2';
 import supabase from '../../utils/supabase';
@@ -88,6 +88,18 @@ const StepManager: React.FC<SignUpManagerProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       )}
+      {currentStep === 1 && (
+        <Image
+        source={require('../../assets/images/stepper_bar1.png')}
+        style={styles.stepper}
+      />
+      )}
+      {currentStep === 2 && (
+        <Image
+        source={require('../../assets/images/stepper_bar2.png')}
+        style={styles.stepper}
+        />
+      )}
     </View>
   );
 };
@@ -112,14 +124,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   buttonText: {
-    position: 'absolute',
+    marginTop: -5,
     color: '#FFF',
     fontFamily: 'Inter',
     fontWeight: '600',
     textAlign: 'center',
     fontSize: 16,
     lineHeight: 22,
-    padding: 10,
 },
   disabledButton: {
     backgroundColor: '#BBB',
@@ -140,8 +151,11 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   loginContainer: {
-    marginBottom: 335,
+    marginBottom: 100,
     alignItems: 'center',
+  },
+  stepper: {
+    marginTop: 175,
   }
 });
 
