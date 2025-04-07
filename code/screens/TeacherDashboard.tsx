@@ -13,6 +13,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
   KeyboardTypeOptions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,6 +23,7 @@ import {
   closeModal as closeModalHandler,
   handleAddCourse as handleAddCourseHandler,
   handlePickImage,
+  handleDeleteCourse as handleDeleteCourseHandler,
   Course,
 } from "../components/teacherdashboard/TeacherDashboardHandlers";
 
@@ -33,7 +35,7 @@ const TeacherDashboard: React.FC = () => {
       season: "Spring",
       year: 2025,
       code: 1234,
-      image: "https://via.placeholder.com/100",
+      image: "",
       section: 3,
       subject: "Mathematics",
     },
@@ -43,7 +45,7 @@ const TeacherDashboard: React.FC = () => {
       season: "Spring",
       year: 2025,
       code: 5678,
-      image: "https://via.placeholder.com/100",
+      image: "",
       section: 3,
       subject: "Science",
     },
@@ -65,7 +67,6 @@ const TeacherDashboard: React.FC = () => {
 
   const slideAnim = useState(new Animated.Value(500))[0];
 
-  // Handlers imported from TeacherDashboardHandlers.ts
   const openModal = () => openModalHandler(setModalVisible, slideAnim);
   const closeModal = () => closeModalHandler(setModalVisible, slideAnim);
   const handleAddCourse = () =>
@@ -77,6 +78,31 @@ const TeacherDashboard: React.FC = () => {
       setIsAddingCourse,
       closeModal
     );
+
+  const onDeleteCourse = () => {
+    Alert.prompt(
+      "Delete Course",
+      "Enter the Course Code to delete:",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: (code) => {
+            const courseCode = Number(code);
+            if (isNaN(courseCode)) {
+              Alert.alert("Invalid Code", "Please enter a valid numeric course code.");
+            } else {
+              handleDeleteCourseHandler(courses, setCourses, courseCode);
+            }
+          },
+        },
+      ],
+      "plain-text"
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -92,9 +118,12 @@ const TeacherDashboard: React.FC = () => {
           </View>
         )}
       />
-      <TouchableOpacity style={styles.editButton} onPress={openModal}>
-        <Ionicons name="ellipsis-vertical" size={32} color="white" />
-      </TouchableOpacity>
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.editButton} onPress={openModal}>
+          <Ionicons name="ellipsis-vertical" size={32} color="white" />
+        </TouchableOpacity>
+      </View>
+
 
       <Modal transparent visible={modalVisible} animationType="none">
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -121,10 +150,11 @@ const TeacherDashboard: React.FC = () => {
                       >
                         <Text style={styles.modalButtonText}>Add Course</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.modalButton}>
-                        <Text style={styles.modalButtonText}>
-                          Delete Course
-                        </Text>
+                      <TouchableOpacity
+                        style={styles.modalButton}
+                        onPress={onDeleteCourse}
+                      >
+                        <Text style={styles.modalButtonText}>Delete Course</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={styles.modalButton}>
                         <Text style={styles.modalButtonText}>
@@ -147,7 +177,6 @@ const TeacherDashboard: React.FC = () => {
                         { label: "Season", key: "season", type: "default" },
                         { label: "Year", key: "year", type: "numeric" },
                         { label: "Code", key: "code", type: "numeric" },
-                        // The image field is now handled via the image picker button
                         { label: "Section", key: "section", type: "numeric" },
                         { label: "Subject", key: "subject", type: "default" },
                       ].map((field) => (
@@ -182,7 +211,7 @@ const TeacherDashboard: React.FC = () => {
                           source={{ uri: imageUri }}
                           style={{
                             width: "100%",
-                            height: 200,
+                            height: 100,
                             resizeMode: "cover",
                             borderRadius: 10,
                             marginVertical: 10,
@@ -206,7 +235,7 @@ const TeacherDashboard: React.FC = () => {
                       </TouchableOpacity>
                     </View>
                   )}
-                  <View style={{ height: 120 }} />
+                  <View style={{ height: 200 }} />
                 </ScrollView>
               </KeyboardAvoidingView>
             </Animated.View>

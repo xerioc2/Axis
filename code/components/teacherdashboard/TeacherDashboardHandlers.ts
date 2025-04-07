@@ -81,15 +81,25 @@ const pickImage = async (): Promise<string | null> => {
       return result.assets[0].uri;
     }
     return null;
-  };
+};
   
-  export const handlePickImage = async (
+export const handlePickImage = async (
     setImageUri: Dispatch<SetStateAction<string | null>>,
     setNewCourse: Dispatch<SetStateAction<Course>>
-  ): Promise<void> => {
+): Promise<void> => {
     const uri = await pickImage();
     if (uri) {
       setImageUri(uri);
       setNewCourse((prev) => ({ ...prev, image: uri }));
     }
-  };
+};
+
+export const handleDeleteCourse = (
+    courses: Course[],
+    setCourses: Dispatch<SetStateAction<Course[]>>,
+    courseCode: number
+) => {
+    const updatedCourses = courses.filter((course) => course.code !== courseCode);
+    setCourses(updatedCourses);
+};
+  
