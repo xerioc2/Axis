@@ -2,6 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignUpScreen from './code/screens/SignUpScreen';
 import LoginScreen from './code/screens/LoginScreen';
+import TeacherDashboard from './code/screens/TeacherDashboard';
 import type { RootStackParamList } from './code/utils/navigation.types';
 
 /*
@@ -16,6 +17,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         
+        <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />       
         <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
 
