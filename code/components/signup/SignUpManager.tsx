@@ -6,7 +6,7 @@ import Step2 from './Step2';
 import ErrorMessage from '../ErrorMessage';
 import { RootStackParamList } from '@/code/utils/navigation.types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { signup } from '@/code/utils/supabaseService';
+import { signup } from '@/code/service/supabaseService';
 
 
 

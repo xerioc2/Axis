@@ -1,5 +1,5 @@
-import supabase from "./supabase";
-import type { User, SectionTeacher, Section, Course, Semester, TeacherDataDto } from "@/App";
+import supabase from "../utils/supabase";
+import type { User, SectionTeacher, Section, SectionDto, Course, Semester, TeacherDataDto } from "@/App";
 
 
 export async function signup(email: string, password: string, firstName: string, lastName: string, userTypeId: number, schoolId: number) {
@@ -76,6 +76,9 @@ export async function getTeacherData(teacherId: string){
         let sections: Section[] = [];
         let courses_taught: Course[] = [];
         let semesters: Semester[] = [];
+
+        let sectionDtos: SectionDto[] = []
+
         let courses_created: Course[] = [];
 
         const { data: sectionTeacherData, error: sectionTeacherError } = await supabase
@@ -111,6 +114,7 @@ export async function getTeacherData(teacherId: string){
                 }
                 else if (courseTaughtData){
                     courses_taught = courseTaughtData as Course[];
+                    //map these indeces to the sections
                 }
                 else{
                     console.log("Unexpected error getting courses");
@@ -130,6 +134,39 @@ export async function getTeacherData(teacherId: string){
                 else{
                     console.log("Unexpected error getting semesters");
                 }
+
+                //map sections to their corresponding courses/semesters
+                let sections_course_map: number[] = new Array(sections.length);
+                let sections_semester_map: number[] = new Array(sections.length);
+                for (let i = 0; i < sections.length; i++){
+                    for (let j = 0; j < courses_taught.length; j++){
+                        if (courses_taught[j].course_id === sections[i].course_id){
+                            sections_course_map[i] = j;
+                        }
+                    }
+                    for (let j = 0; j < semesters.length; j++){
+                        if (semesters[j].semester_id === sections[i].semester_id){
+                            sections_semester_map[i] = j;
+                        }
+                    }
+                }
+                //now build the dtos using those lookup tables
+                for (let i = 0; i < sections.length; i++){
+                    const relatedCourse: Course = courses_taught[sections_course_map[i]];
+                    const relatedSemester: Semester = semesters[sections_semester_map[i]];
+                    const sectionDto: SectionDto = {
+                        section_id: sections[i].section_id,
+                        section_identifier: sections[i].section_identifier,
+                        enrollment_code: sections[i].enrollment_code,
+                        course_name: relatedCourse.course_name,
+                        course_identifier: relatedCourse.course_identifier,
+                        course_subject: relatedCourse.course_subject,
+                        season: relatedSemester.season,
+                        year: relatedSemester.year
+                    }
+                    sectionDtos.push(sectionDto); 
+                }
+
             }
             else{
                 console.log("Unexpected error getting sections");
@@ -154,9 +191,7 @@ export async function getTeacherData(teacherId: string){
 
             //Use the TeacherData data transfer object to pass all 4 lists back
             const teacherData: TeacherDataDto = {
-                sections: sections,
-                courses_taught: courses_taught,
-                semesters: semesters,
+                sections: sectionDtos,
                 courses_created: courses_created
             }
             return teacherData;

@@ -7,7 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../utils/navigation.types';
 import type { User } from "@/App";
 import ErrorMessage from '../components/ErrorMessage';
-import { login } from '../utils/supabaseService';
+import { login } from '../service/supabaseService';
 import { useFonts } from 'expo-font';
 import { Colors } from '../theme';
 

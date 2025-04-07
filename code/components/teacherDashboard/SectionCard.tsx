@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
-import type { Section } from '../../../App';
+import type { SectionDto } from '../../../App';
 import { Colors } from '../../theme'; 
 
 type SectionCardProps = {
-    section: Section
+    section: SectionDto
 }
 
 const SectionCard: React.FC<SectionCardProps> = ({ section }) => {
@@ -12,7 +12,7 @@ const SectionCard: React.FC<SectionCardProps> = ({ section }) => {
     return (
         <>
             <View style={styles.sectionCardContainer}>
-               <Text></Text> 
+               <Text>{section.course_subject} {section.course_identifier}-{section.section_identifier} {section.course_name}</Text> 
             </View>
         </>
     )
@@ -21,7 +21,12 @@ export default SectionCard;
 
 const styles = StyleSheet.create({
     sectionCardContainer: {
-        borderColor: Colors.grey
-    }
+        borderColor: Colors.grey,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+
 })
 

@@ -39,10 +39,26 @@ export type User = {
   school_id: number,
   user_type_id: number
 }
+export type StudentDto = {
+  user_id: string,
+  first_name: string,
+  last_name: string,
+  email: string,
+  school_name: string,
+}
+export type TeacherDto = {
+  user_id: string,
+  first_name: string,
+  last_name: string,
+  email: string,
+  school_name: string,
+}
+
+
 export type Course = {
   course_id: number,
   course_subject: string | null,
-  course_code: number | null,
+  course_identifier: string | null,
   course_name: string,
   creator_id: string,
   school_id: number,
@@ -50,7 +66,7 @@ export type Course = {
 }
 export type CourseInsertDto = {
   course_subject: string | null,
-  course_code: number | null,
+  course_identifier: string | null,
   course_name: string,
   creator_id: string,
   school_id: number
@@ -118,10 +134,30 @@ export type Semester = {
 for a teacher when they login. 
 */
 export type TeacherDataDto = {
-  sections: Section[], //all sections a teacher has taught
-  courses_taught: Course[], //all courses this teacher has taught a section of
-  semesters: Semester[], //all semesters in which this teach has taught at least one section
+  sections: SectionDto[],
   courses_created: Course[], //all courses this teacher has created
 }
+export type SectionDto = {
+  section_id: number,
+  section_identifier: string,
+  enrollment_code: string,
+  season: string,
+  year: number,
+  course_name: string,
+  course_identifier: string | null,
+  course_subject: string | null
+}
 
+//this DTO contains fields from the course, semester, and section
+export type ActiveSectionDto = {
+  course_subject: string | null,
+  course_name: string,
+  course_identifier: string | null,
+  section_identifier: string,
+  teachers: TeacherDto[],
+  enrolled_students: StudentDto[]
+}
 
+export type SemesterSectionsDto = {
+  
+}
