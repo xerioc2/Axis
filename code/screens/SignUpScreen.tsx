@@ -2,9 +2,9 @@ import React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { useFonts } from 'expo-font';
 import { StackNavigationProp } from '@react-navigation/stack';
-
 import SignUpManager from '../components/signup/SignUpManager';
 import { RootStackParamList } from '../utils/navigation.types';
+import { Colors } from '../theme';
 
 type SignUpScreenNavigationProp = StackNavigationProp<RootStackParamList, "SignUp">;
 
@@ -35,16 +35,17 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
         WHERE LEARNING{'\n'}MEETS MASTERY
       </Text>
 
-      <SignUpManager navigation={navigation} />
+      <SignUpManager />
       
     </View>
   );
 };
+export default SignUpScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F1FFED',
+    backgroundColor: Colors.background,
     alignItems: 'center',
     paddingTop: 67,
   },
@@ -56,12 +57,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Rexton Bold',
     fontSize: 12,
     lineHeight: 22,
-    color: '#005824',
+    color: Colors.primary,
     textAlign: 'center',
     marginTop: 230,
   },
   link: {
-    color: '#005824',
+    color: Colors.primary,
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'SF Pro',
@@ -73,4 +74,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default SignUpScreen;
+

@@ -56,33 +56,56 @@ const LoginScreen: React.FC = () => {
     return (
     <>
         <View style={styles.container}>
-            <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
-            <View style={styles.loginForm}>
-                <Text style={styles.title}>Login</Text>
-                <View style={styles.inputContainer}>
-                <TextInput style={styles.input}  placeholder='Email' value={formData.email} onChangeText={(text) => handleChange("email", text)} />
-                <TextInput style={styles.input}   placeholder='Password' value={formData.password} onChangeText={(text) => handleChange("password", text)}  secureTextEntry />
-                </View>
-                {/* Login Button */}
-                <TouchableOpacity 
-                    style={buttonEnabled ? styles.button : styles.disabledButton}
-                    onPress={() => handleLoginSubmission()}    
-                >
-                    <Text>Login</Text>
-                </TouchableOpacity>
-                {errorMessage !== "" && <ErrorMessage message={errorMessage} />}
-                {/* Sign Up Screen Button */}
-                    <TouchableOpacity 
-                        style={styles.signUpButton}
-                        onPress={() => navigation.navigate("SignUp")} 
-                    >
-                        <Text style={styles.signUpText}>Sign Up</Text>
-                    </TouchableOpacity>
-  
-            </View>
-            </ImageBackground>
-            
+            <View>
+                <Image 
+                    source={require('../assets/images/axis_lettering.png')}
+                    style={styles.logo}
+                />
+                <Image
+                    source={require('../assets/images/graph_line.png')}
+                    style={styles.graphLine}
+                />
+                <Text style={styles.slogan}>WHERE LEARNING{"/n"}MEETS MASTERY</Text>
 
+                <View style={styles.emailInput}>
+                    <TextInput 
+                        style={styles.textInput}
+                        placeholder='Email'
+                        value={formData.email}
+                        onChangeText={(text) => handleChange("email", text)}
+                        placeholderTextColor={Colors.textInput}
+                        autoCapitalize='none'
+                    />
+                </View>
+
+                <View style={styles.passwordInput}>
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Password"
+                        value={formData.password}
+                        onChangeText={(text) => handleChange("password", text)}
+                        secureTextEntry
+                        placeholderTextColor={Colors.textInput}
+                    />
+                </View>
+
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleLoginSubmission}
+                    disabled={!buttonEnabled}
+                >
+                    <Text style={styles.buttonText}>SIGN IN</Text>
+                </TouchableOpacity>
+
+                <Text style={[styles.text, {marginTop: 285, fontSize: 12, fontWeight: '600'}]}>DON'T HAVE AN ACCOUNT?</Text>
+                <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+                    <Text
+                        style={[styles.text, {marginTop: -1, color: Colors.primary, fontSize: 16, fontWeight: '600'}]}
+                    >
+                        Sign Up
+                    </Text>
+                </TouchableOpacity>
+            </View>
         </View>
     </>
     );      
@@ -93,30 +116,35 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.background,
-        padding: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 0,
-        paddingVertical: 0
     },
-    backgroundImage: {
-        flex: 1,
-        width: '100%',
-        height: '100%',
+    logo: {
+        alignSelf: 'center',
+        marginTop: 67
     },
-    loginForm: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        height: '100%',
-        justifyContent: 'center',
+    slogan: {
+        color: Colors.primary,
+        textAlign: 'center',
+        fontFamily: 'Rexton Bold',
+        fontSize: 12,
+        lineHeight: 22,
+        marginTop: -30
     },
-    inputContainer: {
-        width: "80%",
+    button: {
+        backgroundColor: Colors.secondary,
+        alignSelf: 'center',
+        width: 255,
+        height: 43,
+        borderRadius: 30,
+        marginTop: 5
     },
-    input: {
-        width: "100%",
-        padding: 10,
+    buttonText: {
+        color: Colors.white,
+        fontFamily: 'Inter',
+        fontWeight: '600',
+        textAlign: 'center',
+        fontSize: 16,
+        lineHeight: 22,
+        padding: 10
     },
     emailInput: {
         marginTop: 65,
@@ -126,83 +154,30 @@ const styles = StyleSheet.create({
     passwordInput: {
         marginTop: 20,
         marginHorizontal: 40,
-        marginBottom: 20,
-        borderWidth: 1,
-        borderColor: Colors.grey,
-        borderRadius: 5,
-        backgroundColor: Colors.white,
-    },
-    title: {
-        fontSize: 30,
+        marginBottom: 20
     },
     textInput: {
-        color: '#000',
-        borderBottomColor: '#358F4B',
+        color: Colors.black,
+        borderBottomColor: Colors.bottomBorder,
         fontFamily: 'Inter',
         fontSize: 16,
         borderBottomWidth: 1,
-        paddingVertical: 10,
+        paddingVertical: 10
     },
     graphLine: {
-      position: 'absolute',
-      left: -45,
-      top: 395,
-      width: 485,
-      height: 485,
-      alignSelf: 'center',
-      resizeMode: 'contain',
+        position: 'absolute',
+        left: -45,
+        top: 395,
+        width: 485,
+        height: 485,
+        alignSelf: 'center',
+        resizeMode: 'contain'
     },
     text: {
-      color: '#808080',
-      textAlign: 'center',
-      fontFamily: 'SF Pro',
-      lineHeight: 22,
-    },
-    button: {
-        backgroundColor: Colors.secondary,
-        padding: 15,
-        borderRadius: 25,
-        width: '80%',
-        alignItems: 'center',
-        shadowColor: Colors.black,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        marginVertical: 15
-    },
-    disabledButton: {
-        backgroundColor: Colors.grey,
-        padding: 15,
-        borderRadius: 25,
-        width: '80%',
-        alignItems: 'center',
-        shadowColor: Colors.black,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        marginVertical: 15
-    },
-    signUpButton: {
-        marginTop: 10,
-        padding: 10,
-        alignItems: "center",
-        width: "100%",
-    },
-    signUpText: {
-        color: Colors.secondary,
-        fontSize: 16,
-        fontWeight: "bold",
-    },
-    errorText: {
-        color: 'red'
+        color: Colors.grey,
+        textAlign: 'center',
+        fontFamily: 'SF Pro',
+        lineHeight: 22
     }
 });
 

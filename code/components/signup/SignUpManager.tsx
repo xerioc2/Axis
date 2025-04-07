@@ -7,7 +7,7 @@ import ErrorMessage from '../ErrorMessage';
 import { RootStackParamList } from '@/code/utils/navigation.types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { signup } from '@/code/service/supabaseService';
-
+import { Colors } from '../../theme';
 
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
@@ -76,22 +76,40 @@ const StepManager: React.FC = () => {
     }
 
 
-    
-
     return <>
         <View style={styles.stepContainer}>
-            {currentStep !== 1 && <TouchableOpacity style={styles.backButton} onPress={() => setCurrentStep(currentStep-1)}><Text>Back</Text></TouchableOpacity>}
+            {currentStep !== 1 && 
+                <TouchableOpacity 
+                    style={styles.backButton} 
+                    onPress={() => setCurrentStep(currentStep-1)}
+                >
+                    <Text>Back</Text>
+                </TouchableOpacity>
+            }
 
-            {currentStep === 1 && <Step1 setRole={setRole} setIsRoleSelected={setIsRoleSelected}/>}
+            {currentStep === 1 && 
+                <Step1 
+                    setRole={setRole} 
+                    setIsRoleSelected={setIsRoleSelected}
+                />
+            }
             
-            {currentStep === 1 && <TouchableOpacity style={isRoleSelected ? styles.button : styles.disabledButton}
-                disabled={!isRoleSelected} onPress={() => setCurrentStep(2)}>
+            {currentStep === 1 && 
+                <TouchableOpacity 
+                    style={isRoleSelected ? styles.button : styles.disabledButton}
+                    disabled={!isRoleSelected} 
+                    onPress={() => setCurrentStep(2)}
+                >
                     <Text>Next</Text>
                 </TouchableOpacity>
             }
 
-            {currentStep === 2 && <Step2 formData={formData} setFormData={setFormData} />}
-
+            {currentStep === 2 && 
+                <Step2 
+                    formData={formData} 
+                    setFormData={setFormData} 
+                />
+            }
 
             {currentStep === 2 && 
                 <TouchableOpacity 
@@ -102,11 +120,15 @@ const StepManager: React.FC = () => {
                     <Text>Sign Up</Text>    
                 </TouchableOpacity>
             }
-            {currentStep === 2 && errorMessage !== "" && <ErrorMessage message={errorMessage}/>}
+            {currentStep === 2 && 
+             errorMessage !== "" && 
+                <ErrorMessage message={errorMessage}/>
+            }
         </View>
     </>
 
 };
+export default StepManager;
 
 const styles = StyleSheet.create({
   stepContainer: {
@@ -116,7 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: Colors.secondary,
     padding: 15,
     borderRadius: 30,
     width: 255,
@@ -129,7 +151,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     position: 'absolute',
-    color: '#FFF',
+    color: Colors.white,
     fontFamily: 'Inter',
     fontWeight: '600',
     textAlign: 'center',
@@ -138,7 +160,7 @@ const styles = StyleSheet.create({
     padding: 10,
 },
   disabledButton: {
-    backgroundColor: '#BBB',
+    backgroundColor: Colors.grey,
     padding: 15,
     borderRadius: 25,
     width: 255,
@@ -149,7 +171,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   backButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: Colors.secondary,
     padding: 10,
     borderRadius: 25,
     width: "20%",
@@ -158,13 +180,7 @@ const styles = StyleSheet.create({
   loginContainer: {
     marginBottom: 335,
     alignItems: 'center',
-  },
-  loginText: {
-    fontSize: 12,
-    color: '#808080',
-    fontFamily: 'SF Pro',
-    textDecorationLine: 'underline',
-  },
+  }
 });
 
-export default StepManager;
+
