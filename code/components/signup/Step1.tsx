@@ -31,7 +31,7 @@ const Step1: React.FC<Step1Props> = ({ setRole, setIsRoleSelected }) => {
           onValueChange={(value) => updateRole(value)} 
         />
       </View>
-      <Image source={require('../../assets/images/stepper_bar1.png')} 
+      <Image source={require('../../assets/images/stepper_bar/stepper_bar1.png')} 
         style={styles.stepper}></Image>
     </View>
   );

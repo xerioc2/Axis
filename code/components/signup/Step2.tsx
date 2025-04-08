@@ -31,7 +31,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
 
     return (
         <View>
-            <View style={styles.firstNameInput}> {/* <-- FIX */} 
+            <View style={styles.firstNameInput}> {/* <-- FIX */}
 
                 <TextInput
                   style={styles.textInput}
@@ -83,7 +83,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
                     value={formData.schoolName}
                     onChangeText={(text) => handleChange("schoolName", text)}
                 />
-                <Image source={require('../../assets/images/stepper_bar2.png')} 
+                <Image source={require('../../assets/images/stepper_bar/stepper_bar2.png')} 
                         style={styles.stepper}></Image>
                     </View>
             </View>

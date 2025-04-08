@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Image, ImageBackground } from 'react-native';
+import { StyleSheet, Image } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import supabase from '../utils/supabase';
 import { useNavigation } from '@react-navigation/native';
