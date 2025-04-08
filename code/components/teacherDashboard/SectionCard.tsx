@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
-import type { SectionDto } from '../../../App';
+import type { SectionPreviewDto } from '../../../App';
 import { Colors } from '../../theme'; 
 
 type SectionCardProps = {
-    section: SectionDto
+    section: SectionPreviewDto
 }
 
 const SectionCard: React.FC<SectionCardProps> = ({ section }) => {

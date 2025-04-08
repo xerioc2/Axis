@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     marginTop: -5,
-    color: '#FFF',
+    color: Colors.white,
     fontFamily: 'Inter',
     fontWeight: '600',
     textAlign: 'center',

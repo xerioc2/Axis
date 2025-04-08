@@ -1,5 +1,6 @@
 import supabase from "../utils/supabase";
-import type { User, SectionTeacher, Section, SectionDto, Course, Semester, TeacherDataDto } from "@/App";
+import type { User, SectionTeacher, Section, SectionPreviewDto, Course, Semester, TeacherDataDto } from "@/App";
+import { compileSectionPreviews, compileTeacherData } from "./dataConverterService";
 
 
 export async function signup(email: string, password: string, firstName: string, lastName: string, userTypeId: number, schoolId: number) {
@@ -70,17 +71,16 @@ export async function login(email: string, password: string){
 }
 
 //runs when a teacher logs in
-export async function getTeacherData(teacherId: string){
+export async function getSectionPreviews(teacherId: string){
     //first query section_teachers, 
     try{
         let sections: Section[] = [];
         let courses_taught: Course[] = [];
         let semesters: Semester[] = [];
 
-        let sectionDtos: SectionDto[] = []
-
         let courses_created: Course[] = [];
 
+        //fetching section_teachers so that we know the relevant sections for this teacher.
         const { data: sectionTeacherData, error: sectionTeacherError } = await supabase
             .from("section_teachers")
             .select("*")
@@ -89,120 +89,137 @@ export async function getTeacherData(teacherId: string){
         if (sectionTeacherError){
             console.log("Error getting section_teachers: ", sectionTeacherError.message);
         }
-        else if (sectionTeacherData && sectionTeacherData.length > 0){
+        else if (sectionTeacherData){
+            if (sectionTeacherData.length == 0){
+                console.log("No section teachers entries for this teacher. This teacher has not taught any sections.");
+                return null;
+            }
             const sectionTeachers: SectionTeacher[] = sectionTeacherData as SectionTeacher[];
+
             //now query the sections themselves using the section ids
             const section_ids: number[] = sectionTeachers.map(section => section.section_id); 
-            const { data: sectionData, error: sectionError } = await supabase
-                .from("sections")
-                .select("*")
-                .in("section_id", section_ids);
-            if (sectionError){
-                console.log("Error getting sections: ", sectionError);
+            const potentialSections: Section[] | null = await getSectionsByIds(section_ids);
+            if (!potentialSections){
+                console.log("Error getting sections while getting teachers data.");
+                return null;
             }
-            else if (sectionData && sectionData.length > 0){
-                sections = sectionData as Section[];
-                //now query the courses they've taught using the course id
-                const course_ids: number[] = sections.map(section => section.course_id);
-                const { data: courseTaughtData, error: courseTaughtError} = await supabase
-                    .from("courses")
-                    .select("*")
-                    .in('course_id', course_ids);
-                
-                if (courseTaughtError){
-                    console.log("");
-                }
-                else if (courseTaughtData){
-                    courses_taught = courseTaughtData as Course[];
-                    //map these indeces to the sections
-                }
-                else{
-                    console.log("Unexpected error getting courses");
-                }
-                
-                const semester_ids: number[] = sections.map(section => section.semester_id);
-                const { data: semesterData, error: semesterError } = await supabase
-                    .from("semesters")
-                    .select("*")
-                    .in("semester_id", semester_ids);
-                if (semesterError){
-                    console.log("Error getting semesters: ", semesterError);
-                }
-                else if (semesterData){
-                    semesters = semesterData as Semester[];
-                }
-                else{
-                    console.log("Unexpected error getting semesters");
-                }
+            sections = potentialSections;
 
-                //map sections to their corresponding courses/semesters
-                let sections_course_map: number[] = new Array(sections.length);
-                let sections_semester_map: number[] = new Array(sections.length);
-                for (let i = 0; i < sections.length; i++){
-                    for (let j = 0; j < courses_taught.length; j++){
-                        if (courses_taught[j].course_id === sections[i].course_id){
-                            sections_course_map[i] = j;
-                        }
-                    }
-                    for (let j = 0; j < semesters.length; j++){
-                        if (semesters[j].semester_id === sections[i].semester_id){
-                            sections_semester_map[i] = j;
-                        }
-                    }
-                }
-                //now build the dtos using those lookup tables
-                for (let i = 0; i < sections.length; i++){
-                    const relatedCourse: Course = courses_taught[sections_course_map[i]];
-                    const relatedSemester: Semester = semesters[sections_semester_map[i]];
-                    const sectionDto: SectionDto = {
-                        section_id: sections[i].section_id,
-                        section_identifier: sections[i].section_identifier,
-                        enrollment_code: sections[i].enrollment_code,
-                        course_name: relatedCourse.course_name,
-                        course_identifier: relatedCourse.course_identifier,
-                        course_subject: relatedCourse.course_subject,
-                        season: relatedSemester.season,
-                        year: relatedSemester.year
-                    }
-                    sectionDtos.push(sectionDto); 
-                }
+            //now query the courses they've taught using the course id
+            const course_ids: number[] = sections.map(section => section.course_id);
+            const potentialCoursesTaught: Course[] | null = await getCoursesByIds(course_ids);
+            if (!potentialCoursesTaught){
+                console.log("Error getting courses taught while getting teachers data.");
+                return null;
+            }
+            courses_taught = potentialCoursesTaught;
 
+            const semester_ids: number[] = sections.map(section => section.semester_id);
+            const potentialSemesters: Semester[] | null = await getSemestersByIds(semester_ids);
+            if (!potentialSemesters){
+                console.log("Error getting semesters while getting teachers data.");
+                return null;
             }
-            else{
-                console.log("Unexpected error getting sections");
-            }
+            semesters = potentialSemesters;
+            const sectionPreviewDtos: SectionPreviewDto[] = compileSectionPreviews(sections, courses_taught, semesters);
+            return sectionPreviewDtos;
             
             //now get courses this teacher has created
             //the course ids will be different here, we can use the teacher_id to query those
-            const { data: courseCreatedData, error: courseCreatedError } = await supabase
-                .from("courses")
-                .select("*")
-                .eq("creator_id", teacherId);
             
-            if (courseCreatedError){
-                console.log("Error getting created courses: ", courseCreatedError.name, courseCreatedError.message);
-            }
-            else if (courseCreatedData){
-                courses_created = courseCreatedData as Course[];
-            }
-            else {
-                console.log("Unexpected error getting created courses");
-            }
-
             //Use the TeacherData data transfer object to pass all 4 lists back
-            const teacherData: TeacherDataDto = {
-                sections: sectionDtos,
-                courses_created: courses_created
-            }
-            return teacherData;
+            
         }
         else{
-            console.log("Unexpected error getting section_teachers");
+            console.log("Unexpected error getting section_teachers while getting teachers data.");
         }
     } catch(err) {
-        console.log("Error getting sections by teacher id: ", err);
+        console.log("Unexpected error while getting teachers data: ", err);
     }
     return null;
 }
 
+export async function getTeacherData(teacherId: string){
+    let sectionPreviews: SectionPreviewDto[] | null = await getSectionPreviews(teacherId);
+    if (!sectionPreviews){
+        sectionPreviews = []
+    }
+    let coursesTaught: Course[] | null = await getCoursesByCreatorId(teacherId);
+    if (!coursesTaught){
+        coursesTaught = []
+    }
+    const teacherData: TeacherDataDto = compileTeacherData(sectionPreviews, coursesTaught);
+    return teacherData;
+}
+
+async function getSectionsByIds(section_ids: number[]){
+    const { data: sectionData, error: sectionError } = await supabase
+        .from("sections")
+        .select("*")
+        .in("section_id", section_ids);
+    if (sectionError){
+        console.log("Error getting sections: ", sectionError);
+    }
+    else if (sectionData){
+        return sectionData as Section[];
+    }
+    else{
+        console.log("Unexpected error getting sections");
+    }
+    return null;
+}
+
+async function getCoursesByCreatorId(creator_id: string){
+    //the course ids will be different here, we can use the teacher_id to query those
+    const { data: courseCreatedData, error: courseCreatedError } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("creator_id", creator_id);
+
+    if (courseCreatedError){
+        console.log("Error getting created courses: ", courseCreatedError.name, courseCreatedError.message);
+    }
+    else if (courseCreatedData){
+        return courseCreatedData as Course[];
+    }
+    else {
+        console.log("Unexpected error getting created courses");
+    }
+    return null;
+}
+
+async function getCoursesByIds(course_ids: number[]){
+    const { data: courseTaughtData, error: courseTaughtError} = await supabase
+        .from("courses")
+        .select("*")
+        .in('course_id', course_ids);
+    
+    if (courseTaughtError){
+        console.log("");
+    }
+    else if (courseTaughtData){
+        return courseTaughtData as Course[];
+    }
+    else{
+        console.log("Unexpected error getting courses");
+    }
+    return null;
+}
+
+async function getSemestersByIds(semester_ids: number[]){
+    const { data: semesterData, error: semesterError } = await supabase
+        .from("semesters")
+        .select("*")
+        .in("semester_id", semester_ids);
+    if (semesterError){
+        console.log("Error getting semesters: ", semesterError);
+    }
+    else if (semesterData){
+        return semesterData as Semester[];
+    }
+    else{
+        console.log("Unexpected error getting semesters");
+    }
+    return null;
+}
 

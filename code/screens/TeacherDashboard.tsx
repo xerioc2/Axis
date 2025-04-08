@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import type { User, Course, TeacherDataDto, SectionDto } from '../../App';
+import type { User, Course, TeacherDataDto, SectionPreviewDto } from '../../App';
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../utils/navigation.types';
@@ -15,16 +15,16 @@ const TeacherDashboard: React.FC = () => {
     const route = useRoute<TeacherDashboardRouteProp>();
     const teacher = route.params;
 
-    const [sections, setSections] = useState<SectionDto[]>([]);
+    const [sections, setSections] = useState<SectionPreviewDto[]>([]);
     const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
     //onMount hook to fetch data 
     useEffect(() => {
         const fetchTeacherData = async (teacher: User) => {
-            let teacherData: TeacherDataDto | null = await getTeacherData(teacher.user_id);
+            let teacherData: TeacherDataDto = await getTeacherData(teacher.user_id);
             if (!teacherData){
-                setErrorMessage("Error fetching your data...");
+                setErrorMessage("Uh oh... looks like you may not have taught any sections yet. When teaching a section, it will be displayed here.");
                 return;
             }
             setSections(teacherData.sections);
@@ -49,6 +49,18 @@ const TeacherDashboard: React.FC = () => {
                     ))}
                 </View>
             )}
+            {coursesCreated.length > 0 &&
+                <View style={[{marginTop:20}]}>
+                    {coursesCreated.length > 0 && (
+                        <View>
+                            <Text>Courses You've Created</Text>
+                            {coursesCreated.map((course) => (
+                                <Text key={course.course_id}>{course.course_subject} {course.course_identifier} {course.course_name}</Text>
+                            ))}
+                        </View>
+                    )}
+                </View>
+            }
             {errorMessage !== "" && <ErrorMessage message={errorMessage}/>}
         </>
     )

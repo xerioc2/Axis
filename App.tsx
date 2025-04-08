@@ -54,7 +54,6 @@ export type TeacherDto = {
   school_name: string,
 }
 
-
 export type Course = {
   course_id: number,
   course_subject: string | null,
@@ -130,14 +129,20 @@ export type Semester = {
   year: number
 }
 
-/*TeacherData is used to collect all info
+/*
+TeacherData is used to collect all info
 for a teacher when they login. 
 */
 export type TeacherDataDto = {
-  sections: SectionDto[],
+  sections: SectionPreviewDto[],
   courses_created: Course[], //all courses this teacher has created
 }
-export type SectionDto = {
+
+/*
+The SectionPreviewDto is used to pass data to
+the SectionCard component in the TeacherDashboard screen
+*/
+export type SectionPreviewDto = {
   section_id: number,
   section_identifier: string,
   enrollment_code: string,
@@ -148,16 +153,20 @@ export type SectionDto = {
   course_subject: string | null
 }
 
-//this DTO contains fields from the course, semester, and section
+/*
+The ActiveSectionDto is used to pass data to 
+the SectionDetails screen
+*/
 export type ActiveSectionDto = {
+  section_id: number,
+  section_identifier: string,
+  enrollment_code: string,
+  course_id: number,
   course_subject: string | null,
   course_name: string,
   course_identifier: string | null,
-  section_identifier: string,
   teachers: TeacherDto[],
   enrolled_students: StudentDto[]
 }
 
-export type SemesterSectionsDto = {
-  
-}
+
