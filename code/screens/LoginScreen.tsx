@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Image, ImageBackground } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import supabase from '../utils/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../utils/navigation.types';
@@ -35,21 +34,19 @@ const LoginScreen: React.FC = () => {
     };
 
     const handleLoginSubmission = async () => {
-        
-                const user: User | null = await login(formData.email, formData.password);
-                
-                if (!user){
-                    setErrorMessage("Unable to login with those credentials. Double check your info and try again, or sign up instead if you don't have an account.");
-                    return;
-                }
+        const user: User | null = await login(formData.email, formData.password);
+        if (!user){
+            setErrorMessage("Unable to login with those credentials. Double check your info and try again, or sign up instead if you don't have an account.");
+            return;
+        }
 
-                //user_types = {1: 'Student', 2: 'Teacher'}
-                if (user.user_type_id === 1){
-                    navigation.navigate("StudentDashboard", user);
-                }
-                else if (user.user_type_id === 2){
-                    navigation.navigate("TeacherDashboard", user);
-                }
+        //user_types = {1: 'Student', 2: 'Teacher'}
+        if (user.user_type_id === 1){
+            navigation.navigate("StudentDashboard", user);
+        }
+        else if (user.user_type_id === 2){
+            navigation.navigate("TeacherDashboard", user);
+        }
                 
     }
 
@@ -106,6 +103,7 @@ const LoginScreen: React.FC = () => {
                     </Text>
                 </TouchableOpacity>
             </View>
+            {errorMessage !== "" && <ErrorMessage message={errorMessage} />}
         </View>
     </>
     );      

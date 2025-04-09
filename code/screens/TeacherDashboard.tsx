@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
 import type { User, Course, TeacherDataDto, SectionPreviewDto } from '../../App';
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../utils/navigation.types';
 import { getTeacherData } from '../service/supabaseService';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ErrorMessage from '../components/ErrorMessage';
 import SectionCard from '../components/teacherDashboard/SectionCard';
 
 
 type TeacherDashboardRouteProp = RouteProp<RootStackParamList, 'TeacherDashboard'>;
-
+type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'TeacherDashboard'>;
 const TeacherDashboard: React.FC = () => {
+    const navigation = useNavigation<NavigationProps>();
     const route = useRoute<TeacherDashboardRouteProp>();
     const teacher = route.params;
 
-    const [sections, setSections] = useState<SectionPreviewDto[]>([]);
+    const [sectionPreviews, setSectionPreviews] = useState<SectionPreviewDto[]>([]);
     const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -27,7 +30,7 @@ const TeacherDashboard: React.FC = () => {
                 setErrorMessage("Uh oh... looks like you may not have taught any sections yet. When teaching a section, it will be displayed here.");
                 return;
             }
-            setSections(teacherData.sections);
+            setSectionPreviews(teacherData.sections);
             setCoursesCreated(teacherData.courses_created);
             console.log("Teacher data loaded successfully");
             
@@ -42,10 +45,12 @@ const TeacherDashboard: React.FC = () => {
     return (
         <>
             <Text>TEACHER DASHBOARD</Text>
-            {sections.length > 0 && (
+            {sectionPreviews.length > 0 && (
                 <View>
-                    {sections.map((section) => (
-                        <SectionCard key={section.section_id} section={section} />
+                    {sectionPreviews.map((sectionPreview) => (
+                        <TouchableOpacity onPress={() => navigation.navigate("SectionDetails", sectionPreview)}>
+                            <SectionCard key={sectionPreview.section_id} section={sectionPreview} />
+                        </TouchableOpacity>
                     ))}
                 </View>
             )}

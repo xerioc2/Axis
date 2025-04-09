@@ -4,6 +4,7 @@ import SignUpScreen from './code/screens/SignUpScreen';
 import LoginScreen from './code/screens/LoginScreen';
 import TeacherDashboard from './code/screens/TeacherDashboard';
 import StudentDashboard from './code/screens/StudentDashboard';
+import SectionDetailsScreen from './code/screens/SectionDetailsScreen';
 import type { RootStackParamList } from './code/utils/navigation.types';
 
 /*
@@ -22,7 +23,7 @@ export default function App() {
         <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
         <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{ headerShown: false}} />
         <Stack.Screen name="StudentDashboard" component={StudentDashboard} options={{ headerShown: false}} />
-        
+        <Stack.Screen name="SectionDetails" component={SectionDetailsScreen} options={{ headerShown: false}} />
 
       </Stack.Navigator>
     </NavigationContainer>
@@ -129,6 +130,14 @@ export type Semester = {
   year: number
 }
 
+export type Enrollment = {
+  enrollment_id: number,
+  date_enrolled: string,
+  date_disenrolled: string,
+  student_id: string,
+  section_id: number
+}
+
 /*
 TeacherData is used to collect all info
 for a teacher when they login. 
@@ -154,10 +163,10 @@ export type SectionPreviewDto = {
 }
 
 /*
-The ActiveSectionDto is used to pass data to 
+The SectionDetailsDto is used to pass data to 
 the SectionDetails screen
 */
-export type ActiveSectionDto = {
+export type SectionDetailsDto = {
   section_id: number,
   section_identifier: string,
   enrollment_code: string,

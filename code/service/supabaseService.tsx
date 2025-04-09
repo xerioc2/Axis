@@ -1,5 +1,5 @@
 import supabase from "../utils/supabase";
-import type { User, SectionTeacher, Section, SectionPreviewDto, Course, Semester, TeacherDataDto } from "@/App";
+import type { User, SectionTeacher, Section, SectionPreviewDto, Course, Semester, TeacherDataDto, Enrollment } from "@/App";
 import { compileSectionPreviews, compileTeacherData } from "./dataConverterService";
 
 
@@ -152,7 +152,7 @@ export async function getTeacherData(teacherId: string){
     return teacherData;
 }
 
-async function getSectionsByIds(section_ids: number[]){
+export async function getSectionsByIds(section_ids: number[]){
     const { data: sectionData, error: sectionError } = await supabase
         .from("sections")
         .select("*")
@@ -169,7 +169,7 @@ async function getSectionsByIds(section_ids: number[]){
     return null;
 }
 
-async function getCoursesByCreatorId(creator_id: string){
+export async function getCoursesByCreatorId(creator_id: string){
     //the course ids will be different here, we can use the teacher_id to query those
     const { data: courseCreatedData, error: courseCreatedError } = await supabase
         .from("courses")
@@ -188,7 +188,7 @@ async function getCoursesByCreatorId(creator_id: string){
     return null;
 }
 
-async function getCoursesByIds(course_ids: number[]){
+export async function getCoursesByIds(course_ids: number[]){
     const { data: courseTaughtData, error: courseTaughtError} = await supabase
         .from("courses")
         .select("*")
@@ -206,7 +206,7 @@ async function getCoursesByIds(course_ids: number[]){
     return null;
 }
 
-async function getSemestersByIds(semester_ids: number[]){
+export async function getSemestersByIds(semester_ids: number[]){
     const { data: semesterData, error: semesterError } = await supabase
         .from("semesters")
         .select("*")
@@ -223,3 +223,36 @@ async function getSemestersByIds(semester_ids: number[]){
     return null;
 }
 
+
+export async function getEnrollmentsBySectionId(sectionId: number){
+    try{
+        const { data: enrollmentData, error: enrollmentError } = await supabase
+            .from("enrollments")
+            .select("*")
+            .eq("section_id", sectionId);
+        if (enrollmentError){
+            console.log(`Error getting enrollment data from section ${sectionId}: ${enrollmentError}`);
+        }
+        else if (enrollmentData){
+            return enrollmentData as Enrollment[];
+        }
+        else{
+            console.log("Unexpected error occurred while getting enrollments for section id ", sectionId);
+        }
+    } catch(err){
+        console.log("Exception thrown while getting enrollments for section id ", sectionId, ': ', err);
+    }
+}
+
+export async function getStudentsBySectonId(sectionId: number){
+    const potentialEnrollments: Enrollment[] | null = getEnrollmentsBySectionId(sectionId);
+    if (!potentialEnrollments){
+        console.log("Error getting students by section id, enrollments was null");
+        return null;
+    }
+    
+}
+
+export async function getTeachersBySectionId(){
+
+}
