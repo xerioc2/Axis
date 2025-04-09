@@ -35,7 +35,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({ options, initialValue, onValueC
 const styles = StyleSheet.create({
     radioGroupContainer: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignSelf: 'center',
         justifyContent: 'center',
 
     }
