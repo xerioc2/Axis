@@ -94,7 +94,7 @@ const LoginScreen: React.FC = () => {
                     <Text style={styles.buttonText}>SIGN IN</Text>
                 </TouchableOpacity>
 
-                <Text style={[styles.text, {marginTop: 285, fontSize: 12, fontWeight: '600'}]}>DON'T HAVE AN ACCOUNT?</Text>
+                <Text style={[styles.text, {fontSize: 12, fontWeight: '600'}]}>DON'T HAVE AN ACCOUNT?</Text>
                 <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
                     <Text
                         style={[styles.text, {marginTop: -1, color: Colors.primary, fontSize: 16, fontWeight: '600'}]}
