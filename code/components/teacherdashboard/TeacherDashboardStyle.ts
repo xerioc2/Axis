@@ -14,6 +14,8 @@ export const styles = StyleSheet.create({
       marginBottom: 10, 
       marginTop: 20,
     },
+
+    //card stuff
     card: { 
       backgroundColor: "white", 
       borderRadius: 10, 

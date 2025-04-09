@@ -65,7 +65,7 @@ const TeacherDashboard: React.FC = () => {
   });
   const [imageUri, setImageUri] = useState<string | null>(null);
 
-  const slideAnim = useState(new Animated.Value(500))[0];
+  const slideAnim = useState(new Animated.Value(500))[0]; 
 
   const openModal = () => openModalHandler(setModalVisible, slideAnim);
   const closeModal = () => closeModalHandler(setModalVisible, slideAnim);
@@ -79,6 +79,7 @@ const TeacherDashboard: React.FC = () => {
       closeModal
     );
 
+  //deleting the courses using the course code (crn)
   const onDeleteCourse = () => {
     Alert.prompt(
       "Delete Course",
@@ -107,6 +108,8 @@ const TeacherDashboard: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Teacher Dashboard</Text>
+
+      //list of cards
       <FlatList
         data={courses}
         keyExtractor={(item) => item.id.toString()}
@@ -118,15 +121,27 @@ const TeacherDashboard: React.FC = () => {
           </View>
         )}
       />
+
+      //footer
       <View style={styles.footer}>
+
+        //opens the modal (edit button)
         <TouchableOpacity style={styles.editButton} onPress={openModal}>
+          //Ionicons: library for icons. 
+          //name="ellipsis-vertical" is the icon on the button
           <Ionicons name="ellipsis-vertical" size={32} color="white" />
         </TouchableOpacity>
       </View>
 
-
+      //Modal: slide up thing
       <Modal transparent visible={modalVisible} animationType="none">
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+
+      /*
+      can move in the modal without it reacting
+      the TouchableOpacity tag will be used for the things that need feedback
+      /*
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}> 
+
           <View style={styles.modalOverlay}>
             <Animated.View
               style={[
@@ -134,39 +149,52 @@ const TeacherDashboard: React.FC = () => {
                 { transform: [{ translateY: slideAnim }] },
               ]}
             >
-              <KeyboardAvoidingView
+
+              //so that the keyboard doesn't obstruct the modal
+              <KeyboardAvoidingView 
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
-              >
+              > 
+
+                //so that you can scroll in the modal
                 <ScrollView
                   contentContainerStyle={{ paddingBottom: 100 }}
                   keyboardShouldPersistTaps="handled"
-                >
+                > 
                   {!isAddingCourse ? (
                     <>
+
+                      //adds course 
                       <TouchableOpacity
                         style={styles.modalButton}
                         onPress={() => setIsAddingCourse(true)}
-                      >
+                      > 
                         <Text style={styles.modalButtonText}>Add Course</Text>
                       </TouchableOpacity>
+
+                      //deletes course
                       <TouchableOpacity
                         style={styles.modalButton}
                         onPress={onDeleteCourse}
-                      >
+                      > 
                         <Text style={styles.modalButtonText}>Delete Course</Text>
                       </TouchableOpacity>
+
+                      //modifies course. doesn't have functionality
                       <TouchableOpacity style={styles.modalButton}>
                         <Text style={styles.modalButtonText}>
                           Modify Course
                         </Text>
                       </TouchableOpacity>
+
+                      //closes modal when cancel is pressed
                       <TouchableOpacity
                         style={[styles.modalButton, { backgroundColor: "#ccc" }]}
                         onPress={closeModal}
-                      >
+                      > 
                         <Text style={styles.modalButtonText}>Cancel</Text>
                       </TouchableOpacity>
+
                     </>
                   ) : (
                     <View style={styles.formContainer}>
@@ -194,20 +222,24 @@ const TeacherDashboard: React.FC = () => {
                                   : text,
                             }))
                           }
-                        />
+                        /> 
                       ))}
+
+                      //handles picking an image
                       <TouchableOpacity
                         style={styles.imagePickerButton}
                         onPress={() =>
                           handlePickImage(setImageUri, setNewCourse)
                         }
-                      >
+                      > 
                         <Text style={styles.modalButtonText}>
                           {imageUri ? "Change Image" : "Pick an Image"}
                         </Text>
                       </TouchableOpacity>
+
+                      //shows the image while in the modal
                       {imageUri && (
-                        <Image
+                        <Image 
                           source={{ uri: imageUri }}
                           style={{
                             width: "100%",
@@ -218,29 +250,38 @@ const TeacherDashboard: React.FC = () => {
                           }}
                         />
                       )}
+
+                      //submits add course
                       <TouchableOpacity
                         style={styles.modalButton}
                         onPress={handleAddCourse}
-                      >
+                      > 
                         <Text style={styles.modalButtonText}>Submit</Text>
                       </TouchableOpacity>
+
+                      //closes modal
                       <TouchableOpacity
                         style={[styles.modalButton, { backgroundColor: "#ccc" }]}
                         onPress={() => {
                           setIsAddingCourse(false);
                           closeModal();
                         }}
-                      >
+                      > 
                         <Text style={styles.modalButtonText}>Cancel</Text>
                       </TouchableOpacity>
                     </View>
                   )}
                   <View style={{ height: 200 }} />
-                </ScrollView>
-              </KeyboardAvoidingView>
+
+                //so that you can scroll in the modal
+                </ScrollView> 
+
+              //so that you can see the modal while typing in the keyboard
+              </KeyboardAvoidingView> 
             </Animated.View>
           </View>
-        </TouchableWithoutFeedback>
+          //so that you can type without the modal closing
+        </TouchableWithoutFeedback> 
       </Modal>
     </View>
   );

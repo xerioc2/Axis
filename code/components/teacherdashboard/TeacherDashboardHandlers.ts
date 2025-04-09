@@ -13,6 +13,7 @@ export interface Course {
   subject: string;
 }
 
+//to oped the modal
 export const openModal = (
   setModalVisible: Dispatch<SetStateAction<boolean>>,
   slideAnim: Animated.Value
@@ -25,6 +26,7 @@ export const openModal = (
   }).start();
 };
 
+//to cloase the modal
 export const closeModal = (
   setModalVisible: Dispatch<SetStateAction<boolean>>,
   slideAnim: Animated.Value
@@ -36,7 +38,7 @@ export const closeModal = (
   }).start(() => setModalVisible(false));
 };
 
-// Function to handle adding a new course
+//function to handle adding a new course
 export const handleAddCourse = (
   courses: Course[],
   newCourse: Course,
@@ -60,6 +62,7 @@ export const handleAddCourse = (
   closeModalCallback();
 };
 
+//picking an image from the library *ios only*
 const pickImage = async (): Promise<string | null> => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -79,7 +82,8 @@ const pickImage = async (): Promise<string | null> => {
     }
     return null;
 };
-  
+
+//handler for picking images
 export const handlePickImage = async (
     setImageUri: Dispatch<SetStateAction<string | null>>,
     setNewCourse: Dispatch<SetStateAction<Course>>
@@ -91,6 +95,12 @@ export const handlePickImage = async (
     }
 };
 
+/*
+handler for deleting a course ased on the course code 
+course code meaning the crn
+this would be better if it deleted it by id
+or just had it to where you press the class to delete it
+*/
 export const handleDeleteCourse = (
     courses: Course[],
     setCourses: Dispatch<SetStateAction<Course[]>>,
