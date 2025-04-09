@@ -21,6 +21,7 @@ const TeacherDashboard: React.FC = () => {
     const [sectionPreviews, setSectionPreviews] = useState<SectionPreviewDto[]>([]);
     const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
+    const [selectedMenuOption, setSelectedMenuOption] = useState<string>("sections");
 
     //onMount hook to fetch data 
     useEffect(() => {
@@ -45,7 +46,7 @@ const TeacherDashboard: React.FC = () => {
     return (
         <>
             <Text>TEACHER DASHBOARD</Text>
-            {sectionPreviews.length > 0 && (
+            {selectedMenuOption === "sections" && sectionPreviews.length > 0 && (
                 <View>
                     {sectionPreviews.map((sectionPreview) => (
                         <TouchableOpacity onPress={() => navigation.navigate("SectionDetails", sectionPreview)}>
@@ -54,7 +55,7 @@ const TeacherDashboard: React.FC = () => {
                     ))}
                 </View>
             )}
-            {coursesCreated.length > 0 &&
+            {selectedMenuOption === "courses" && coursesCreated.length > 0 &&
                 <View style={[{marginTop:20}]}>
                     {coursesCreated.length > 0 && (
                         <View>

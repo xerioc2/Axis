@@ -242,17 +242,83 @@ export async function getEnrollmentsBySectionId(sectionId: number){
     } catch(err){
         console.log("Exception thrown while getting enrollments for section id ", sectionId, ': ', err);
     }
+    return null;
 }
 
-export async function getStudentsBySectonId(sectionId: number){
-    const potentialEnrollments: Enrollment[] | null = getEnrollmentsBySectionId(sectionId);
-    if (!potentialEnrollments){
-        console.log("Error getting students by section id, enrollments was null");
-        return null;
+export async function getStudentsBySectionId(sectionId: number){
+    try{
+        const potentialEnrollments: Enrollment[] | null = await  getEnrollmentsBySectionId(sectionId);
+        if (!potentialEnrollments){
+            console.log("Error getting students by section id, enrollments was null: ");
+        }
+        else if (potentialEnrollments){
+            const actualEnrollments: Enrollment[] = potentialEnrollments;
+            const studentIds = actualEnrollments.map(enrollment => (enrollment.student_id));
+            let enrolledStudents: User[] = []
+            for(let i = 0; i < studentIds.length; i++){
+                const { data: studentData, error: studentError} = await supabase
+                    .from("users")
+                    .select("*")
+                    .eq("user_id", studentIds[i]);
+                if (studentError){
+                    console.log(`Error getting student account for student id ${studentIds[i]}: ${studentError}`);
+                }
+                else if (studentData && studentData.length === 1){
+                    const student: User = studentData[0] as User;
+                    enrolledStudents.push(student)
+                }
+                else{
+                    console.log(`Unexpected error getting student id ${studentIds[i]}`);
+                }
+            }
+            return enrolledStudents;
+        }
+        else{
+            console.log("Unexpected error getting enrollments");
+        }
+    } catch (err) {
+        console.log("Exception thrown while getting students by section id: ", err);
     }
-    
+    return null;
 }
 
-export async function getTeachersBySectionId(){
-
+export async function getTeachersBySectionId(sectionId: number){
+    try{
+        const { data: sectionTeacherData, error: sectionTeacherError } = await supabase
+            .from("section_teachers")
+            .select("*")
+            .eq("section_id", sectionId);
+        if (sectionTeacherError){
+            console.log("Error getting section teachers for section id ", sectionId, ": ", sectionTeacherError);
+        }
+        else if (sectionTeacherData){
+            const sectionTeachers: SectionTeacher[] = sectionTeacherData as SectionTeacher[];
+            //now get the actual teachers
+            const teacherIds: string[] = sectionTeachers.map(sectionTeacher => (sectionTeacher.teacher_id));
+            let teachers: User[] = [];
+            for (let i = 0; i < teacherIds.length; i++){
+                const { data: teacherData, error: teacherError } = await supabase
+                    .from("users")
+                    .select("*")
+                    .eq("user_id", teacherIds[i]);
+                if (teacherError){
+                    console.log(`Error getting teacher id ${teacherIds[i]}`);
+                }
+                else if (teacherData && teacherData.length===1){
+                    const teacher: User = teacherData[0] as User;
+                    teachers.push(teacher);
+                }
+                else{
+                    console.log(`Unexpected error getting teacher id ${teacherIds[i]} for section id ${sectionId}`);
+                }
+            }
+            return teachers;
+        }
+        else{
+            console.log("Unexpected error while getting section teachers for section id ", sectionId);
+        }
+    } catch(err){
+        console.log("Exception thrown while getting teachers for section ", sectionId);
+    }
+    return null;
 }
