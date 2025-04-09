@@ -110,7 +110,7 @@ export const styles = StyleSheet.create({
 
     //footer
     footer: {
-      position: 'absolute',
+      position: 'relative',
       bottom: 0,
       width: '115%',
       height: '7%',
