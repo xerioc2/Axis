@@ -2,7 +2,6 @@ import { Animated, Alert } from 'react-native';
 import { Dispatch, SetStateAction } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 
-// Define the Course interface (optional: can import this if shared)
 export interface Course {
   id: number;
   name: string;
@@ -14,7 +13,6 @@ export interface Course {
   subject: string;
 }
 
-// Function to open the modal with slide-up animation
 export const openModal = (
   setModalVisible: Dispatch<SetStateAction<boolean>>,
   slideAnim: Animated.Value
@@ -27,7 +25,6 @@ export const openModal = (
   }).start();
 };
 
-// Function to close the modal with slide-down animation
 export const closeModal = (
   setModalVisible: Dispatch<SetStateAction<boolean>>,
   slideAnim: Animated.Value
