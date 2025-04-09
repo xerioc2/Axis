@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Text, View, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import type { User, Course, TeacherDataDto, SectionPreviewDto } from '../../App';
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -9,6 +9,8 @@ import { getTeacherData } from '../service/supabaseService';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ErrorMessage from '../components/ErrorMessage';
 import SectionCard from '../components/teacherDashboard/SectionCard';
+import { useFonts } from 'expo-font';
+import { Colors } from '../theme';
 
 
 type TeacherDashboardRouteProp = RouteProp<RootStackParamList, 'TeacherDashboard'>;
@@ -22,6 +24,9 @@ const TeacherDashboard: React.FC = () => {
     const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [selectedMenuOption, setSelectedMenuOption] = useState<string>("sections");
+    const [fontsLoaded] = useFonts({
+        'SF Pro': require('../assets/fonts/sf_pro.ttf'),
+    });
 
     //onMount hook to fetch data 
     useEffect(() => {
@@ -47,12 +52,15 @@ const TeacherDashboard: React.FC = () => {
         <>
             <Text>TEACHER DASHBOARD</Text>
             {selectedMenuOption === "sections" && sectionPreviews.length > 0 && (
+        <SafeAreaView style={styles.container}>
+        
+            <Text style={styles.titleText}>Teacher Dashboard</Text>
+            {sections.length > 0 && (
                 <View>
-                    {sectionPreviews.map((sectionPreview) => (
-                        <TouchableOpacity onPress={() => navigation.navigate("SectionDetails", sectionPreview)}>
-                            <SectionCard key={sectionPreview.section_id} section={sectionPreview} />
-                        </TouchableOpacity>
+                    {sections.map((section) => (
+                        <SectionCard key={section.section_id} section={section} />
                     ))}
+                    <Image source={require('../assets/images/icons/account_icon.png')} style={styles.accountIcon} />
                 </View>
             )}
             {selectedMenuOption === "courses" && coursesCreated.length > 0 &&
@@ -68,9 +76,35 @@ const TeacherDashboard: React.FC = () => {
                 </View>
             }
             {errorMessage !== "" && <ErrorMessage message={errorMessage}/>}
+    
+        </SafeAreaView>
         </>
-    )
+    );
+    
 }
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: Colors.background,
+    },
+    titleText: {
+        color: Colors.primary,
+        fontFamily: "SF Pro",
+        textAlign: "center",
+        fontSize: 20,
+        fontWeight: "600",
+        lineHeight: 25,
+        letterSpacing: 0.4,
+        paddingTop: 20,
+        paddingBottom: 30,
+    },
+    accountIcon: {
+        height: 29,
+        width: 29,
+        marginLeft: 325,
+        marginTop: -784,
+      },      
+});
 
 export default TeacherDashboard;

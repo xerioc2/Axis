@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, TextInput, StyleSheet} from 'react-native';
+import { View, TextInput, StyleSheet, Image} from 'react-native';
 import CustomPicker from '../buttons/CustomPicker'; 
+import { Colors } from '../../theme';
 
 type Step2Props = {
     formData: {
@@ -30,7 +31,8 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
 
     return (
         <View>
-            <View style={styles.firstNameInput}>
+            <View style={styles.firstNameInput}> {/* <-- FIX */}
+
                 <TextInput
                   style={styles.textInput}
                   placeholder="First Name"
@@ -81,32 +83,33 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
                     value={formData.schoolName}
                     onChangeText={(text) => handleChange("schoolName", text)}
                 />
+                <Image source={require('../../assets/images/stepper_bar/stepper_bar2.png')} 
+                        style={styles.stepper}></Image>
+                    </View>
             </View>
-        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#F1FFED',
+      backgroundColor: Colors.background,
     },
     textInput: {
-      color: '#000',
-      borderBottomColor: '#358F4B',
+      color: Colors.black,
+      borderBottomColor: Colors.secondary,
       fontFamily: 'Inter',
       fontSize: 16,
       borderBottomWidth: 1,
-  },
+    },
     firstNameInput: {
-      marginTop: 65,
-      marginHorizontal: 40,
-      marginBottom: 10,
     },
     lastNameInput: {
-      marginTop: 65,
-      marginHorizontal: 40,
-      marginBottom: 10,
+    },
+    stepper: {
+        position: "absolute",
+        alignSelf: "center",
+        marginTop: 385,
     }
   });
 

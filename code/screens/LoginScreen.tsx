@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Image, ImageBackground } from 'react-native';
+import { StyleSheet, Image } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -62,7 +62,7 @@ const LoginScreen: React.FC = () => {
                     source={require('../assets/images/graph_line.png')}
                     style={styles.graphLine}
                 />
-                <Text style={styles.slogan}>WHERE LEARNING{"/n"}MEETS MASTERY</Text>
+                <Text style={styles.slogan}>WHERE LEARNING{"\n"}MEETS MASTERY</Text>
 
                 <View style={styles.emailInput}>
                     <TextInput 

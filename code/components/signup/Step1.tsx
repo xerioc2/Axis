@@ -1,6 +1,6 @@
 import RadioGroup from '../buttons/RadioGroup';
 import React, { Dispatch, SetStateAction } from 'react';
-import { View, Text, StyleSheet, Image} from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { useFonts } from 'expo-font';
 
 type Step1Props = {
@@ -31,6 +31,8 @@ const Step1: React.FC<Step1Props> = ({ setRole, setIsRoleSelected }) => {
           onValueChange={(value) => updateRole(value)} 
         />
       </View>
+      <Image source={require('../../assets/images/stepper_bar/stepper_bar1.png')} 
+        style={styles.stepper}></Image>
     </View>
   );
 }
@@ -53,7 +55,11 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 10,
   },
-  
+  stepper: {
+    position: "absolute",
+    alignSelf: "center",
+    marginTop: 450,
+  }
 })
 
 export default Step1;

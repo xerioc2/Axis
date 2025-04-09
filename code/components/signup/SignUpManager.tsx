@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Step1 from './Step1';
 import Step2 from './Step2';
@@ -9,139 +9,132 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { signup } from '@/code/service/supabaseService';
 import { Colors } from '../../theme';
 
-
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
 
 const StepManager: React.FC = () => {
-    const navigation = useNavigation<NavigationProps>();
-    const [currentStep, setCurrentStep] = useState(1);
-    const [role, setRole] = useState("");
-    const [isRoleSelected, setIsRoleSelected] = useState(false);
-    const [areAllFieldsEdited, setAreAllFieldsEdited] = useState(false);
-    const [formData, setFormData] = useState({
-            firstName: "",
-            lastName: "",
-            email: "",
-            password: "",
-            confirmPassword: "",
-            schoolType: "",
-            schoolName: ""
-        });
-    const [errorMessage, setErrorMessage] = useState("");
-    
-    useEffect(() => {
-        if (currentStep === 1) {
-            setRole("");
-            setIsRoleSelected(false);
-        }
-    }, [currentStep]);
+  const navigation = useNavigation<NavigationProps>();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [role, setRole] = useState("");
+  const [isRoleSelected, setIsRoleSelected] = useState(false);
+  const [areAllFieldsEdited, setAreAllFieldsEdited] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    schoolType: "",
+    schoolName: ""
+  });
+  const [errorMessage, setErrorMessage] = useState("");
 
-    useEffect(() => {
-        if (formData.firstName !== "" && 
-            formData.lastName !== "" && 
-            formData.email !== "" && 
-            formData.password !== "" && 
-            formData.confirmPassword !== "" && 
-            formData.schoolType !== "" && 
-            formData.schoolName !== "")
-            setAreAllFieldsEdited(true);
-    }, [formData]);
+  useEffect(() => {
+    if (currentStep === 1) {
+      setRole("");
+      setIsRoleSelected(false);
+    }
+  }, [currentStep]);
 
-    const handleSignUpSubmission = async () => {
-        if (formData.password !== formData.confirmPassword){
-            setErrorMessage("Password and confirmation do not match. Double check your password and try again.");
-            return;
-        }
-        let userTypeId = 0
-        if (role === "Student"){
-            userTypeId = 1;
-        }
-        else if (role === "Teacher"){
-            userTypeId = 2;
-        }
-        else{
-            setErrorMessage("No role selected. Please go back and select your role and try again.");
-            return;
-        }
+  useEffect(() => {
+    if (
+      formData.firstName !== "" &&
+      formData.lastName !== "" &&
+      formData.email !== "" &&
+      formData.password !== "" &&
+      formData.confirmPassword !== "" &&
+      formData.schoolType !== "" &&
+      formData.schoolName !== ""
+    ) {
+      setAreAllFieldsEdited(true);
+    }
+  }, [formData]);
 
-        const singupResponse: {user: any, session: any} | null = await signup(formData.email, formData.password, formData.firstName, formData.lastName, userTypeId, 1); //change this school id
-        if (!singupResponse){
-            setErrorMessage("There was an error signing up, please close the app and try again.");
-            return;
-        }
-        //redirect to login, so they can log in to there new account
-    
-        navigation.navigate("Login");
-
+  const handleSignUpSubmission = async () => {
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Password and confirmation do not match. Double check your password and try again.");
+      return;
     }
 
+    let userTypeId = 0;
+    if (role === "Student") {
+      userTypeId = 1;
+    } else if (role === "Teacher") {
+      userTypeId = 2;
+    } else {
+      setErrorMessage("No role selected. Please go back and select your role and try again.");
+      return;
+    }
 
-    return <>
-        <View style={styles.stepContainer}>
-            {currentStep !== 1 && 
-                <TouchableOpacity 
-                    onPress={() => setCurrentStep(currentStep-1)}
-                >
-                    <Text
-                        style={styles.backButton}
-                    >Back</Text>
-                </TouchableOpacity>
-            }
+    const singupResponse: { user: any; session: any } | null = await signup(
+      formData.email,
+      formData.password,
+      formData.firstName,
+      formData.lastName,
+      userTypeId,
+      1 // change this school id
+    );
 
-            {currentStep === 1 && 
-                <Step1 
-                    setRole={setRole} 
-                    setIsRoleSelected={setIsRoleSelected}
-                />
-            }
-            
-            {currentStep === 1 && 
-                <TouchableOpacity 
-                    style={isRoleSelected ? styles.button : styles.disabledButton}
-                    disabled={!isRoleSelected} 
-                    onPress={() => setCurrentStep(2)}
-                >
-                    <Text>Next</Text>
-                </TouchableOpacity>
-            }
+    if (!singupResponse) {
+      setErrorMessage("There was an error signing up, please close the app and try again.");
+      return;
+    }
 
-            {currentStep === 2 && 
-                <Step2 
-                    formData={formData} 
-                    setFormData={setFormData} 
-                />
-            }
+    // redirect to login, so they can log in to their new account
+    navigation.navigate("Login");
+  };
 
-            {currentStep === 2 && 
-                <TouchableOpacity 
-                    style={areAllFieldsEdited ? styles.button : styles.disabledButton}
-                    disabled={!areAllFieldsEdited}
-                    onPress={handleSignUpSubmission}
-                >
-                    <Text>Sign Up</Text>    
-                </TouchableOpacity>
-            }
-            {currentStep === 2 && 
-             errorMessage !== "" && 
-                <ErrorMessage message={errorMessage}/>
-            }
-        
-        
-      {currentStep === 1 && (
-        <Image
-        source={require('../../assets/images/stepper_bar1.png')}
-        style={styles.stepper}
-      />
-      )}
-      {currentStep === 2 && (
-        <Image
-        source={require('../../assets/images/stepper_bar2.png')}
-        style={styles.stepper}
-        />
-      )}
-    </View>
-  </>
-}
+  return (
+    <>
+      <View style={styles.stepContainer}>
+
+        {currentStep === 1 && (
+          <Step1
+            setRole={setRole}
+            setIsRoleSelected={setIsRoleSelected}
+          />
+        )}
+
+        {currentStep === 1 && (
+          <TouchableOpacity
+          style={isRoleSelected ? styles.button : styles.disabledButton}
+          disabled={!isRoleSelected}
+          onPress={() => setCurrentStep(2)}
+        >
+          <Text style={styles.buttonText}>NEXT</Text>
+        </TouchableOpacity>
+        )}
+
+        {currentStep === 2 && (
+          <Step2
+            formData={formData}
+            setFormData={setFormData}
+          />
+        )}
+
+        {currentStep === 2 && (
+          <TouchableOpacity
+            style={areAllFieldsEdited ? styles.button : styles.disabledButton}
+            disabled={!areAllFieldsEdited}
+            onPress={handleSignUpSubmission}
+          >
+            <Text>Sign Up</Text>
+          </TouchableOpacity>
+        )}
+
+        {currentStep === 2 && errorMessage !== "" && (
+          <ErrorMessage message={errorMessage} />
+        )}
+
+        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+          <Text style={styles.backButton}>
+            ALREADY HAVE AN ACCOUNT?
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+};
+
 export default StepManager;
 
 const styles = StyleSheet.create({
@@ -171,7 +164,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     lineHeight: 22,
-},
+  },
   disabledButton: {
     backgroundColor: Colors.grey,
     padding: 15,
@@ -185,8 +178,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 12,
-    fontWeight: 600,
-    color: '#808080',
+    fontWeight: '600',
+    color: Colors.grey,
     fontFamily: 'SF Pro',
     textDecorationLine: 'underline',
   },
@@ -194,9 +187,4 @@ const styles = StyleSheet.create({
     marginBottom: 100,
     alignItems: 'center',
   },
-  stepper: {
-    marginTop: 175,
-  }
 });
-
-
