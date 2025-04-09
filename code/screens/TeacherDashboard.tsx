@@ -20,9 +20,9 @@ const TeacherDashboard: React.FC = () => {
     const [sections, setSections] = useState<SectionDto[]>([]);
     const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
-        const [fontsLoaded] = useFonts({
-            'SF Pro': require('../assets/fonts/sf_pro.ttf'),
-        });
+    const [fontsLoaded] = useFonts({
+        'SF Pro': require('../assets/fonts/sf_pro.ttf'),
+    });
 
     //onMount hook to fetch data 
     useEffect(() => {
@@ -47,13 +47,14 @@ const TeacherDashboard: React.FC = () => {
     return (
         <>
         <SafeAreaView style={styles.container}>
+        
             <Text style={styles.titleText}>Teacher Dashboard</Text>
-            <Image source={require('../assets/images/icons/account_icon.png')} style={styles.accountIcon} />
             {sections.length > 0 && (
                 <View>
                     {sections.map((section) => (
                         <SectionCard key={section.section_id} section={section} />
                     ))}
+                    <Image source={require('../assets/images/icons/account_icon.png')} style={styles.accountIcon} />
                 </View>
             )}
     
@@ -78,11 +79,13 @@ const styles = StyleSheet.create({
         lineHeight: 25,
         letterSpacing: 0.4,
         paddingTop: 20,
-        paddingBottom: 25,
+        paddingBottom: 30,
     },
     accountIcon: {
-        marginLeft: 340,
-        marginTop: -52,
+        height: 29,
+        width: 29,
+        marginLeft: 325,
+        marginTop: -784,
       },      
 });
 
