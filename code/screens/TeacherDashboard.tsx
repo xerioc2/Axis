@@ -1,111 +1,249 @@
-import { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
-import type { User, Course, TeacherDataDto, SectionPreviewDto } from '../../App';
-import { useRoute } from '@react-navigation/native';
-import type { RouteProp } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
-import type { RootStackParamList } from '../utils/navigation.types';
-import { getTeacherData } from '../service/supabaseService';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import ErrorMessage from '../components/ErrorMessage';
-import SectionCard from '../components/teacherDashboard/SectionCard';
-import { useFonts } from 'expo-font';
-import { Colors } from '../theme';
-import TeacherDashboardNav from '../components/teacherDashboard/TeacherDashboardNav';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  Modal,
+  Animated,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Alert,
+  KeyboardTypeOptions,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { styles } from "../components/teacherdashboard/TeacherDashboardStyle";
+import {
+  openModal as openModalHandler,
+  closeModal as closeModalHandler,
+  handleAddCourse as handleAddCourseHandler,
+  handlePickImage,
+  handleDeleteCourse as handleDeleteCourseHandler,
+  Course,
+} from "../components/teacherdashboard/TeacherDashboardHandlers";
 
-
-type TeacherDashboardRouteProp = RouteProp<RootStackParamList, 'TeacherDashboard'>;
-type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'TeacherDashboard'>;
 const TeacherDashboard: React.FC = () => {
-    const navigation = useNavigation<NavigationProps>();
-    const route = useRoute<TeacherDashboardRouteProp>();
-    const teacher = route.params;
-
-    const [sectionPreviews, setSectionPreviews] = useState<SectionPreviewDto[]>([]);
-    const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
-    const [errorMessage, setErrorMessage] = useState<string>("");
-    const [selectedMenuOption, setSelectedMenuOption] = useState<string>("sections");
-    const [fontsLoaded] = useFonts({
-        'SF Pro': require('../assets/fonts/sf_pro.ttf'),
-    });
-
-    //onMount hook to fetch data 
-    useEffect(() => {
-        const fetchTeacherData = async (teacher: User) => {
-            let teacherData: TeacherDataDto = await getTeacherData(teacher.user_id);
-            if (!teacherData){
-                setErrorMessage("Uh oh... looks like you may not have taught any sections yet. When teaching a section, it will be displayed here.");
-                return;
-            }
-            setSectionPreviews(teacherData.sections);
-            setCoursesCreated(teacherData.courses_created);
-            console.log("Teacher data loaded successfully");
-            
-            //now we actually want to organize sections by semester, 
-            //and show only the ones for the current semester at the top
-        }
-        setErrorMessage("");
-        fetchTeacherData(teacher);
-    }, []);
-
-
-    return (
-        
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.titleText}>Teacher Dashboard</Text>
-                
-            {selectedMenuOption === "sections" && sectionPreviews.length > 0 && (
-                <View>
-                    {sectionPreviews.map((section) => (
-                        <TouchableOpacity key={section.section_id} onPress={() => navigation.navigate("SectionDetails", section)}>
-                            <SectionCard section={section} />
-                        </TouchableOpacity>
-                    ))}
-                    <Image source={require('../assets/images/icons/account_icon.png')} style={styles.accountIcon} />
-                </View>
-            )}
-            {selectedMenuOption === "courses" && coursesCreated.length > 0 &&
-                <View style={[{marginTop:20}]}>
-                    {coursesCreated.length > 0 && (
-                        <View>
-                            <Text>Courses You've Created</Text>
-                            {coursesCreated.map((course) => (
-                                <Text key={course.course_id}>{course.course_subject} {course.course_identifier} {course.course_name}</Text>
-                            ))}
-                        </View>
-                    )}
-                </View>
-            }
-            
-            {errorMessage !== "" && <ErrorMessage message={errorMessage}/>}
-        <TeacherDashboardNav setSelectedMenuOption={setSelectedMenuOption} />
-        </SafeAreaView>
-    )
-    
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: Colors.background,
+  const [courses, setCourses] = useState<Course[]>([
+    {
+      id: 123,
+      name: "Math 101",
+      season: "Spring",
+      year: 2025,
+      code: 1234,
+      image: "",
+      section: 3,
+      subject: "Mathematics",
     },
-    titleText: {
-        color: Colors.primary,
-        fontFamily: "SF Pro",
-        textAlign: "center",
-        fontSize: 20,
-        fontWeight: "600",
-        lineHeight: 25,
-        letterSpacing: 0.4,
-        paddingTop: 20,
-        paddingBottom: 30,
+    {
+      id: 124,
+      name: "Science 201",
+      season: "Spring",
+      year: 2025,
+      code: 5678,
+      image: "",
+      section: 3,
+      subject: "Science",
     },
-    accountIcon: {
-        height: 29,
-        width: 29,
-        marginLeft: 325,
-        marginTop: -784,
-      },      
-});
+  ]);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isAddingCourse, setIsAddingCourse] = useState(false);
+  const [newCourse, setNewCourse] = useState<Course>({
+    id: 0,
+    name: "",
+    season: "",
+    year: new Date().getFullYear(),
+    code: 0,
+    image: "",
+    section: 0,
+    subject: "",
+  });
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const slideAnim = useState(new Animated.Value(500))[0];
+
+  const openModal = () => openModalHandler(setModalVisible, slideAnim);
+  const closeModal = () => closeModalHandler(setModalVisible, slideAnim);
+  const handleAddCourse = () =>
+    handleAddCourseHandler(
+      courses,
+      newCourse,
+      setCourses,
+      setNewCourse,
+      setIsAddingCourse,
+      closeModal
+    );
+
+  const onDeleteCourse = () => {
+    Alert.prompt(
+      "Delete Course",
+      "Enter the Course Code to delete:",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: (code) => {
+            const courseCode = Number(code);
+            if (isNaN(courseCode)) {
+              Alert.alert("Invalid Code", "Please enter a valid numeric course code.");
+            } else {
+              handleDeleteCourseHandler(courses, setCourses, courseCode);
+            }
+          },
+        },
+      ],
+      "plain-text"
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Teacher Dashboard</Text>
+      <FlatList
+        data={courses}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <Image source={{ uri: item.image }} style={styles.image} />
+            <Text style={styles.courseTitle}>{item.name}</Text>
+            <Text style={styles.courseCode}>{item.code}</Text>
+          </View>
+        )}
+      />
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.editButton} onPress={openModal}>
+          <Ionicons name="ellipsis-vertical" size={32} color="white" />
+        </TouchableOpacity>
+      </View>
+
+
+      <Modal transparent visible={modalVisible} animationType="none">
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.modalContainer,
+                { transform: [{ translateY: slideAnim }] },
+              ]}
+            >
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+              >
+                <ScrollView
+                  contentContainerStyle={{ paddingBottom: 100 }}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  {!isAddingCourse ? (
+                    <>
+                      <TouchableOpacity
+                        style={styles.modalButton}
+                        onPress={() => setIsAddingCourse(true)}
+                      >
+                        <Text style={styles.modalButtonText}>Add Course</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.modalButton}
+                        onPress={onDeleteCourse}
+                      >
+                        <Text style={styles.modalButtonText}>Delete Course</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.modalButton}>
+                        <Text style={styles.modalButtonText}>
+                          Modify Course
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.modalButton, { backgroundColor: "#ccc" }]}
+                        onPress={closeModal}
+                      >
+                        <Text style={styles.modalButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <View style={styles.formContainer}>
+                      <Text style={styles.formTitle}>Add New Course</Text>
+                      {[
+                        { label: "ID", key: "id", type: "numeric" },
+                        { label: "Name", key: "name", type: "default" },
+                        { label: "Season", key: "season", type: "default" },
+                        { label: "Year", key: "year", type: "numeric" },
+                        { label: "Code", key: "code", type: "numeric" },
+                        { label: "Section", key: "section", type: "numeric" },
+                        { label: "Subject", key: "subject", type: "default" },
+                      ].map((field) => (
+                        <TextInput
+                          key={field.key}
+                          placeholder={field.label}
+                          keyboardType={field.type as KeyboardTypeOptions}
+                          style={styles.input}
+                          onChangeText={(text) =>
+                            setNewCourse((prev) => ({
+                              ...prev,
+                              [field.key]:
+                                field.type === "numeric"
+                                  ? Number(text)
+                                  : text,
+                            }))
+                          }
+                        />
+                      ))}
+                      <TouchableOpacity
+                        style={styles.imagePickerButton}
+                        onPress={() =>
+                          handlePickImage(setImageUri, setNewCourse)
+                        }
+                      >
+                        <Text style={styles.modalButtonText}>
+                          {imageUri ? "Change Image" : "Pick an Image"}
+                        </Text>
+                      </TouchableOpacity>
+                      {imageUri && (
+                        <Image
+                          source={{ uri: imageUri }}
+                          style={{
+                            width: "100%",
+                            height: 100,
+                            resizeMode: "cover",
+                            borderRadius: 10,
+                            marginVertical: 10,
+                          }}
+                        />
+                      )}
+                      <TouchableOpacity
+                        style={styles.modalButton}
+                        onPress={handleAddCourse}
+                      >
+                        <Text style={styles.modalButtonText}>Submit</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.modalButton, { backgroundColor: "#ccc" }]}
+                        onPress={() => {
+                          setIsAddingCourse(false);
+                          closeModal();
+                        }}
+                      >
+                        <Text style={styles.modalButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  <View style={{ height: 200 }} />
+                </ScrollView>
+              </KeyboardAvoidingView>
+            </Animated.View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </View>
+  );
+};
 
 export default TeacherDashboard;
