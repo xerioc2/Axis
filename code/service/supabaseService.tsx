@@ -234,6 +234,7 @@ export async function getEnrollmentsBySectionId(sectionId: number){
             console.log(`Error getting enrollment data from section ${sectionId}: ${enrollmentError}`);
         }
         else if (enrollmentData){
+            console.log(`retrieved enrollmentData successfully: ${enrollmentData.length} records, data[0]=${enrollmentData[0].student_id}`);
             return enrollmentData as Enrollment[];
         }
         else{
@@ -254,8 +255,10 @@ export async function getStudentsBySectionId(sectionId: number){
         else if (potentialEnrollments){
             const actualEnrollments: Enrollment[] = potentialEnrollments;
             const studentIds = actualEnrollments.map(enrollment => (enrollment.student_id));
+            console.log(`mapped enrollmentData to studentIds: ${studentIds}`);
             let enrolledStudents: User[] = []
             for(let i = 0; i < studentIds.length; i++){
+                console.log(`attempting to get student with id ${studentIds[i]}`);
                 const { data: studentData, error: studentError} = await supabase
                     .from("users")
                     .select("*")
@@ -263,7 +266,8 @@ export async function getStudentsBySectionId(sectionId: number){
                 if (studentError){
                     console.log(`Error getting student account for student id ${studentIds[i]}: ${studentError}`);
                 }
-                else if (studentData && studentData.length === 1){
+                else if (studentData && studentData.length > 0){
+                    console.log(`Retrieved student with id ${studentIds[i]}, pushing to enrolledStudents`);
                     const student: User = studentData[0] as User;
                     enrolledStudents.push(student)
                 }

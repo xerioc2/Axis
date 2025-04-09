@@ -52,11 +52,16 @@ const SectionDetailsScreen: React.FC = () => {
                 <Text>{sectionPreview.course_subject} {sectionPreview.course_identifier} {sectionPreview.section_identifier} {sectionPreview.course_name}</Text>
             </View>
             <View>
-                {teachers.length === 1 && <Text>Section Teacher</Text>}
+                {teachers.length === 1 && (
+                    <View>
+                        <Text>Section Teacher</Text>
+                        <Text>{teachers[0].first_name} {teachers[0].last_name}</Text>
+                    </View>
+                )}
                 {teachers.length > 1 && <Text>Section Teachers</Text>}
                 {teachers.length === 0 && <Text>No teachers found for this section...</Text>}
                 {teachers.length > 1 && teachers.map(teacher => (
-                    <Text>{teacher.first_name} {teacher.last_name}</Text>
+                    <Text key={teacher.user_id}>{teacher.first_name} {teacher.last_name}</Text>
                 ))}
             </View>
 
@@ -64,7 +69,7 @@ const SectionDetailsScreen: React.FC = () => {
                 <Text>Enrolled Students:</Text>
                 {students.length === 0 && <Text>No students are enrolled in this section yet...</Text>}
                 {students.length > 0 && students.map(student => (
-                    <Text>{student.first_name} {student.last_name} - {student.email}</Text>
+                    <Text key={student.user_id}>{student.first_name} {student.last_name} - {student.email}</Text>
                 ))}
             </View>
         {errorMessage !== "" && <ErrorMessage message={errorMessage}/>}

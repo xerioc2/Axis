@@ -16,9 +16,11 @@ const TeacherDashboardNav: React.FC<TeacherDashboardNavProps> = ({setSelectedMen
             <TouchableOpacity onPress={() => setSelectedMenuOption("sections")}>
                 <Text>Sections</Text>
             </TouchableOpacity>
+            {/*
             <TouchableOpacity onPress={() => setSelectedMenuOption("semesters")}>
                 <Text>Semesters</Text>
             </TouchableOpacity>
+            */}
         </View>
     </>
 

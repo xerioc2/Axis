@@ -11,6 +11,7 @@ import ErrorMessage from '../components/ErrorMessage';
 import SectionCard from '../components/teacherDashboard/SectionCard';
 import { useFonts } from 'expo-font';
 import { Colors } from '../theme';
+import TeacherDashboardNav from '../components/teacherDashboard/TeacherDashboardNav';
 
 
 type TeacherDashboardRouteProp = RouteProp<RootStackParamList, 'TeacherDashboard'>;
@@ -49,16 +50,16 @@ const TeacherDashboard: React.FC = () => {
 
 
     return (
-        <>
-            <Text>TEACHER DASHBOARD</Text>
-            {selectedMenuOption === "sections" && sectionPreviews.length > 0 && (
-        <SafeAreaView style={styles.container}>
         
+        <SafeAreaView style={styles.container}>
             <Text style={styles.titleText}>Teacher Dashboard</Text>
-            {sections.length > 0 && (
+                
+            {selectedMenuOption === "sections" && sectionPreviews.length > 0 && (
                 <View>
-                    {sections.map((section) => (
-                        <SectionCard key={section.section_id} section={section} />
+                    {sectionPreviews.map((section) => (
+                        <TouchableOpacity key={section.section_id} onPress={() => navigation.navigate("SectionDetails", section)}>
+                            <SectionCard section={section} />
+                        </TouchableOpacity>
                     ))}
                     <Image source={require('../assets/images/icons/account_icon.png')} style={styles.accountIcon} />
                 </View>
@@ -75,11 +76,11 @@ const TeacherDashboard: React.FC = () => {
                     )}
                 </View>
             }
+            
             {errorMessage !== "" && <ErrorMessage message={errorMessage}/>}
-    
+        <TeacherDashboardNav setSelectedMenuOption={setSelectedMenuOption} />
         </SafeAreaView>
-        </>
-    );
+    )
     
 }
 
