@@ -14,7 +14,6 @@ type Step2Props = {
         confirmPassword: string,
         state: string,
         schoolType: string,
-        schoolState: string,
         schoolName: string
     };
     setFormData: (data: any) => void;
