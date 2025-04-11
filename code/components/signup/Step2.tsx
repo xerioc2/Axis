@@ -48,6 +48,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
         //handle if state changed:
         if (key === "schoolState"){
             //run the query to load possibleSchools, use schoolType if available
+            
         }
     };
 
