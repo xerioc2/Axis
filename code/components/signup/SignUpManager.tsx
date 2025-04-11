@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowRadius: 3.84,
     elevation: 5,
-    marginTop: -20,
+    marginTop: 20,
     marginBottom: 15,
   },
   buttonText: {
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     height: 43,
     alignItems: 'center',
     elevation: 5,
-    marginTop: -20,
+    marginTop: 20,
     marginBottom: 15,
   },
   backButton: {

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TextInput, StyleSheet, Image} from 'react-native';
 import CustomPicker from '../buttons/CustomPicker'; 
 import { Colors } from '../../theme';
+import StatePicker from '../buttons/StatePicker';
 
 type Step2Props = {
     formData: {
@@ -10,6 +11,7 @@ type Step2Props = {
         email: string,
         password: string,
         confirmPassword: string,
+        state: string,
         schoolType: string,
         schoolName: string
     };
@@ -29,47 +31,56 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
         { label: "College", value: "College" }
     ];
 
+    {/* Add Back Button */}
     return (
         <View>
-            <View style={styles.firstNameInput}> {/* <-- FIX */}
+            <View style={styles.container}> {/* <-- FIX */}
 
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="First Name"
-                  value={formData.firstName}
-                  onChangeText={(text) => handleChange("firstName", text)}
-                  placeholderTextColor="#4F4F4F"
-                />
+            <View style={styles.row}>
+  <TextInput
+    style={styles.halfInput}
+    placeholder="First Name"
+    value={formData.firstName}
+    onChangeText={(text) => handleChange("firstName", text)}
+    placeholderTextColor="#4F4F4F"
+  />
+  <TextInput
+    style={styles.halfInput}
+    placeholder="Last Name"
+    value={formData.lastName}
+    onChangeText={(text) => handleChange("lastName", text)}
+    placeholderTextColor="#4F4F4F"
+  />
+</View>
+
 
                 <TextInput
                     style={styles.textInput}
-                    placeholder='Last Name'
-                    value={formData.lastName}
-                    onChangeText={(text) => handleChange("lastName", text)}
+                    placeholder='Email'
+                    value={formData.email}
+                    onChangeText={(text) => handleChange("email", text)}
                     placeholderTextColor="#4F4F4F"
                 />
 
                 <TextInput
-                    placeholder='Email'
-                    value={formData.email}
-                    onChangeText={(text) => handleChange("email", text)}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                />
-
-                <TextInput
+                    style={styles.textInput}
                     placeholder='Password'
                     value={formData.password}
                     onChangeText={(text) => handleChange("password", text)}
-                    secureTextEntry
+                    placeholderTextColor="#4F4F4F"
                 />
 
                 <TextInput
-                    placeholder='Confirm Password'
+                    style={styles.textInput}
+                    placeholder='Confrim Password'
                     value={formData.confirmPassword}
-                    onChangeText={(text) => handleChange("confirmPassword", text)}
-                    secureTextEntry
+                    onChangeText={(text) => handleChange("confrimPassword", text)}
+                    placeholderTextColor="#4F4F4F"
                 />
+<StatePicker 
+  selectedValue={formData.state}
+  onValueChange={(value) => handleChange('state', value)}
+/>
 
                 <CustomPicker
                     selectedValue={formData.schoolType}
@@ -79,12 +90,12 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
                 />
 
                 <TextInput
-                    placeholder="School Name"
+                    style={styles.textInput}
+                    placeholder='School Name'
                     value={formData.schoolName}
                     onChangeText={(text) => handleChange("schoolName", text)}
+                    placeholderTextColor="#4F4F4F"
                 />
-                <Image source={require('../../assets/images/stepper_bar/stepper_bar2.png')} 
-                        style={styles.stepper}></Image>
                     </View>
             </View>
     );
@@ -92,25 +103,45 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: Colors.background,
     },
     textInput: {
-      color: Colors.black,
       borderBottomColor: Colors.secondary,
       fontFamily: 'Inter',
       fontSize: 16,
       borderBottomWidth: 1,
+      width: 230,
+      margin: 5,
     },
-    firstNameInput: {
+    firstName: {
+        borderBottomColor: Colors.secondary,
+        fontFamily: 'Inter',
+        fontSize: 16,
+        borderBottomWidth: 1,
+        width: 115,
     },
-    lastNameInput: {
+    lastName: {
+        borderBottomColor: Colors.secondary,
+        fontFamily: 'Inter',
+        fontSize: 16,
+        borderBottomWidth: 1,
+        width: 115,
+        left: 140,
+        bottom: 20,
     },
-    stepper: {
-        position: "absolute",
-        alignSelf: "center",
-        marginTop: 385,
-    }
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginHorizontal: 30,
+        marginTop: 5,
+      },
+      halfInput: {
+        borderBottomColor: Colors.secondary,
+        fontFamily: 'Inter',
+        fontSize: 16,
+        borderBottomWidth: 1,
+        width: '48%',
+      }
   });
 
 export default Step2;

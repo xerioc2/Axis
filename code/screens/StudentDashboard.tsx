@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
-import Header from '../components/headers/StudentHeader';
-import Footer from '../components/footer/StudentFooter';
+//import Header from '../components/headers/StudentHeader';
+//import Footer from '../components/footer/StudentFooter';
 
 const StudentDashboard: React.FC = () => {
 
 
     return<>      
      <View style={styles.container}>
-                    <ImageBackground source={require('../assets/images/axis-bg.png')} style={styles.backgroundImage} resizeMode="cover">
+                    <ImageBackground source={require('../assets/images/defaultBG.jpg')} style={styles.backgroundImage} resizeMode="cover">
             <Text>Student Dashboard</Text>
             
             <TouchableOpacity style={styles.backButton}>
