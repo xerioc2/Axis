@@ -23,23 +23,28 @@ const SchoolPicker: React.FC<SchoolPickerProps> = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log("Triggering useEffect with:", selectedState, selectedSchoolType);
+  
     const loadSchools = async () => {
       const key = `${selectedState}_${selectedSchoolType}`;
       const filePath = fileMap[key];
-
+  
       if (!filePath) {
         console.warn(`No file found for key ${key}`);
         setSchoolOptions([]);
         return;
       }
-
+  
       try {
         setLoading(true);
-        const asset = Asset.fromModule(fileMap[key]); 
+        setSchoolOptions([]); // Clear old options immediately
+  
+        const asset = Asset.fromModule(filePath);
         await asset.downloadAsync();
+  
         const text = await FileSystem.readAsStringAsync(asset.localUri!);
         const parsed = Papa.parse(text, { header: true });
-
+  
         const names = parsed.data.map((row: any) => row.NAME).filter(Boolean);
         setSchoolOptions(names);
       } catch (err) {
@@ -49,11 +54,14 @@ const SchoolPicker: React.FC<SchoolPickerProps> = ({
         setLoading(false);
       }
     };
-
+  
     if (selectedState && selectedSchoolType) {
       loadSchools();
     }
   }, [selectedState, selectedSchoolType]);
+  
+
+
 
   if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
 

@@ -24,6 +24,7 @@ fs.readdirSync(basePath).forEach(schoolType => {
       const relPath = `../assets/schoolData/${schoolType}/${file}`;
 
       mapContent += `  '${key}': require('${relPath}'),\n`;
+
     }
   });
 });
