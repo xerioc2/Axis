@@ -1,111 +1,197 @@
-import { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
-import type { User, Course, TeacherDataDto, SectionPreviewDto } from '../../App';
-import { useRoute } from '@react-navigation/native';
-import type { RouteProp } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
-import type { RootStackParamList } from '../utils/navigation.types';
-import { getTeacherData } from '../service/supabaseService';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import ErrorMessage from '../components/ErrorMessage';
-import SectionCard from '../components/teacherDashboard/SectionCard';
-import { useFonts } from 'expo-font';
-import { Colors } from '../theme';
-import TeacherDashboardNav from '../components/teacherDashboard/TeacherDashboardNav';
+import React, { useState, useRef, useEffect } from "react";
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    Modal,
+    Animated,
+    StyleSheet, 
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { styles } from "../components/teacherDashboard/TeacherDashboardStyle"; 
+import { getTeacherData } from "../service/supabaseService"; 
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type {
+    User,
+    Course,
+    TeacherDataDto,
+    SectionPreviewDto,
+} from "../../App";
+import {
+    useRoute,
+    useNavigation,
+    RouteProp,
+} from "@react-navigation/native";
+import type { RootStackParamList } from "../utils/navigation.types";
+import ErrorMessage from "../components/ErrorMessage"; 
+import TeacherDashboardMenu from "../components/teacherDashboard/TeacherDashboardMenu"; 
+import { useFonts } from "expo-font";
+import SectionCardList from "../components/teacherDashboard/SectionCardList"; 
+import CourseCardList from "../components/teacherDashboard/CourseCardList"; 
+import CreateSectionForm from "../components/teacherDashboard/CreateSectionForm";
 
+type TeacherDashboardRouteProp = RouteProp<
+    RootStackParamList,
+    "TeacherDashboard"
+>;
+type NavigationProps = NativeStackNavigationProp<
+    RootStackParamList,
+    "TeacherDashboard"
+>;
 
-type TeacherDashboardRouteProp = RouteProp<RootStackParamList, 'TeacherDashboard'>;
-type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'TeacherDashboard'>;
 const TeacherDashboard: React.FC = () => {
     const navigation = useNavigation<NavigationProps>();
     const route = useRoute<TeacherDashboardRouteProp>();
     const teacher = route.params;
 
+    const slideAnim = useRef(new Animated.Value(500)).current;
+
     const [sectionPreviews, setSectionPreviews] = useState<SectionPreviewDto[]>([]);
     const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
-    const [selectedMenuOption, setSelectedMenuOption] = useState<string>("sections");
-    const [fontsLoaded] = useFonts({
-        'SF Pro': require('../assets/fonts/sf_pro.ttf'),
-    });
+    // Default to sections view
+    const [selectedMenuOption, setSelectedMenuOption] = useState<"sections" | "courses">("sections");
+    const [modalVisible, setModalVisible] = useState(false);
+    const [creatingSection, setCreatingSection] = useState(false);
+    
 
-    //onMount hook to fetch data 
     useEffect(() => {
         const fetchTeacherData = async (teacher: User) => {
-            let teacherData: TeacherDataDto = await getTeacherData(teacher.user_id);
-            if (!teacherData){
-                setErrorMessage("Uh oh... looks like you may not have taught any sections yet. When teaching a section, it will be displayed here.");
-                return;
+            try { // Add error handling for API calls
+                let teacherData: TeacherDataDto = await getTeacherData(teacher.user_id);
+                if (!teacherData || (!teacherData.sections?.length && !teacherData.courses_created?.length)) {
+                    setErrorMessage(
+                        "Get started by creating a course or section using the menu!"
+                    );
+                    setSectionPreviews([]);
+                    setCoursesCreated([]);
+                } else {
+                    setSectionPreviews(teacherData.sections || []);
+                    setCoursesCreated(teacherData.courses_created || []);
+                    setErrorMessage(""); // Clear error message on success
+                    console.log("Teacher data loaded successfully");
+                }
+            } catch (error) {
+                console.error("Failed to fetch teacher data:", error);
+                setErrorMessage("Failed to load dashboard data. Please try again.");
+                setSectionPreviews([]);
+                setCoursesCreated([]);
             }
-            setSectionPreviews(teacherData.sections);
-            setCoursesCreated(teacherData.courses_created);
-            console.log("Teacher data loaded successfully");
-            
-            //now we actually want to organize sections by semester, 
-            //and show only the ones for the current semester at the top
-        }
-        setErrorMessage("");
+        };
         fetchTeacherData(teacher);
-    }, []);
+    }, [teacher]); // Re-fetch if teacher prop changes
+
+    const openModal = () => {
+        setModalVisible(true);
+        Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const closeModal = () => {
+        Animated.timing(slideAnim, {
+            toValue: 300, 
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => setModalVisible(false));
+        setCreatingSection(false);
+    };
+
+
 
 
     return (
-        
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.titleText}>Teacher Dashboard</Text>
-                
-            {selectedMenuOption === "sections" && sectionPreviews.length > 0 && (
-                <View>
-                    {sectionPreviews.map((section) => (
-                        <TouchableOpacity key={section.section_id} onPress={() => navigation.navigate("SectionDetails", section)}>
-                            <SectionCard section={section} />
-                        </TouchableOpacity>
-                    ))}
-                    <Image source={require('../assets/images/icons/account_icon.png')} style={styles.accountIcon} />
-                </View>
-            )}
-            {selectedMenuOption === "courses" && coursesCreated.length > 0 &&
-                <View style={[{marginTop:20}]}>
-                    {coursesCreated.length > 0 && (
-                        <View>
-                            <Text>Courses You've Created</Text>
-                            {coursesCreated.map((course) => (
-                                <Text key={course.course_id}>{course.course_subject} {course.course_identifier} {course.course_name}</Text>
-                            ))}
-                        </View>
-                    )}
-                </View>
-            }
-            
-            {errorMessage !== "" && <ErrorMessage message={errorMessage}/>}
-        <TeacherDashboardNav setSelectedMenuOption={setSelectedMenuOption} />
-        </SafeAreaView>
-    )
-    
-}
+        <View style={styles.container}>
+            {/* Content Area */}
+            <View style={styles.content}>
+                <Text style={styles.title}>
+                    Welcome, {teacher.first_name}
+                </Text>
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: Colors.background,
+                {selectedMenuOption === "sections" && (
+                    <SectionCardList sectionPreviews={sectionPreviews} />
+                )}
+
+                {selectedMenuOption === "courses" && (
+                    <CourseCardList courses={coursesCreated} />
+                )}
+
+                {/* Show error message within content if applicable */}
+                {errorMessage !== "" && !sectionPreviews.length && !coursesCreated.length && (
+                    <ErrorMessage message={errorMessage} />
+                )}
+            </View>
+
+            {/* Footer */}
+            <View style={styles.footer}>
+                <View style={styles.footerButtonContainer}>
+                    {/* Courses Button */}
+                    <TouchableOpacity 
+                        style={[
+                            styles.footerButton, 
+                            selectedMenuOption === 'courses' && inlineStyles.selectedFooterButton 
+                        ]} 
+                        onPress={() => setSelectedMenuOption('courses')}
+                    >
+                        <Text style={[
+                            styles.footerButtonText,
+                            selectedMenuOption === 'courses' && inlineStyles.selectedFooterButtonText
+                        ]}>
+                            Courses
+                        </Text>
+                    </TouchableOpacity>
+
+                    {/* Sections Button */}
+                    <TouchableOpacity 
+                        style={[
+                            styles.footerButton,
+                            selectedMenuOption === 'sections' && inlineStyles.selectedFooterButton
+                        ]} 
+                        onPress={() => setSelectedMenuOption('sections')}
+                    >
+                        <Text style={[
+                            styles.footerButtonText,
+                            selectedMenuOption === 'sections' && inlineStyles.selectedFooterButtonText
+                        ]}>
+                            Sections
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Absolutely Positioned Edit Button - Renders on top */}
+                <TouchableOpacity style={styles.editButton} onPress={openModal}>
+                    <Ionicons name="add" size={32} color="white" /> 
+                </TouchableOpacity>
+            </View>
+
+            {/* Modal for adding sections or courses */}
+            {modalVisible && (
+                <Modal transparent animationType="none" visible={modalVisible}>
+                    {/* Ensure TeacherDashboardMenu receives necessary props */}
+                    <TeacherDashboardMenu closeModal={closeModal} slideAnim={slideAnim} setCreatingSection={setCreatingSection} />
+                </Modal>
+            )}
+
+            {creatingSection && (
+                <CreateSectionForm />
+            )}
+
+        </View>
+    );
+};
+
+// Inline styles for selected
+const inlineStyles = StyleSheet.create({
+    selectedFooterButton: {
+        borderBottomWidth: 3,
+        borderBottomColor: '#005824' 
     },
-    titleText: {
-        color: Colors.primary,
-        fontFamily: "SF Pro",
-        textAlign: "center",
-        fontSize: 20,
-        fontWeight: "600",
-        lineHeight: 25,
-        letterSpacing: 0.4,
-        paddingTop: 20,
-        paddingBottom: 30,
-    },
-    accountIcon: {
-        height: 29,
-        width: 29,
-        marginLeft: 325,
-        marginTop: -784,
-      },      
+    selectedFooterButtonText: {
+        color: '#005824', // Highlight color for selected text
+        fontWeight: 'bold',
+    }
 });
 
 export default TeacherDashboard;
