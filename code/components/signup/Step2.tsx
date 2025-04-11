@@ -3,6 +3,7 @@ import { View, TextInput, StyleSheet, Image} from 'react-native';
 import CustomPicker from '../buttons/CustomPicker'; 
 import { Colors } from '../../theme';
 import StatePicker from '../buttons/StatePicker';
+import SchoolPicker from '../buttons/SchoolPicker';
 import type { School } from '../../../App';
 
 type Step2Props = {
@@ -118,13 +119,18 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
                     placeholder="Select School Type"
                 />
 
-                <TextInput
-                    style={styles.textInput}
-                    placeholder='School Name'
-                    value={formData.schoolName}
-                    onChangeText={(text) => handleChange("schoolName", text)}
-                    placeholderTextColor="#4F4F4F"
-                />
+<SchoolPicker
+  selectedValue={formData.schoolName}
+  onValueChange={(value) => handleChange('schoolName', value)}
+  selectedState={formData.state}
+  selectedSchoolType={
+    formData.schoolType === 'Middle School'
+      ? 'Middle'
+      : formData.schoolType === 'High School'
+      ? 'HS'
+      : 'College'
+  }
+/>
                     </View>
             </View>
     );
