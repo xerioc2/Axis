@@ -1,4 +1,4 @@
-import React from "react";
+import React, { SetStateAction } from "react";
 import {
   View,
   Text,
@@ -15,11 +15,13 @@ import { styles } from "./TeacherDashboardStyle";
 type TeacherDashboardMenuProps = {
   closeModal: () => void;
   slideAnim: Animated.Value;
+  setCreatingSection: React.Dispatch<SetStateAction<boolean>>;
 };
 
 const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
   closeModal,
   slideAnim,
+  setCreatingSection
 }) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -35,7 +37,10 @@ const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
               contentContainerStyle={{ paddingBottom: 100 }}
               keyboardShouldPersistTaps="handled"
             >
-              <TouchableOpacity style={styles.modalButton}>
+              <TouchableOpacity 
+                onPress={() => setCreatingSection(true)}
+                style={styles.modalButton}
+              >
                 <Text style={styles.modalButtonText}>Add Section</Text>
               </TouchableOpacity>
 
@@ -43,9 +48,6 @@ const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
                 <Text style={styles.modalButtonText}>Add Course</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Delete Course</Text>
-              </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: "#ccc" }]}

@@ -72,6 +72,7 @@ export type CourseInsertDto = {
   school_id: number
 }
 
+
 export type Section = {
   section_id: number,
   section_identifier: string,
@@ -83,7 +84,6 @@ export type Section = {
 }
 export type SectionInsertDto = {
   section_identifier: string,
-  enrollment_code: string,
   semester_id: number,
   course_id: number,
   start_date: string
