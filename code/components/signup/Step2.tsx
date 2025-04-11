@@ -29,6 +29,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
         { label: "College", value: "College" }
     ];
 
+    {/* Add Back Button */}
     return (
         <View>
             <View style={styles.firstNameInput}> {/* <-- FIX */}
