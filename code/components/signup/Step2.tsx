@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TextInput, StyleSheet, Image} from 'react-native';
 import CustomPicker from '../buttons/CustomPicker'; 
 import { Colors } from '../../theme';
+import type { School } from '../../../App';
 
 type Step2Props = {
     formData: {
@@ -11,6 +12,7 @@ type Step2Props = {
         password: string,
         confirmPassword: string,
         schoolType: string,
+        schoolState: string,
         schoolName: string
     };
     setFormData: (data: any) => void;
@@ -18,8 +20,35 @@ type Step2Props = {
 
 const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
 
+    const [schoolTypeId, setSchoolTypeId] = useState(3); //defaults to colleges
+    const [schoolState, setSchoolState] = useState("");
+    const [possibleSchools, setPossibleSchools] = useState<School[] | null>(null);
+
     const handleChange = (key: string, value: string) => {
         setFormData((prev: any) => ({ ...prev, [key]: value }));
+        
+        //handle if schoolType changed:
+        if (key === "schoolType"){
+            switch (value){
+                case "Middle School":
+                    setSchoolTypeId(1);
+                    break;
+                case "High School":
+                    setSchoolTypeId(2);
+                    break;
+                case "College":
+                    setSchoolTypeId(3);
+                    break;
+                case "":
+                    setSchoolTypeId(3);
+                    break;
+            }
+        }
+
+        //handle if state changed:
+        if (key === "schoolState"){
+            //run the query to load possibleSchools, use schoolType if available
+        }
     };
 
     const schoolTypeOptions = [
@@ -31,7 +60,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
 
     return (
         <View>
-            <View style={styles.firstNameInput}> {/* <-- FIX */}
+            <View style={styles.firstNameInput}> 
 
                 <TextInput
                   style={styles.textInput}

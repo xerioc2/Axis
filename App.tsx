@@ -55,6 +55,14 @@ export type TeacherDto = {
   school_name: string,
 }
 
+export type School = {
+  school_id: number,
+  school_name: string,
+  city: string,
+  state: string,
+  school_type_id: number
+}
+
 export type Course = {
   course_id: number,
   course_subject: string | null,
