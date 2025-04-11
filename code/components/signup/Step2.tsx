@@ -63,7 +63,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
     {/* Add Back Button */}
     return (
         <View>
-            <View style={styles.firstNameInput}> 
+            <View style={styles.container}> 
 
             <View style={styles.row}>
   <TextInput
