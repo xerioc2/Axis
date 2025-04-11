@@ -24,7 +24,7 @@ const StepManager: React.FC = () => {
     password: "",
     confirmPassword: "",
     schoolType: "",
-    schoolState: "",
+    state: "",
     schoolName: ""
   });
   const [errorMessage, setErrorMessage] = useState("");
@@ -44,7 +44,7 @@ const StepManager: React.FC = () => {
       formData.password !== "" &&
       formData.confirmPassword !== "" &&
       formData.schoolType !== "" &&
-      formData.schoolState !== "" &&
+      formData.state !== "" &&
       formData.schoolName !== ""
     ) {
       setAreAllFieldsEdited(true);
