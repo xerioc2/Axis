@@ -27,14 +27,11 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
     const [possibleSchools, setPossibleSchools] = useState<School[] | null>(null);
 
     const handleChange = (key: string, value: string) => {
-      // Prepare base formData update
+      console.log("✍️ handleChange", key, value);
       const newFormData: any = { ...formData, [key]: value };
-    
-      // If changing state or schoolType, reset schoolName too
       if (key === "schoolType" || key === "state") {
         newFormData.schoolName = '';
       }
-    
       setFormData(newFormData);
     
       // Also update schoolTypeId logic if needed
@@ -128,6 +125,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
   selectedState={formData.state}
   selectedSchoolType={formData.schoolType}
 />
+
 
 
                     </View>
