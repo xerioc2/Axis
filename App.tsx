@@ -146,13 +146,47 @@ export type Enrollment = {
   section_id: number
 }
 
+export type Point = {
+  point_id: number,
+  is_test_point: boolean,
+  section_id: number,
+  concept_id: number
+}
+export type StudentPoint = {
+  student_point_id: number,
+  date_status_last_updated: string | null,
+  student_id: string,
+  point_id: number,
+  point_status_id: number
+}
+export type PointStatus = {
+  point_status_id: number,
+  point_status_name: string
+}
+export type StudentPointDto = {
+  student_point_id: number,
+  point_id: number,
+  topic_id: number,
+  concept_id: number,
+  student_id: string,
+  point_status_name: string, //use the status name instead of Id
+  date_status_last_updated: string | null
+}
+
+
+
+/* Start of more complex DTO structures */
 /*
 TeacherData is used to collect all info
 for a teacher when they login. 
 */
 export type TeacherDataDto = {
-  sections: SectionPreviewDto[],
+  sections: SectionPreviewDto[], //all sections this teacher has taught
   courses_created: Course[], //all courses this teacher has created
+}
+
+export type StudentDataDto = {
+  sections: SectionPreviewDto[]
 }
 
 /*
@@ -184,6 +218,14 @@ export type SectionDetailsDto = {
   course_identifier: string | null,
   teachers: TeacherDto[],
   enrolled_students: StudentDto[]
+}
+
+export type StudentGradesDto = {
+  student: StudentDto,
+  section: SectionPreviewDto, //contains course_id, semester info
+  topics: Topic[],
+  concepts: Concept[],
+  points: StudentPointDto[] //contains point_id, status_name
 }
 
 

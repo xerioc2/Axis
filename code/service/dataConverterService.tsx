@@ -3,13 +3,13 @@ import { SectionPreviewDto, Course, Section, Semester, TeacherDataDto } from '..
 
 
  //map sections to their corresponding courses/semesters
- export function compileSectionPreviews(sections: Section[], courses_taught: Course[], semesters: Semester[]){
+ export function compileSectionPreviews(sections: Section[], courses: Course[], semesters: Semester[]){
     let sectionPreviewDtos: SectionPreviewDto[] = []
     let sections_course_map: number[] = new Array(sections.length);
     let sections_semester_map: number[] = new Array(sections.length);
     for (let i = 0; i < sections.length; i++){
-        for (let j = 0; j < courses_taught.length; j++){
-            if (courses_taught[j].course_id === sections[i].course_id){
+        for (let j = 0; j < courses.length; j++){
+            if (courses[j].course_id === sections[i].course_id){
                 sections_course_map[i] = j;
             }
         }
@@ -21,7 +21,7 @@ import { SectionPreviewDto, Course, Section, Semester, TeacherDataDto } from '..
     }
     //now build the dtos using those lookup tables
     for (let i = 0; i < sections.length; i++){
-        const relatedCourse: Course = courses_taught[sections_course_map[i]];
+        const relatedCourse: Course = courses[sections_course_map[i]];
         const relatedSemester: Semester = semesters[sections_semester_map[i]];
         const sectionDto: SectionPreviewDto = {
             section_id: sections[i].section_id,

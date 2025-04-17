@@ -326,3 +326,54 @@ export async function getTeachersBySectionId(sectionId: number){
     }
     return null;
 }
+
+export async function getSectionsByStudentId(studentId: string){
+    try{
+        const {data: enrollmentsData, error: enrollmentsError} = await supabase
+            .from("enrollments")
+            .select("section_id")
+            .eq("student_id", studentId)
+            .is("date_disenrolled", null);
+        if (enrollmentsError){
+            console.log("Error getting enrollments: ", enrollmentsError);
+        }
+        else if (enrollmentsData){
+            const section_ids = new Array(enrollmentsData.length);
+            for (let i = 0; i < section_ids.length; i++){
+                section_ids[i] = enrollmentsData[i].section_id;
+            }
+
+            const potentialSections: Section[] | null = await getSectionsByIds(section_ids);
+            if (!potentialSections){
+                console.log("Error getting sections");
+            }
+            else{
+                const sections: Section[] = potentialSections;
+                //need courses and semesters to use dataConverter
+                const course_ids: number[] = sections.map(section => (section.course_id));
+                const potentialCoursesTaken: Course[] | null = await getCoursesByIds(course_ids);
+                if (!potentialCoursesTaken){
+                    console.log("Error getting courses taken");
+                    return null;
+                }
+                const courses_taken: Course[] = potentialCoursesTaken;
+                const semester_ids: number[] = sections.map(section => (section.semester_id));
+                const potentialSemesters: Semester[] | null = await getSemestersByIds(semester_ids);
+                if (!potentialSemesters){
+                    console.log("Error getting semesters");
+                    return null;
+                }
+                const semesters: Semester[] = potentialSemesters
+                const sectionPreviews: SectionPreviewDto[] = compileSectionPreviews(sections, courses_taken, semesters);
+                return sectionPreviews;
+            }
+        }
+    }
+    catch(err){
+        console.log("Exception thrown in getSectionsByStudentId: ", err);
+    }
+
+
+}
+
+
