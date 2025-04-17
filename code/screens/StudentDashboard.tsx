@@ -23,6 +23,8 @@ import type { RootStackParamList } from "../utils/navigation.types";
 import ErrorMessage from "../components/ErrorMessage"; 
 import SectionCardList from "../components/StudentDashboard/SectionCardList";
 import CourseCardList from "../components/StudentDashboard/CourseCardList";
+import { TextInput } from "react-native";
+
 
 type StudentDashboardRouteProp = RouteProp<
     RootStackParamList,
@@ -42,6 +44,16 @@ const StudentDashboard: React.FC = () => {
     const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [selectedMenuOption, setSelectedMenuOption] = useState<"sections" | "courses">("sections");
+
+    const [showJoinModal, setShowJoinModal] = useState(false);
+const [joinCode, setJoinCode] = useState('');
+
+const joinCourseByCode = async (code: string) => {
+    console.log(`Trying to join course with code: ${code}`);
+    // TODO: Replace this with actual Supabase call when backend is ready
+};
+
+
 
     useEffect(() => {
         const fetchStudentData = async (Student: User) => {
@@ -75,20 +87,57 @@ const StudentDashboard: React.FC = () => {
                 <Text style={styles.title}>
                     Welcome, {Student.first_name}
                 </Text>
-
+    
                 {selectedMenuOption === "sections" && (
                     <SectionCardList sectionPreviews={sectionPreviews} />
                 )}
-
+    
                 {selectedMenuOption === "courses" && (
                     <CourseCardList courses={coursesCreated} />
                 )}
-
+    
                 {errorMessage !== "" && !sectionPreviews.length && !coursesCreated.length && (
                     <ErrorMessage message={errorMessage} />
                 )}
             </View>
+            {showJoinModal && (
+    <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+            <Text style={styles.formTitle}>Join Course by Code</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Enter course code"
+                value={joinCode}
+                onChangeText={setJoinCode}
+            />
+            <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                    joinCourseByCode(joinCode);
+                    setShowJoinModal(false);
+                }}
+            >
+                <Text style={styles.modalButtonText}>Join</Text>
+            </TouchableOpacity>
 
+            <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: '#ccc' }]}
+                onPress={() => setShowJoinModal(false)}
+            >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+)}
+
+
+            <TouchableOpacity
+                style={styles.floatingJoinButton}
+                onPress={() => setShowJoinModal(true)}
+            >
+                <Text style={styles.fabText}>+</Text>
+            </TouchableOpacity>
+    
             <View style={styles.footer}>
                 <View style={styles.footerButtonContainer}>
                     <TouchableOpacity 
@@ -105,7 +154,7 @@ const StudentDashboard: React.FC = () => {
                             Courses
                         </Text>
                     </TouchableOpacity>
-
+    
                     <TouchableOpacity 
                         style={[
                             styles.footerButton,
@@ -124,6 +173,7 @@ const StudentDashboard: React.FC = () => {
             </View>
         </View>
     );
+    
 };
 
 const inlineStyles = StyleSheet.create({
