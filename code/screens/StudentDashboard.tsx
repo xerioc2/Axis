@@ -1,45 +1,139 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
-//import Header from '../components/headers/StudentHeader';
-//import Footer from '../components/footer/StudentFooter';
+import React, { useState, useEffect } from "react";
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+} from "react-native";
+import { styles } from "../components/StudentDashboard/StudentDashboardStyle"; 
+import { getstudentData } from "../service/supabaseService"; 
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type {
+    User,
+    Course,
+    studentDataDto,
+    SectionPreviewDto,
+} from "../../App";
+import {
+    useRoute,
+    useNavigation,
+    RouteProp,
+} from "@react-navigation/native";
+import type { RootStackParamList } from "../utils/navigation.types";
+import ErrorMessage from "../components/ErrorMessage"; 
+import SectionCardList from "../components/StudentDashboard/SectionCardList";
+import CourseCardList from "../components/StudentDashboard/CourseCardList";
+
+type StudentDashboardRouteProp = RouteProp<
+    RootStackParamList,
+    "StudentDashboard"
+>;
+type NavigationProps = NativeStackNavigationProp<
+    RootStackParamList,
+    "StudentDashboard"
+>;
 
 const StudentDashboard: React.FC = () => {
+    const navigation = useNavigation<NavigationProps>();
+    const route = useRoute<StudentDashboardRouteProp>();
+    const Student = route.params;
 
+    const [sectionPreviews, setSectionPreviews] = useState<SectionPreviewDto[]>([]);
+    const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
+    const [errorMessage, setErrorMessage] = useState<string>("");
+    const [selectedMenuOption, setSelectedMenuOption] = useState<"sections" | "courses">("sections");
 
-    return<>      
-     <View style={styles.container}>
-                    <ImageBackground source={require('../assets/images/defaultBG.jpg')} style={styles.backgroundImage} resizeMode="cover">
-            <Text>Student Dashboard</Text>
-            
-            <TouchableOpacity style={styles.backButton}>
-                <Text style={{color: 'white'}}>Back</Text>
-            </TouchableOpacity>
-            </ImageBackground>
+    useEffect(() => {
+        const fetchStudentData = async (Student: User) => {
+            try {
+                let StudentData: studentDataDto = await getstudentData(Student.user_id);
+                if (!StudentData || (!StudentData.sections?.length && !StudentData.courses_created?.length)) {
+                    setErrorMessage(
+                        "You are not enrolled in any courses or sections yet. Ask your teacher to invite you!"
+                    );
+                    setSectionPreviews([]);
+                    setCoursesCreated([]);
+                } else {
+                    setSectionPreviews(StudentData.sections || []);
+                    setCoursesCreated(StudentData.courses_created || []);
+                    setErrorMessage("");
+                    console.log("Student data loaded successfully");
+                }
+            } catch (error) {
+                console.error("Failed to fetch student data:", error);
+                setErrorMessage("Failed to load dashboard data. Please try again.");
+                setSectionPreviews([]);
+                setCoursesCreated([]);
+            }
+        };
+        fetchStudentData(Student);
+    }, [Student]);
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.content}>
+                <Text style={styles.title}>
+                    Welcome, {Student.first_name}
+                </Text>
+
+                {selectedMenuOption === "sections" && (
+                    <SectionCardList sectionPreviews={sectionPreviews} />
+                )}
+
+                {selectedMenuOption === "courses" && (
+                    <CourseCardList courses={coursesCreated} />
+                )}
+
+                {errorMessage !== "" && !sectionPreviews.length && !coursesCreated.length && (
+                    <ErrorMessage message={errorMessage} />
+                )}
             </View>
-        </>
-    
-}
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#E8F5E9',
-        padding: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 0,
-        paddingVertical: 0
+
+            <View style={styles.footer}>
+                <View style={styles.footerButtonContainer}>
+                    <TouchableOpacity 
+                        style={[
+                            styles.footerButton, 
+                            selectedMenuOption === 'courses' && inlineStyles.selectedFooterButton 
+                        ]} 
+                        onPress={() => setSelectedMenuOption('courses')}
+                    >
+                        <Text style={[
+                            styles.footerButtonText,
+                            selectedMenuOption === 'courses' && inlineStyles.selectedFooterButtonText
+                        ]}>
+                            Courses
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        style={[
+                            styles.footerButton,
+                            selectedMenuOption === 'sections' && inlineStyles.selectedFooterButton
+                        ]} 
+                        onPress={() => setSelectedMenuOption('sections')}
+                    >
+                        <Text style={[
+                            styles.footerButtonText,
+                            selectedMenuOption === 'sections' && inlineStyles.selectedFooterButtonText
+                        ]}>
+                            Sections
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </View>
+    );
+};
+
+const inlineStyles = StyleSheet.create({
+    selectedFooterButton: {
+        borderBottomWidth: 3,
+        borderBottomColor: '#005824' 
     },
-    backgroundImage: {
-        flex: 1,
-        width: '100%',
-        height: '100%',
-    },
-    backButton: {
-        backgroundColor: '#2E7D32',
-        padding: 10,
-        borderRadius: 25,
-        width: "20%",
-        alignItems: "center",
+    selectedFooterButtonText: {
+        color: '#005824',
+        fontWeight: 'bold',
     }
 });
 
