@@ -1,5 +1,5 @@
 import supabase from "../utils/supabase";
-import type { User, SectionTeacher, Section, SectionPreviewDto, Course, Semester, TeacherDataDto, Enrollment } from "@/App";
+import type { User, SectionTeacher, Section, SectionPreviewDto, Course, Semester, TeacherDataDto, Enrollment, StudentDataDto } from "@/App";
 import { compileSectionPreviews, compileTeacherData } from "./dataConverterService";
 
 
@@ -150,6 +150,18 @@ export async function getTeacherData(teacherId: string){
     }
     const teacherData: TeacherDataDto = compileTeacherData(sectionPreviews, coursesTaught);
     return teacherData;
+}
+
+export async function getStudentData(studentId: string){
+    const potentialSectionPreviews: SectionPreviewDto[] | null = await getSectionsByStudentId(studentId);
+    if (!potentialSectionPreviews){
+        console.log("Error getting sectionPreviews");
+        return null;
+    }
+    const sectionPreviews: SectionPreviewDto[] = potentialSectionPreviews;
+    const studentDataDto: StudentDataDto = {sections: sectionPreviews};
+    console.log(`Successfully fetched studentdata... sectionPreviews.length=${sectionPreviews.length}`)
+    return studentDataDto; 
 }
 
 export async function getSectionsByIds(section_ids: number[]){
@@ -373,7 +385,7 @@ export async function getSectionsByStudentId(studentId: string){
         console.log("Exception thrown in getSectionsByStudentId: ", err);
     }
 
-
+    return null;
 }
 
 
