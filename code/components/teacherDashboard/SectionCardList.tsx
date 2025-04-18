@@ -25,7 +25,7 @@ const SectionCardList: React.FC<SectionCardListProps> = ({ sectionPreviews }) =>
                   keyExtractor={(section) => section.section_id.toString()}
                   renderItem={({ item }) => (
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("SectionDetails", item)}
+                        onPress={() => navigation.navigate("TeacherSectionDetails", item)}
                     >
                         <View style={styles.card}>
                             {/* Need stock image here */}
@@ -34,6 +34,9 @@ const SectionCardList: React.FC<SectionCardListProps> = ({ sectionPreviews }) =>
                             <Text style={styles.courseCode}>
                                 {item.course_subject} {item.course_identifier}{"-"}
                                 {item.section_identifier}
+                            </Text>
+                            <Text style={styles.courseCode}>
+                                {item.season} {item.year}
                             </Text>
                         </View>
                     </TouchableOpacity>

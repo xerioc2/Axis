@@ -2,9 +2,9 @@ import React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { useFonts } from 'expo-font';
 import { StackNavigationProp } from '@react-navigation/stack';
-import SignUpManager from '../components/signup/SignUpManager';
-import { RootStackParamList } from '../utils/navigation.types';
-import { Colors } from '../theme';
+import SignUpManager from '../../components/signup/SignUpManager';
+import { RootStackParamList } from '../../utils/navigation.types';
+import { Colors } from '../../theme';
 
 type SignUpScreenNavigationProp = StackNavigationProp<RootStackParamList, "SignUp">;
 
@@ -14,8 +14,8 @@ type SignUpScreenProps = {
 
 const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
   const [fontsLoaded] = useFonts({
-    'SF Pro': require('../assets/fonts/sf_pro.ttf'),
-    'Rexton Bold': require('../assets/fonts/rexton_bold.otf'),
+    'SF Pro': require('../../assets/fonts/sf_pro.ttf'),
+    'Rexton Bold': require('../../assets/fonts/rexton_bold.otf'),
   });
 
   if (!fontsLoaded) return null;
@@ -23,7 +23,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/images/axis_lettering.png')}
+        source={require('../../assets/images/axis_lettering.png')}
         style={styles.logo}
       />
 

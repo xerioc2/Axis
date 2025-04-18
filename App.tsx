@@ -1,10 +1,11 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import SignUpScreen from './code/screens/SignUpScreen';
-import LoginScreen from './code/screens/LoginScreen';
-import TeacherDashboard from './code/screens/TeacherDashboard';
-import StudentDashboard from './code/screens/StudentDashboard';
-import SectionDetailsScreen from './code/screens/SectionDetailsScreen';
+import SignUpScreen from './code/screens/auth/SignUpScreen';
+import LoginScreen from './code/screens/auth/LoginScreen';
+import TeacherDashboard from './code/screens/teacher/TeacherDashboard';
+import StudentDashboard from './code/screens/student/StudentDashboard';
+import TeacherSectionDetailsScreen from './code/screens/teacher/TeacherSectionDetailsScreen';
+import StudentSectionDetailsScreen from './code/screens/student/StudentSectionDetailsScreen';
 import type { RootStackParamList } from './code/utils/navigation.types';
 
 /*
@@ -23,7 +24,8 @@ export default function App() {
         <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
         <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{ headerShown: false}} />
         <Stack.Screen name="StudentDashboard" component={StudentDashboard} options={{ headerShown: false}} />
-        <Stack.Screen name="SectionDetails" component={SectionDetailsScreen} options={{ headerShown: false}} />
+        <Stack.Screen name="TeacherSectionDetails" component={TeacherSectionDetailsScreen} options={{ headerShown: false}} />
+        <Stack.Screen name="StudentSectionDetails" component={StudentSectionDetailsScreen} options={{ headerShown: false}} />
 
       </Stack.Navigator>
     </NavigationContainer>

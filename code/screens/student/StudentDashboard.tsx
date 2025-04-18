@@ -5,21 +5,20 @@ import {
     TouchableOpacity,
     StyleSheet,
 } from "react-native";
-import { styles } from "../components/StudentDashboard/StudentDashboardStyle"; 
-import { getStudentData } from "../service/supabaseService"; 
+import { styles } from "../../components/studentDashboard/StudentDashboardStyle"; 
+import { getStudentData, enrollInSection } from "../../service/supabaseService"; 
 import type {
     User,
     StudentDataDto,
     SectionPreviewDto,
-} from "../../App";
+} from "../../../App";
 import {
     useRoute,
     RouteProp,
 } from "@react-navigation/native";
-import type { RootStackParamList } from "../utils/navigation.types";
-import ErrorMessage from "../components/ErrorMessage"; 
-import SectionCardList from "../components/StudentDashboard/SectionCardList";
-import CourseCardList from "../components/StudentDashboard/CourseCardList";
+import type { RootStackParamList } from "../../utils/navigation.types";
+import ErrorMessage from "../../components/ErrorMessage"; 
+import SectionCardList from "../../components/studentDashboard/SectionCardList";
 import { TextInput } from "react-native";
 
 
@@ -38,11 +37,22 @@ const StudentDashboard: React.FC = () => {
     
 
     const [showJoinModal, setShowJoinModal] = useState(false);
-const [joinCode, setJoinCode] = useState('');
+    const [joinCode, setJoinCode] = useState('');
 
-const joinCourseByCode = async (code: string) => {
-    console.log(`Trying to join course with code: ${code}`);
-    // TODO: Replace this with actual Supabase call when backend is ready
+const joinSectionByCode = async (code: string) => {
+    console.log(`Trying to join section with code: ${code}`);
+    const potentialSectionPreview: SectionPreviewDto | null | undefined = await enrollInSection(code, student.user_id);
+    if (potentialSectionPreview === undefined){
+        setErrorMessage("That enrollment code is not associated with any sections... please double check the code and try again.");
+        return;
+    }
+    else if (!potentialSectionPreview){
+        setErrorMessage("There was an error enrolling you in that course. Please try again.");
+        return;
+    }
+    //otherwise add the sectionPreview to sectionPreviews
+    setSectionPreviews(prev => [...prev, potentialSectionPreview]);
+
 };
 
 
@@ -78,9 +88,9 @@ const joinCourseByCode = async (code: string) => {
                 <Text style={styles.title}>
                     Welcome, {student.first_name}
                 </Text>
-    
+
                 
-                <SectionCardList sectionPreviews={sectionPreviews} />
+                <SectionCardList sectionPreviews={sectionPreviews} student={student} />
                 
     
     
@@ -91,17 +101,17 @@ const joinCourseByCode = async (code: string) => {
             {showJoinModal && (
     <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
-            <Text style={styles.formTitle}>Join Course by Code</Text>
+            <Text style={styles.formTitle}>Join Section by Code</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Enter course code"
+                placeholder="Enter enrollment code"
                 value={joinCode}
                 onChangeText={setJoinCode}
             />
             <TouchableOpacity
                 style={styles.modalButton}
                 onPress={() => {
-                    joinCourseByCode(joinCode);
+                    joinSectionByCode(joinCode);
                     setShowJoinModal(false);
                 }}
             >

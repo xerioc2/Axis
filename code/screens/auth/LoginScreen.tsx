@@ -3,12 +3,12 @@ import { StyleSheet, Image } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../utils/navigation.types';
+import type { RootStackParamList } from '../../utils/navigation.types';
 import type { User } from "@/App";
-import ErrorMessage from '../components/ErrorMessage';
-import { login } from '../service/supabaseService';
+import ErrorMessage from '../../components/ErrorMessage';
+import { login } from '../../service/supabaseService';
 import { useFonts } from 'expo-font';
-import { Colors } from '../theme';
+import { Colors } from '../../theme';
 
 
 
@@ -20,9 +20,9 @@ const LoginScreen: React.FC = () => {
     const [buttonEnabled, setButtonEnabled] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [fontsLoaded] = useFonts({
-        'Rexton Bold': require('../assets/fonts/rexton_bold.otf'),
-        'Inter': require('../assets/fonts/antonio_semibold.ttf'),
-        'SF Pro': require('../assets/fonts/sf_pro.ttf'),
+        'Rexton Bold': require('../../assets/fonts/rexton_bold.otf'),
+        'Inter': require('../../assets/fonts/antonio_semibold.ttf'),
+        'SF Pro': require('../../assets/fonts/sf_pro.ttf'),
     });
 
     useEffect(() => {
@@ -55,11 +55,11 @@ const LoginScreen: React.FC = () => {
         <View style={styles.container}>
             <View>
                 <Image 
-                    source={require('../assets/images/axis_lettering.png')}
+                    source={require('../../assets/images/axis_lettering.png')}
                     style={styles.logo}
                 />
                 <Image
-                    source={require('../assets/images/graph_line.png')}
+                    source={require('../../assets/images/graph_line.png')}
                     style={styles.graphLine}
                 />
                 <Text style={styles.slogan}>WHERE LEARNING{"\n"}MEETS MASTERY</Text>

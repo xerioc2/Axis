@@ -1,15 +1,15 @@
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../utils/navigation.types';
-import { User } from '../../App';
+import type { RootStackParamList } from '../../utils/navigation.types';
+import { User } from '../../../App';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useEffect, useState } from 'react';
-import ErrorMessage from '../components/ErrorMessage';
-import { getStudentsBySectionId, getTeachersBySectionId } from '../service/supabaseService';
+import ErrorMessage from '../../components/ErrorMessage';
+import { getStudentsBySectionId, getTeachersBySectionId } from '../../service/supabaseService';
 
-type SectionDetailsRouteProp = RouteProp<RootStackParamList, 'SectionDetails'>;
+type SectionDetailsRouteProp = RouteProp<RootStackParamList, 'TeacherSectionDetails'>;
 
-const SectionDetailsScreen: React.FC = () => {
+const TeacherSectionDetailsScreen: React.FC = () => {
     const route = useRoute<SectionDetailsRouteProp>();
     const sectionPreview = route.params;
     
@@ -54,11 +54,11 @@ const SectionDetailsScreen: React.FC = () => {
             <View>
                 {teachers.length === 1 && (
                     <View>
-                        <Text>Section Teacher</Text>
+                        <Text>Section Teacher:</Text>
                         <Text>{teachers[0].first_name} {teachers[0].last_name}</Text>
                     </View>
                 )}
-                {teachers.length > 1 && <Text>Section Teachers</Text>}
+                {teachers.length > 1 && <Text>Section Teachers:</Text>}
                 {teachers.length === 0 && <Text>No teachers found for this section...</Text>}
                 {teachers.length > 1 && teachers.map(teacher => (
                     <Text key={teacher.user_id}>{teacher.first_name} {teacher.last_name}</Text>
@@ -69,7 +69,11 @@ const SectionDetailsScreen: React.FC = () => {
                 <Text>Enrolled Students:</Text>
                 {students.length === 0 && <Text>No students are enrolled in this section yet...</Text>}
                 {students.length > 0 && students.map(student => (
-                    <Text key={student.user_id}>{student.first_name} {student.last_name} - {student.email}</Text>
+                    <TouchableOpacity
+                        key={student.user_id}
+                    >
+                        <Text>{student.first_name} {student.last_name} - {student.email}</Text>
+                    </TouchableOpacity>
                 ))}
             </View>
         {errorMessage !== "" && <ErrorMessage message={errorMessage}/>}
@@ -77,4 +81,4 @@ const SectionDetailsScreen: React.FC = () => {
     </>
 }
 
-export default SectionDetailsScreen;
+export default TeacherSectionDetailsScreen;

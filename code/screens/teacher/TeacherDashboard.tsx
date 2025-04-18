@@ -8,39 +8,34 @@ import {
     StyleSheet, 
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles } from "../components/teacherDashboard/TeacherDashboardStyle"; 
-import { getTeacherData } from "../service/supabaseService"; 
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { styles } from "../../components/teacherDashboard/TeacherDashboardStyle"; 
+import { getTeacherData } from "../../service/supabaseService"; 
 import type {
     User,
     Course,
     TeacherDataDto,
     SectionPreviewDto,
-} from "../../App";
+} from "../../../App";
 import {
     useRoute,
-    useNavigation,
     RouteProp,
 } from "@react-navigation/native";
-import type { RootStackParamList } from "../utils/navigation.types";
-import ErrorMessage from "../components/ErrorMessage"; 
-import TeacherDashboardMenu from "../components/teacherDashboard/TeacherDashboardMenu"; 
+import type { RootStackParamList } from "../../utils/navigation.types";
+import ErrorMessage from "../../components/ErrorMessage"; 
+import TeacherDashboardMenu from "../../components/teacherDashboard/TeacherDashboardMenu"; 
 import { useFonts } from "expo-font";
-import SectionCardList from "../components/teacherDashboard/SectionCardList"; 
-import CourseCardList from "../components/teacherDashboard/CourseCardList"; 
-import CreateSectionForm from "../components/teacherDashboard/CreateSectionForm";
+import SectionCardList from "../../components/teacherDashboard/SectionCardList"; 
+import CourseCardList from "../../components/teacherDashboard/CourseCardList"; 
+import CreateSectionForm from "../../components/teacherDashboard/CreateSectionForm";
 
 type TeacherDashboardRouteProp = RouteProp<
     RootStackParamList,
     "TeacherDashboard"
 >;
-type NavigationProps = NativeStackNavigationProp<
-    RootStackParamList,
-    "TeacherDashboard"
->;
+
 
 const TeacherDashboard: React.FC = () => {
-    const navigation = useNavigation<NavigationProps>();
+
     const route = useRoute<TeacherDashboardRouteProp>();
     const teacher = route.params;
 
