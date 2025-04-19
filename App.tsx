@@ -6,6 +6,7 @@ import TeacherDashboard from './code/screens/teacher/TeacherDashboard';
 import StudentDashboard from './code/screens/student/StudentDashboard';
 import TeacherSectionDetailsScreen from './code/screens/teacher/TeacherSectionDetailsScreen';
 import StudentSectionDetailsScreen from './code/screens/student/StudentSectionDetailsScreen';
+import TeacherGradeView from './code/screens/teacher/TeacherGradeView';
 import type { RootStackParamList } from './code/utils/navigation.types';
 
 /*
@@ -16,17 +17,18 @@ import type { RootStackParamList } from './code/utils/navigation.types';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
+
+  const shouldHeaderBeShown = false;
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />       
-        <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{ headerShown: false}} />
-        <Stack.Screen name="StudentDashboard" component={StudentDashboard} options={{ headerShown: false}} />
-        <Stack.Screen name="TeacherSectionDetails" component={TeacherSectionDetailsScreen} options={{ headerShown: false}} />
-        <Stack.Screen name="StudentSectionDetails" component={StudentSectionDetailsScreen} options={{ headerShown: false}} />
-
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: shouldHeaderBeShown }} />       
+        <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: shouldHeaderBeShown }} />
+        <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{ headerShown: shouldHeaderBeShown}} />
+        <Stack.Screen name="StudentDashboard" component={StudentDashboard} options={{ headerShown: shouldHeaderBeShown}} />
+        <Stack.Screen name="TeacherSectionDetails" component={TeacherSectionDetailsScreen} options={{ headerShown: shouldHeaderBeShown}} />
+        <Stack.Screen name="StudentSectionDetails" component={StudentSectionDetailsScreen} options={{ headerShown: shouldHeaderBeShown}} />
+        <Stack.Screen name="TeacherGradeView" component={TeacherGradeView} options={{headerShown: shouldHeaderBeShown}} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -96,6 +98,7 @@ export type SectionInsertDto = {
   section_identifier: string,
   semester_id: number,
   course_id: number,
+  date_created: string,
   start_date: string
   //insert start date as '2024-01-01'
 }
@@ -168,10 +171,12 @@ export type PointStatus = {
 export type StudentPointDto = {
   student_point_id: number,
   point_id: number,
-  topic_id: number,
-  concept_id: number,
+  topic_id: number, //use to organize ui
+  concept_id: number, //use to organize ui
   student_id: string,
-  point_status_name: string, //use the status name instead of Id
+  point_status_id: number, //use to update status
+  point_status_name: string,
+  is_test_point: boolean,
   date_status_last_updated: string | null
 }
 
@@ -201,6 +206,7 @@ export type SectionPreviewDto = {
   enrollment_code: string,
   season: string,
   year: number,
+  course_id: number,
   course_name: string,
   course_identifier: string | null,
   course_subject: string | null
@@ -228,6 +234,18 @@ export type StudentGradesDto = {
   topics: Topic[],
   concepts: Concept[],
   points: StudentPointDto[] //contains point_id, status_name
+}
+
+export type GradeViewDto = {
+  topicsToConcepts: {
+    topic: Topic,
+    concepts: Concept[]
+  }[],
+  conceptsToPoints: {
+    concept: Concept,
+    points: StudentPointDto[]
+  }[],
+  indexAssociations: number[]
 }
 
 

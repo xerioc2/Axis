@@ -24,18 +24,17 @@ import type { RootStackParamList } from "../../utils/navigation.types";
 import ErrorMessage from "../../components/ErrorMessage"; 
 import TeacherDashboardMenu from "../../components/teacherDashboard/TeacherDashboardMenu"; 
 import { useFonts } from "expo-font";
-import SectionCardList from "../../components/teacherDashboard/SectionCardList"; 
+import TeacherSectionCardList from "@/code/components/teacherDashboard/TeacherSectionCardList";
 import CourseCardList from "../../components/teacherDashboard/CourseCardList"; 
 import CreateSectionForm from "../../components/teacherDashboard/CreateSectionForm";
+import CreateCourseForm from "../../components/teacherDashboard/CreateCourseForm";
 
 type TeacherDashboardRouteProp = RouteProp<
     RootStackParamList,
     "TeacherDashboard"
 >;
 
-
 const TeacherDashboard: React.FC = () => {
-
     const route = useRoute<TeacherDashboardRouteProp>();
     const teacher = route.params;
 
@@ -48,7 +47,23 @@ const TeacherDashboard: React.FC = () => {
     const [selectedMenuOption, setSelectedMenuOption] = useState<"sections" | "courses">("sections");
     const [modalVisible, setModalVisible] = useState(false);
     const [creatingSection, setCreatingSection] = useState(false);
+    const [creatingCourse, setCreatingCourse] = useState(false);
     
+    // Function to refresh data after creating a new course or section
+    const refreshData = async () => {
+        try {
+            const teacherData: TeacherDataDto = await getTeacherData(teacher.user_id);
+            if (teacherData) {
+                setSectionPreviews(teacherData.sections || []);
+                setCoursesCreated(teacherData.courses_created || []);
+                setErrorMessage("");
+                console.log("Teacher data refreshed successfully");
+            }
+        } catch (error) {
+            console.error("Failed to refresh teacher data:", error);
+            setErrorMessage("Failed to load updated dashboard data. Please try again.");
+        }
+    };
 
     useEffect(() => {
         const fetchTeacherData = async (teacher: User) => {
@@ -91,11 +106,26 @@ const TeacherDashboard: React.FC = () => {
             duration: 300,
             useNativeDriver: true,
         }).start(() => setModalVisible(false));
-        setCreatingSection(false);
     };
 
+    // Handle successful form submission
+    const handleFormSuccess = async () => {
+        setCreatingSection(false);
+        setCreatingCourse(false);
+        await refreshData();
+        // Auto-switch to the relevant tab based on what was created
+        if (creatingCourse) {
+            setSelectedMenuOption("courses");
+        } else if (creatingSection) {
+            setSelectedMenuOption("sections");
+        }
+    };
 
-
+    // Handle form cancellation
+    const handleFormCancel = () => {
+        setCreatingSection(false);
+        setCreatingCourse(false);
+    };
 
     return (
         <View style={styles.container}>
@@ -106,7 +136,7 @@ const TeacherDashboard: React.FC = () => {
                 </Text>
 
                 {selectedMenuOption === "sections" && (
-                    <SectionCardList sectionPreviews={sectionPreviews} />
+                    <TeacherSectionCardList sectionPreviews={sectionPreviews} teacher={teacher}/>
                 )}
 
                 {selectedMenuOption === "courses" && (
@@ -157,22 +187,38 @@ const TeacherDashboard: React.FC = () => {
 
                 {/* Absolutely Positioned Edit Button - Renders on top */}
                 <TouchableOpacity style={styles.editButton} onPress={openModal}>
-                    <Ionicons name="add" size={32} color="white" /> 
+                    <Ionicons name="add" size={32} color="white" />
                 </TouchableOpacity>
             </View>
 
             {/* Modal for adding sections or courses */}
-            {modalVisible && (
-                <Modal transparent animationType="none" visible={modalVisible}>
-                    {/* Ensure TeacherDashboardMenu receives necessary props */}
-                    <TeacherDashboardMenu closeModal={closeModal} slideAnim={slideAnim} setCreatingSection={setCreatingSection} />
-                </Modal>
-            )}
+            <Modal transparent animationType="none" visible={modalVisible}>
+                <TeacherDashboardMenu 
+                    closeModal={closeModal} 
+                    slideAnim={slideAnim} 
+                    setCreatingSection={setCreatingSection} 
+                    setCreatingCourse={setCreatingCourse} 
+                />
+            </Modal>
 
-            {creatingSection && (
-                <CreateSectionForm />
-            )}
+            {/* Create Section Modal */}
+            <Modal animationType="slide" transparent={false} visible={creatingSection}>
+                <CreateSectionForm 
+                    userId={teacher.user_id}
+                    onSuccess={handleFormSuccess}
+                    onCancel={handleFormCancel}
+                />
+            </Modal>
 
+            {/* Create Course Modal */}
+            <Modal animationType="slide" transparent={false} visible={creatingCourse}>
+                <CreateCourseForm 
+                    userId={teacher.user_id}
+                    schoolId={teacher.school_id}
+                    onSuccess={handleFormSuccess}
+                    onCancel={handleFormCancel}
+                />
+            </Modal>
         </View>
     );
 };

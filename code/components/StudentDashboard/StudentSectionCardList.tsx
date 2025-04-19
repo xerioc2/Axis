@@ -12,7 +12,7 @@ type SectionCardListProps = {
 }
 
 
-const SectionCardList: React.FC<SectionCardListProps> = ({ sectionPreviews, student }) => {
+const StudentSectionCardList: React.FC<SectionCardListProps> = ({ sectionPreviews, student }) => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const [fontsLoaded] = useFonts({
         'SF Pro': require('../../assets/fonts/sf_pro.ttf'),
@@ -42,4 +42,4 @@ const SectionCardList: React.FC<SectionCardListProps> = ({ sectionPreviews, stud
     );
 };
 
-export default SectionCardList;
+export default StudentSectionCardList;

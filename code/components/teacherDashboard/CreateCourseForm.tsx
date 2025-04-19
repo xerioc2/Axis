@@ -13,7 +13,7 @@ import {
   Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { Calendar, DateData } from "react-native-calendars";
 import type { 
   SectionInsertDto, 
   Course, 
@@ -28,8 +28,10 @@ import {
   getSemesters
 } from "../../service/supabaseService";
 
-const CreateSectionForm: React.FC<{
+
+const CreateCourseForm: React.FC<{
   userId?: string;
+  schoolId: number;
   onSuccess?: () => void;
   onCancel?: () => void;
 }> = ({ userId, onSuccess, onCancel }) => {
@@ -38,7 +40,7 @@ const CreateSectionForm: React.FC<{
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [selectedSemesterId, setSelectedSemesterId] = useState<number | null>(null);
   const [startDate, setStartDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   
   // Dynamic data
   const [courses, setCourses] = useState<Course[]>([]);
@@ -76,17 +78,17 @@ const CreateSectionForm: React.FC<{
     fetchData();
   }, [userId]);
 
-  // Handle date change
-  const onDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setStartDate(selectedDate);
-    }
-  };
-
   // Format date for display
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0]; // YYYY-MM-DD
+  };
+
+  // Format date for calendar marking
+  const getMarkedDates = () => {
+    const formattedDate = formatDate(startDate);
+    return {
+      [formattedDate]: { selected: true, selectedColor: '#005824' }
+    };
   };
 
   // Get selected course name
@@ -234,23 +236,35 @@ const CreateSectionForm: React.FC<{
             <Text style={styles.label}>Start Date</Text>
             <TouchableOpacity 
               style={styles.pickerButton}
-              onPress={() => setShowDatePicker(true)}
+              onPress={() => setShowCalendar(!showCalendar)}
             >
               <Text style={styles.pickerButtonText}>
                 {formatDate(startDate)}
               </Text>
-              <Ionicons name="calendar" size={20} color="#666" />
+              <Ionicons name={showCalendar ? "chevron-up" : "calendar"} size={20} color="#666" />
             </TouchableOpacity>
+            
+            {/* Inline Calendar */}
+            {showCalendar && (
+              <View style={styles.calendarContainer}>
+                <Calendar
+                  onDayPress={(day: DateData) => {
+                    setStartDate(new Date(day.timestamp));
+                    setShowCalendar(false);
+                  }}
+                  markedDates={getMarkedDates()}
+                  theme={{
+                    selectedDayBackgroundColor: '#005824',
+                    todayTextColor: '#005824',
+                    arrowColor: '#005824',
+                    textMonthFontWeight: 'bold',
+                    textDayFontSize: 14,
+                    textMonthFontSize: 16,
+                  }}
+                />
+              </View>
+            )}
           </View>
-
-          {showDatePicker && (
-            <DateTimePicker
-              value={startDate}
-              mode="date"
-              display="default"
-              onChange={onDateChange}
-            />
-          )}
         </View>
 
         <View style={styles.noteContainer}>
@@ -457,6 +471,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
+  calendarContainer: {
+    marginTop: 8,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
   noteContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -564,4 +585,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateSectionForm;
+export default CreateCourseForm;

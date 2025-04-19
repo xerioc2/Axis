@@ -1,5 +1,5 @@
 import { View, Text, Image, FlatList, TouchableOpacity } from 'react-native';
-import type { SectionPreviewDto } from '../../../App';
+import type { SectionPreviewDto, User } from '../../../App';
 import { useFonts } from 'expo-font';
 import { styles } from "./TeacherDashboardStyle";
 import { useNavigation } from '@react-navigation/native';
@@ -7,11 +7,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/code/utils/navigation.types';
 
 
-type SectionCardListProps = {
-    sectionPreviews: SectionPreviewDto[]
+type TeacherSectionCardListProps = {
+    sectionPreviews: SectionPreviewDto[],
+    teacher: User
 }
 
-const SectionCardList: React.FC<SectionCardListProps> = ({ sectionPreviews }) => {
+const TeacherSectionCardList: React.FC<TeacherSectionCardListProps> = ({ sectionPreviews, teacher }) => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const [fontsLoaded] = useFonts({
         'SF Pro': require('../../assets/fonts/sf_pro.ttf'),
@@ -25,7 +26,7 @@ const SectionCardList: React.FC<SectionCardListProps> = ({ sectionPreviews }) =>
                   keyExtractor={(section) => section.section_id.toString()}
                   renderItem={({ item }) => (
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("TeacherSectionDetails", item)}
+                        onPress={() => navigation.navigate("TeacherSectionDetails", {user: teacher, sectionPreview: item})}
                     >
                         <View style={styles.card}>
                             {/* Need stock image here */}
@@ -45,5 +46,5 @@ const SectionCardList: React.FC<SectionCardListProps> = ({ sectionPreviews }) =>
         </>
     )
 };
-export default SectionCardList;
+export default TeacherSectionCardList;
 

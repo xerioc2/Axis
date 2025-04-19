@@ -5,6 +5,8 @@ export type RootStackParamList = {
     Login: undefined; // Login screen takes NO parameters
     TeacherDashboard: User;
     StudentDashboard: User;
-    TeacherSectionDetails: SectionPreviewDto;
+    TeacherSectionDetails: {user: User, sectionPreview: SectionPreviewDto};
     StudentSectionDetails: {user: User, sectionPreview: SectionPreviewDto};
+    TeacherGradeView: {user: User, sectionPreview: SectionPreviewDto, student: User};
+    StudentGradeView: {user: User, sectionPreview: SectionPreviewDto}
   };

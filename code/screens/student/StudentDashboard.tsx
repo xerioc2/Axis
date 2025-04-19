@@ -18,7 +18,7 @@ import {
 } from "@react-navigation/native";
 import type { RootStackParamList } from "../../utils/navigation.types";
 import ErrorMessage from "../../components/ErrorMessage"; 
-import SectionCardList from "../../components/StudentDashboard/SectionCardList";
+import StudentSectionCardList from "../../components/studentDashboard/StudentSectionCardList";
 import { TextInput } from "react-native";
 
 
@@ -90,7 +90,7 @@ const joinSectionByCode = async (code: string) => {
                 </Text>
 
                 
-                <SectionCardList sectionPreviews={sectionPreviews} student={student} />
+                <StudentSectionCardList sectionPreviews={sectionPreviews} student={student} />
                 
     
     
