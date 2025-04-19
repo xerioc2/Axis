@@ -1,7 +1,154 @@
 import supabase from "../utils/supabase";
-import type { User, SectionTeacher, Section, SectionPreviewDto, Course, Semester, TeacherDataDto, Enrollment, StudentDataDto } from "@/App";
+import type { 
+    User, 
+    SectionTeacher, 
+    Section, 
+    SectionPreviewDto, 
+    Course, 
+    Semester, 
+    TeacherDataDto, 
+    Enrollment, 
+    StudentDataDto, 
+    Topic, 
+    Concept, 
+    Point, 
+    StudentPoint,
+    CourseInsertDto,
+    TopicInsertDto,
+    ConceptInsertDto,
+    SectionInsertDto,
+    SectionTeacherInsertDto
+} from "@/App";
 import { compileSectionPreviews, compileTeacherData } from "./dataConverterService";
 
+// ========================= COURSE CREATION FUNCTIONS =========================
+
+export async function createCourse(courseData: CourseInsertDto) {
+    try {
+        const { data, error } = await supabase
+            .from("courses")
+            .insert(courseData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.log("Error creating course:", error);
+            return null;
+        }
+        
+        console.log("Successfully created course:", data);
+        return data as Course;
+    } catch (err) {
+        console.log("Exception thrown while creating course:", err);
+        return null;
+    }
+}
+
+export async function createTopic(topicData: TopicInsertDto) {
+    try {
+        const { data, error } = await supabase
+            .from("topics")
+            .insert(topicData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.log("Error creating topic:", error);
+            return null;
+        }
+        
+        console.log("Successfully created topic:", data);
+        return data as Topic;
+    } catch (err) {
+        console.log("Exception thrown while creating topic:", err);
+        return null;
+    }
+}
+
+export async function createConcept(conceptData: ConceptInsertDto) {
+    try {
+        const { data, error } = await supabase
+            .from("concepts")
+            .insert(conceptData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.log("Error creating concept:", error);
+            return null;
+        }
+        
+        console.log("Successfully created concept:", data);
+        return data as Concept;
+    } catch (err) {
+        console.log("Exception thrown while creating concept:", err);
+        return null;
+    }
+}
+
+// ========================= SECTION CREATION FUNCTIONS =========================
+
+export async function createSection(sectionData: SectionInsertDto) {
+    try {
+        const { data, error } = await supabase
+            .from("sections")
+            .insert(sectionData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.log("Error creating section:", error);
+            return null;
+        }
+        
+        console.log("Successfully created section:", data);
+        return data as Section;
+    } catch (err) {
+        console.log("Exception thrown while creating section:", err);
+        return null;
+    }
+}
+
+export async function createSectionTeacher(sectionTeacherData: SectionTeacherInsertDto) {
+    try {
+        const { data, error } = await supabase
+            .from("section_teachers")
+            .insert(sectionTeacherData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.log("Error creating section teacher association:", error);
+            return null;
+        }
+        
+        console.log("Successfully created section teacher association:", data);
+        return data as SectionTeacher;
+    } catch (err) {
+        console.log("Exception thrown while creating section teacher association:", err);
+        return null;
+    }
+}
+
+export async function getSemesters() {
+    try {
+        const { data, error } = await supabase
+            .from("semesters")
+            .select("*");
+        
+        if (error) {
+            console.log("Error fetching semesters:", error);
+            return null;
+        }
+        
+        return data as Semester[];
+    } catch (err) {
+        console.log("Exception thrown while fetching semesters:", err);
+        return null;
+    }
+}
+
+// ====================== EXISTING FUNCTIONS BELOW =======================
 
 export async function signup(email: string, password: string, firstName: string, lastName: string, userTypeId: number, schoolId: number) {
     try{
@@ -78,7 +225,6 @@ export async function getSectionPreviews(userId: string){
         let courses_taught: Course[] = [];
         let semesters: Semester[] = [];
 
-        let courses_created: Course[] = [];
 
         //fetching section_teachers so that we know the relevant sections for this teacher.
         const { data: sectionTeacherData, error: sectionTeacherError } = await supabase
@@ -461,6 +607,7 @@ export async function enrollInSection(enrollmentCode: string, studentId: string)
                 enrollment_code: section.enrollment_code,
                 season: potentialSemester[0].season,
                 year: potentialSemester[0].year,
+                course_id: potentialCourse[0].course_id,
                 course_name: potentialCourse[0].course_name,
                 course_identifier: potentialCourse[0].course_identifier,
                 course_subject: potentialCourse[0].course_subject
@@ -476,3 +623,136 @@ export async function enrollInSection(enrollmentCode: string, studentId: string)
 }
 
 
+export async function getTopicsByCourseId(courseId: number){
+    try{
+        const {data: topicData, error: topicError} = await supabase
+            .from('topics')
+            .select("*")
+            .eq("course_id", courseId);
+
+        if (topicError){
+            console.log("Error getting topics by course id: ", topicError);
+            return null;
+        }
+        if (topicData && topicData.length === 0){
+            console.log("There are no topics associated with that course, or at least, none were returned");
+            return [];
+        }
+        if (topicData && topicData.length > 0){
+            console.log("successfully retrieved topics. topics.length=", topicData.length);
+            return topicData as Topic[];
+        }
+    }
+    catch(err){
+        console.log("Exception thrown while getting Topics by course id: ", err);
+    }
+
+    return null;
+}
+
+
+export async function getConceptsByTopicId(topicId: number) {
+    try{
+        const {data: conceptData, error: conceptError} = await supabase
+            .from("concepts")
+            .select("*")
+            .eq("topic_id", topicId);
+        
+        if(conceptError){
+            console.log("Error getting concepts by topicId: ", conceptError);
+            return null;
+        }
+        if (conceptData){
+            console.log("successfully retrieved concepts for topic: ", topicId);
+            if (conceptData.length === 0){
+                console.log("There are no concepts associated with that topic");
+                return [];
+            }
+            else{
+                console.log(`there are ${conceptData.length} concepts associated with that topic`);
+                return conceptData as Concept[];
+            }
+        }
+    }
+    catch(err){
+        console.log("Exception thrown while getting concepts by topic id: ", err);
+    }
+    return null;
+}
+
+
+export async function getPointsByConceptId(conceptId: number){
+    try{
+        const {data: pointData, error: pointError} = await supabase
+            .from('points')
+            .select("*")
+            .eq("concept_id", conceptId);
+
+        if (pointError){
+            console.log("Error getting points by concept id for concept: ", conceptId, ": ", pointError);
+            return null;
+        }
+        if (pointData){
+            console.log("successfully retrieved the points for concept: ", conceptId);
+            if (pointData.length === 0){
+                console.log("There are no points associated with that concept");
+            }
+            return pointData as Point[];
+        }
+    }
+    catch (err){
+        console.log("Exception thrown while getting points by concept id: ", err);
+    }
+
+    return null;
+}
+
+export async function getStudentPointsByPointIds(pointIds: number[]){
+
+    try{
+        const { data: studentPointData, error: studentPointError } = await supabase
+            .from("student_points")
+            .select("*")
+            .in("point_id", pointIds);
+        
+        if (studentPointError){
+            console.log("Error getting student point data for point ids: ", pointIds, "\n", studentPointError);
+            return null;
+        }
+        if (studentPointData){
+            console.log("successfully retrieved student point data");
+            return studentPointData as StudentPoint[];
+        }
+
+    }
+    catch(err){
+        console.log("Exception thrown while getting student points by point ids: ", err);
+    }
+
+    return null;
+}
+
+// Add this function to your supabaseService.tsx file
+
+export async function updateStudentPoint(studentPointId: number, newStatusId: number) {
+    try {
+        const { data, error } = await supabase
+            .from('student_points')
+            .update({ 
+                point_status_id: newStatusId,
+                date_status_last_updated: new Date().toISOString()
+            })
+            .eq('student_point_id', studentPointId);
+        
+        if (error) {
+            console.log("Error updating student point:", error);
+            return false;
+        }
+        
+        console.log("Successfully updated student point status");
+        return true;
+    } catch (err) {
+        console.log("Exception thrown while updating student point:", err);
+        return false;
+    }
+}

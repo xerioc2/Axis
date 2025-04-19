@@ -16,13 +16,29 @@ type TeacherDashboardMenuProps = {
   closeModal: () => void;
   slideAnim: Animated.Value;
   setCreatingSection: React.Dispatch<SetStateAction<boolean>>;
+  setCreatingCourse: React.Dispatch<SetStateAction<boolean>>;
 };
 
 const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
   closeModal,
   slideAnim,
-  setCreatingSection
+  setCreatingSection,
+  setCreatingCourse
 }) => {
+  const handleAddSection = () => {
+    // First set the state to show the section form
+    setCreatingSection(true);
+    // Then close the modal
+    closeModal();
+  };
+
+  const handleAddCourse = () => {
+    // First set the state to show the course form
+    setCreatingCourse(true);
+    // Then close the modal
+    closeModal();
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.modalOverlay}>
@@ -38,13 +54,16 @@ const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
               keyboardShouldPersistTaps="handled"
             >
               <TouchableOpacity 
-                onPress={() => setCreatingSection(true)}
+                onPress={handleAddSection}
                 style={styles.modalButton}
               >
                 <Text style={styles.modalButtonText}>Add Section</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.modalButton}>
+              <TouchableOpacity 
+                onPress={handleAddCourse}
+                style={styles.modalButton}
+              >
                 <Text style={styles.modalButtonText}>Add Course</Text>
               </TouchableOpacity>
 
