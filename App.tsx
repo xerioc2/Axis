@@ -8,6 +8,7 @@ import TeacherSectionDetailsScreen from './code/screens/teacher/TeacherSectionDe
 import StudentSectionDetailsScreen from './code/screens/student/StudentSectionDetailsScreen';
 import TeacherGradeView from './code/screens/teacher/TeacherGradeView';
 import type { RootStackParamList } from './code/utils/navigation.types';
+import ProfileScreen from './code/screens/ProfileScreen'; // or wherever you put it
 
 /*
 {} are used to import NAMED exports. the name inside brackets must match the name of export variable
@@ -29,6 +30,8 @@ export default function App() {
         <Stack.Screen name="TeacherSectionDetails" component={TeacherSectionDetailsScreen} options={{ headerShown: shouldHeaderBeShown}} />
         <Stack.Screen name="StudentSectionDetails" component={StudentSectionDetailsScreen} options={{ headerShown: shouldHeaderBeShown}} />
         <Stack.Screen name="TeacherGradeView" component={TeacherGradeView} options={{headerShown: shouldHeaderBeShown}} />
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: shouldHeaderBeShown }} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

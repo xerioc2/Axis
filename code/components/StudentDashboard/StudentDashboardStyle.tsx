@@ -4,10 +4,13 @@ export const styles = StyleSheet.create({
     container: { 
         height: '100%',
         display: 'flex',
+        flex: 1, // ← fixed this line
         flexDirection: 'column',
         justifyContent: 'space-between',
         backgroundColor: "#F2FFED", 
+        position: 'relative', // ← added to support absolute elements like your profile icon
     },
+    
     content: {
         flex: 1,
         padding: 20,
