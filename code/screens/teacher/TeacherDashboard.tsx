@@ -28,11 +28,16 @@ import TeacherSectionCardList from "@/code/components/teacherDashboard/TeacherSe
 import CourseCardList from "../../components/teacherDashboard/CourseCardList"; 
 import CreateSectionForm from "../../components/teacherDashboard/CreateSectionForm";
 import CreateCourseForm from "../../components/teacherDashboard/CreateCourseForm";
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+
 
 type TeacherDashboardRouteProp = RouteProp<
     RootStackParamList,
     "TeacherDashboard"
 >;
+type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'TeacherDashboard'>;
 
 const TeacherDashboard: React.FC = () => {
     const route = useRoute<TeacherDashboardRouteProp>();
@@ -48,6 +53,8 @@ const TeacherDashboard: React.FC = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [creatingSection, setCreatingSection] = useState(false);
     const [creatingCourse, setCreatingCourse] = useState(false);
+    const navigation = useNavigation<NavigationProps>();
+
     
     // Function to refresh data after creating a new course or section
     const refreshData = async () => {
@@ -130,6 +137,19 @@ const TeacherDashboard: React.FC = () => {
     return (
         <View style={styles.container}>
             {/* Content Area */}
+            <TouchableOpacity
+  onPress={() => navigation.navigate('Profile', { user: teacher })}
+  style={{
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    zIndex: 10,
+    padding: 10,
+  }}
+>
+  <Ionicons name="person-circle-outline" size={28} color="#005824" />
+</TouchableOpacity>
+
             <View style={styles.content}>
                 <Text style={styles.title}>
                     Welcome, {teacher.first_name}
