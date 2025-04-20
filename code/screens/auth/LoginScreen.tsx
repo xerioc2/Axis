@@ -9,6 +9,8 @@ import ErrorMessage from '../../components/ErrorMessage';
 import { login } from '../../service/supabaseService';
 import { useFonts } from 'expo-font';
 import { Colors } from '../../theme';
+import ForgotPasswordModal from '../auth/ForgotPasswordModal';
+
 
 
 
@@ -24,6 +26,10 @@ const LoginScreen: React.FC = () => {
         'Inter': require('../../assets/fonts/antonio_semibold.ttf'),
         'SF Pro': require('../../assets/fonts/sf_pro.ttf'),
     });
+    const [resetEmail, setResetEmail] = useState('');
+    const [showResetModal, setShowResetModal] = useState(false);
+
+
 
     useEffect(() => {
         setButtonEnabled(formData.email !== "" && formData.password !== "");
@@ -102,9 +108,18 @@ const LoginScreen: React.FC = () => {
                         Sign Up
                     </Text>
                 </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowResetModal(true)} style={{ alignSelf: 'center', marginBottom: 10 }}>
+  <Text style={{ color: Colors.primary, fontWeight: '600' }}>Forgot Password?</Text>
+</TouchableOpacity>
+
             </View>
             {errorMessage !== "" && <ErrorMessage message={errorMessage} />}
         </View>
+        <ForgotPasswordModal
+  visible={showResetModal}
+  onClose={() => setShowResetModal(false)}
+/>
+
     </>
     );      
 };
