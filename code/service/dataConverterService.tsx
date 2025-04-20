@@ -115,17 +115,13 @@ export async function compileGradeViewData(user: User, sectionPreview: SectionPr
             const studentPointDtos: StudentPointDto[] = [];
             
             //BUILD STUDENT POINT DTOS
-            for(let k = 0; k < points.length; k++){
-                if (!pointsToStudentPoints[k]) {
-                    console.log(`No student point found for point ${points[k].point_id}`);
-                    continue;
-                }
-                
+            for (let k = 0; k < points.length; k++) {
                 const point: Point = points[k];
-                const studentPoint: StudentPoint = pointsToStudentPoints[k]; 
-                const statusId: number = studentPoint.point_status_id;
+                const studentPoint: StudentPoint | null = pointsToStudentPoints[k] ?? null;
+            
+                const statusId: number = studentPoint?.point_status_id ?? 1; // Default to 'Not Attempted'
                 let statusName: string = "";
-                switch (statusId){
+                switch (statusId) {
                     case 1:
                         statusName = "Not Attempted";
                         break;
@@ -141,9 +137,9 @@ export async function compileGradeViewData(user: User, sectionPreview: SectionPr
                     default:
                         statusName = "Unknown";
                 }
-                
+            
                 const studentPointDto: StudentPointDto = {
-                    student_point_id: studentPoint.student_point_id, // Fixed from point_id
+                    student_point_id: studentPoint?.student_point_id ?? -1, // or null if you prefer
                     point_id: point.point_id,
                     topic_id: topics[i].topic_id,
                     concept_id: concepts[j].concept_id,
@@ -151,11 +147,12 @@ export async function compileGradeViewData(user: User, sectionPreview: SectionPr
                     point_status_id: statusId,
                     point_status_name: statusName,
                     is_test_point: point.is_test_point,
-                    date_status_last_updated: studentPoint.date_status_last_updated
+                    date_status_last_updated: studentPoint?.date_status_last_updated ?? null
                 };
-                
+            
                 studentPointDtos.push(studentPointDto);
-            }
+            }            
+                
             
             // Add the concept and its points to conceptsToPoints
             gradeViewData.conceptsToPoints.push({
