@@ -774,3 +774,42 @@ export async function updatePassword(newPassword: string): Promise<boolean> {
         return false;
     }
 }
+export async function updateSchool(userId: string, newSchoolId: number): Promise<boolean> {
+    try {
+        const { error } = await supabase
+            .from("users")
+            .update({ school_id: newSchoolId })
+            .eq("user_id", userId);
+
+        if (error) {
+            console.log("Error updating school:", error);
+            return false;
+        }
+
+        console.log("School updated successfully.");
+        return true;
+    } catch (err) {
+        console.log("Exception thrown while updating school:", err);
+        return false;
+    }
+}
+export async function getSchoolById(schoolId: number) {
+    try {
+      const { data, error } = await supabase
+        .from("schools")
+        .select("*")
+        .eq("school_id", schoolId)
+        .single();
+  
+      if (error) {
+        console.log("Error fetching school:", error);
+        return null;
+      }
+  
+      return data;
+    } catch (err) {
+      console.log("Exception fetching school by ID:", err);
+      return null;
+    }
+  }
+  
