@@ -1,49 +1,97 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Modal, TextInput, StyleSheet, Alert } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { RootStackParamList } from '../utils/navigation.types';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
-import supabase from '../utils/supabase';
+import type { RootStackParamList } from '../utils/navigation.types';
+import type { User } from '@/App';
+import { updatePassword } from '../service/supabaseService';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+
 
 // Types
-
-type ProfileRouteProp = RouteProp<RootStackParamList, 'Profile'>;
+type ProfileScreenRouteProp = RouteProp<RootStackParamList, 'Profile'>;
 type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
-const ProfileScreen: React.FC = () => {
-  const route = useRoute<ProfileRouteProp>();
-  const navigation = useNavigation<NavigationProps>();
-  const { user } = route.params;
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      Alert.alert('Logout Failed', error.message);
-    } else {
-      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+const ProfileScreen: React.FC = () => {
+  const route = useRoute<ProfileScreenRouteProp>();
+  const { user } = route.params;
+  const navigation = useNavigation<NavigationProps>();
+
+
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
     }
+    const success = await updatePassword(newPassword);
+    if (!success) {
+      setError("Failed to update password. Please try again.");
+      return;
+    }
+    
+    Alert.alert('Success', 'Password updated successfully');
+    setShowPasswordModal(false);
+    setNewPassword('');
+    setConfirmPassword('');
+    setError('');
+    
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Profile</Text>
+      <Text style={styles.title}>Profile</Text>
+      <Text style={styles.infoText}>Name: {user.first_name} {user.last_name}</Text>
+      <Text style={styles.infoText}>Email: {user.email}</Text>
+      <Text style={styles.infoText}>School ID: {user.school_id}</Text>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Name:</Text>
-        <Text style={styles.value}>{user.first_name} {user.last_name}</Text>
-
-        <Text style={styles.label}>Email:</Text>
-        <Text style={styles.value}>{user.email}</Text>
-
-        <Text style={styles.label}>User Type:</Text>
-        <Text style={styles.value}>{user.user_type_id === 1 ? 'Student' : 'Teacher'}</Text>
-      </View>
-
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Ionicons name="log-out-outline" size={20} color="white" />
-        <Text style={styles.logoutText}>Logout</Text>
+      <TouchableOpacity onPress={() => setShowPasswordModal(true)} style={styles.button}>
+        <Text style={styles.buttonText}>Change Password</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => navigation.navigate('Login')} style={[styles.button, { backgroundColor: 'gray' }]}>
+        <Text style={styles.buttonText}>Logout</Text>
+      </TouchableOpacity>
+
+      {/* Password Modal */}
+      <Modal transparent animationType="slide" visible={showPasswordModal}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Change Password</Text>
+
+            <TextInput
+              placeholder="New Password"
+              style={styles.input}
+              secureTextEntry
+              value={newPassword}
+              onChangeText={setNewPassword}
+            />
+
+            <TextInput
+              placeholder="Confirm Password"
+              style={styles.input}
+              secureTextEntry
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+
+            {error !== '' && <Text style={styles.errorText}>{error}</Text>}
+
+            <TouchableOpacity style={styles.modalButton} onPress={handleChangePassword}>
+              <Text style={styles.buttonText}>Update Password</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.modalButton, { backgroundColor: '#ccc' }]} onPress={() => setShowPasswordModal(false)}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -51,44 +99,69 @@ const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2FFED',
     padding: 20,
-    justifyContent: 'center',
+    backgroundColor: '#F2FFED',
+    justifyContent: 'center'
   },
-  header: {
-    fontSize: 28,
+  title: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#005824',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
   },
-  infoContainer: {
-    marginBottom: 40,
-  },
-  label: {
+  infoText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#444',
+    marginVertical: 5,
   },
-  value: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 15,
-  },
-  logoutButton: {
-    flexDirection: 'row',
+  button: {
     backgroundColor: '#005824',
-    padding: 15,
+    padding: 12,
     borderRadius: 8,
+    marginTop: 20,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  logoutText: {
+  buttonText: {
     color: 'white',
     fontWeight: 'bold',
-    marginLeft: 10,
-    fontSize: 16,
   },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    width: '80%',
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center'
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+  },
+  modalButton: {
+    backgroundColor: '#005824',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: 'center'
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+    textAlign: 'center',
+  }
 });
 
 export default ProfileScreen;

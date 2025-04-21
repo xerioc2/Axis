@@ -756,3 +756,21 @@ export async function updateStudentPoint(studentPointId: number, newStatusId: nu
         return false;
     }
 }
+export async function updatePassword(newPassword: string): Promise<boolean> {
+    try {
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (error) {
+            console.log("Error updating password:", error);
+            return false;
+        }
+
+        console.log("Password updated successfully.");
+        return true;
+    } catch (err) {
+        console.log("Exception thrown while updating password:", err);
+        return false;
+    }
+}
