@@ -5,7 +5,7 @@ import {
     TouchableOpacity,
     StyleSheet,
 } from "react-native";
-import { styles } from "../../components/studentDashboard/StudentDashboardStyle"; 
+import { styles } from "../../components/StudentDashboard/StudentDashboardStyle"; 
 import { getStudentData, enrollInSection } from "../../service/supabaseService"; 
 import type {
     User,
@@ -18,7 +18,7 @@ import {
 } from "@react-navigation/native";
 import type { RootStackParamList } from "../../utils/navigation.types";
 import ErrorMessage from "../../components/ErrorMessage"; 
-import StudentSectionCardList from "../../components/studentDashboard/StudentSectionCardList";
+import StudentSectionCardList from "../../components/StudentDashboard/StudentSectionCardList";
 import { TextInput } from "react-native";
 
 

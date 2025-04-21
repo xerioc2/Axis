@@ -148,6 +148,135 @@ export async function getSemesters() {
     }
 }
 
+// ========================= POINT CREATION FUNCTIONS =========================
+
+export async function createPoint(pointData: { is_test_point: boolean, section_id: number, concept_id: number }) {
+    try {
+        const { data, error } = await supabase
+            .from("points")
+            .insert({
+                is_test_point: pointData.is_test_point,
+                section_id: pointData.section_id,
+                concept_id: pointData.concept_id
+            })
+            .select()
+            .single();
+        
+        if (error) {
+            console.log("Error creating point:", error);
+            return null;
+        }
+        
+        console.log("Successfully created point:", data);
+        return data as Point;
+    } catch (err) {
+        console.log("Exception thrown while creating point:", err);
+        return null;
+    }
+}
+
+export async function createStudentPointsForSection(sectionId: number) {
+    try {
+        // Get all students enrolled in the section
+        const enrollments = await getEnrollmentsBySectionId(sectionId);
+        if (!enrollments || enrollments.length === 0) {
+            console.log("No students enrolled in this section");
+            return true; // Not an error, just no students to create points for
+        }
+        
+        // Get all points for this section
+        const { data: points, error: pointsError } = await supabase
+            .from("points")
+            .select("*")
+            .eq("section_id", sectionId);
+            
+        if (pointsError) {
+            console.log("Error getting points for section:", pointsError);
+            return false;
+        }
+        
+        if (!points || points.length === 0) {
+            console.log("No points found for this section");
+            return true; // Not an error, just no points to create
+        }
+        
+        // Create student points for each student for each point
+        for (const enrollment of enrollments) {
+            await createStudentPoints(enrollment.student_id, sectionId);
+        }
+        
+        return true;
+    } catch (err) {
+        console.log("Exception thrown while creating student points for section:", err);
+        return false;
+    }
+}
+
+export async function createStudentPoints(studentId: string, sectionId: number) {
+    try {
+        // Get all points for this section
+        const { data: sectionPoints, error: pointsError } = await supabase
+            .from("points")
+            .select("*")
+            .eq("section_id", sectionId);
+            
+        if (pointsError) {
+            console.log("Error getting points for section:", pointsError);
+            return false;
+        }
+        
+        if (!sectionPoints || sectionPoints.length === 0) {
+            console.log("No points found for this section");
+            return true; // Not an error, just no points to create
+        }
+        
+        // Check if student points already exist to avoid duplicates
+        const pointIds = sectionPoints.map(point => point.point_id);
+        const { data: existingPoints, error: checkError } = await supabase
+            .from("student_points")
+            .select("*")
+            .eq("student_id", studentId)
+            .in("point_id", pointIds);
+            
+        if (checkError) {
+            console.log("Error checking existing student points:", checkError);
+            return false;
+        }
+        
+        // Filter out points that already have student points
+        const existingPointIds = existingPoints ? existingPoints.map(ep => ep.point_id) : [];
+        const pointsToCreate = sectionPoints.filter(point => !existingPointIds.includes(point.point_id));
+        
+        if (pointsToCreate.length === 0) {
+            console.log("All student points already exist for this student");
+            return true;
+        }
+        
+        // Create student points
+        const studentPointsToInsert = pointsToCreate.map(point => ({
+            student_id: studentId,
+            point_id: point.point_id,
+            point_status_id: 1, // Default to "Not Attempted"
+            date_status_last_updated: new Date().toISOString()
+        }));
+        
+        const { error: insertError } = await supabase
+            .from("student_points")
+            .insert(studentPointsToInsert);
+            
+        if (insertError) {
+            console.log("Error creating student points:", insertError);
+            return false;
+        }
+        
+        console.log(`Successfully created ${studentPointsToInsert.length} student points for student ${studentId}`);
+        return true;
+    } catch (err) {
+        console.log("Exception thrown while creating student points:", err);
+        return false;
+    }
+}
+
 // ====================== EXISTING FUNCTIONS BELOW =======================
 
 export async function signup(email: string, password: string, firstName: string, lastName: string, userTypeId: number, schoolId: number) {
@@ -586,6 +715,14 @@ export async function enrollInSection(enrollmentCode: string, studentId: string)
             }
             
             console.log("successfully inserted enrollment record");
+            
+            // NEW CODE: Create student points for this student
+            console.log("Creating student points for this enrollment...");
+            const success = await createStudentPoints(studentId, section_id);
+            if (!success) {
+                console.log("Warning: Failed to create student points. Student points will need to be created manually.");
+            }
+            
             // Get course data for the section
             const potentialCourse: Course[] | null = await getCoursesByIds([section.course_id]);
             if (!potentialCourse || potentialCourse.length === 0) {
@@ -708,7 +845,6 @@ export async function getPointsByConceptId(conceptId: number){
 }
 
 export async function getStudentPointsByPointIds(pointIds: number[]){
-
     try{
         const { data: studentPointData, error: studentPointError } = await supabase
             .from("student_points")
@@ -723,16 +859,12 @@ export async function getStudentPointsByPointIds(pointIds: number[]){
             console.log("successfully retrieved student point data");
             return studentPointData as StudentPoint[];
         }
-
     }
     catch(err){
         console.log("Exception thrown while getting student points by point ids: ", err);
     }
-
     return null;
 }
-
-// Add this function to your supabaseService.tsx file
 
 export async function updateStudentPoint(studentPointId: number, newStatusId: number) {
     try {
