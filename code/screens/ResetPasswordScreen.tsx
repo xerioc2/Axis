@@ -61,7 +61,6 @@ const ResetPasswordScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Reset Your Password</Text>
-      <Text style={styles.tokenLabel}>Token: {token}</Text>
 
       <TextInput
         style={styles.input}
