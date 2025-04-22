@@ -1,5 +1,4 @@
 import { Point, StudentPoint, StudentPointDto, SectionPreviewDto, Course, Section, Semester, TeacherDataDto, User, Topic, Concept, GradeViewDto } from '../../App';
-import pointStatusMap from '../utils/pointStatusMap';
 import { getTopicsByCourseId, getConceptsByTopicId, getPointsByConceptId, getStudentPointsByPointIds } from './supabaseService';
 
 
@@ -55,7 +54,7 @@ export function compileTeacherData(sectionPreviewDtos: SectionPreviewDto[], cour
 But, it is basically the core of the application, in my defense.
  */
 /* if a student needs the GradeView, then user === student */
-export async function compileGradeViewData(user: User, sectionPreview: SectionPreviewDto, student: User){
+export async function compileGradeViewData(user: User, sectionPreview: SectionPreviewDto, student: User) {
     
     const gradeViewData: GradeViewDto = {
         topicsToConcepts: [],
@@ -64,14 +63,14 @@ export async function compileGradeViewData(user: User, sectionPreview: SectionPr
     }
 
     const potentialTopics: Topic[] | null = await getTopicsByCourseId(sectionPreview.course_id);
-    if (!potentialTopics){
+    if (!potentialTopics) {
         console.log("Error getting topics, cannot compile GradeView Data");
         return null;
     }
     const topics: Topic[] = potentialTopics;
-    for(let i = 0; i < topics.length; i++){
+    for (let i = 0; i < topics.length; i++) {
         const potentialConcepts: Concept[] | null = await getConceptsByTopicId(topics[i].topic_id);
-        if (!potentialConcepts){
+        if (!potentialConcepts) {
             console.log(`Error getting concepts for topic ${topics[i].topic_id}.`);
             continue;
         }
@@ -83,43 +82,63 @@ export async function compileGradeViewData(user: User, sectionPreview: SectionPr
         
         
         //get points for each concept
-        for (let j = 0; j < concepts.length; j++){
+        for (let j = 0; j < concepts.length; j++) {
             const potentialPoints: Point[] | null = await getPointsByConceptId(concepts[j].concept_id);
-            if (!potentialPoints){
+            if (!potentialPoints) {
                 console.log("Error getting points for concept: ", concepts[j].concept_id);
                 continue;
             } 
             const points: Point[] = potentialPoints;
-            const pointIds = points.map(point => point.point_id);
+            
+            // Filter points by section_id to only get points for the current section
+            const sectionPoints = points.filter(point => point.section_id === sectionPreview.section_id);
+            if (sectionPoints.length === 0) {
+                console.log(`No points for concept ${concepts[j].concept_id} in this section`);
+                gradeViewData.conceptsToPoints.push({
+                    concept: concepts[j],
+                    points: []
+                });
+                continue;
+            }
+            
+            const pointIds = sectionPoints.map(point => point.point_id);
             
             //now go for StudentPoints from these point_ids
             const potentialStudentPoints: StudentPoint[] | null = await getStudentPointsByPointIds(pointIds);
-            if (!potentialStudentPoints){
+            if (!potentialStudentPoints) {
                 console.log("Error getting student points for concept: ", concepts[j].concept_id);
                 continue;
             }
-            const studentPoints: StudentPoint[] = potentialStudentPoints;
             
-            //associate the points w student points
-            const pointsToStudentPoints = new Array(points.length);
-            for (let k = 0; k < points.length; k++){
-                for (let s = 0; s < studentPoints.length; s++){
-                    if (points[k].point_id === studentPoints[s].point_id){
-                        pointsToStudentPoints[k] = studentPoints[s];
-                        break; // Add break to exit loop once found
-                    }
-                }
+            // IMPORTANT FIX: Filter student points to only include points for the specific student
+            const studentPoints: StudentPoint[] = potentialStudentPoints.filter(sp => sp.student_id === student.user_id);
+            
+            if (studentPoints.length === 0) {
+                console.log(`No student points for student ${student.user_id} for concept ${concepts[j].concept_id}`);
+                gradeViewData.conceptsToPoints.push({
+                    concept: concepts[j],
+                    points: []
+                });
+                continue;
             }
-
+            
             // Create an array to store student point DTOs for this concept
             const studentPointDtos: StudentPointDto[] = [];
             
-            //BUILD STUDENT POINT DTOS
-            for (let k = 0; k < points.length; k++) {
-                const point: Point = points[k];
-                const studentPoint: StudentPoint | null = pointsToStudentPoints[k] ?? null;
-            
-                const statusId: number = studentPoint?.point_status_id ?? 1; // Default to 'Not Attempted'
+            // BUILD STUDENT POINT DTOS
+            for (let k = 0; k < sectionPoints.length; k++) {
+                const point = sectionPoints[k];
+                
+                // Find the corresponding student point for this point
+                const studentPoint = studentPoints.find(sp => sp.point_id === point.point_id);
+                
+                // If no student point exists for this point, continue to the next point
+                if (!studentPoint) {
+                    console.log(`No student point found for point ${point.point_id} and student ${student.user_id}`);
+                    continue;
+                }
+                
+                const statusId: number = studentPoint.point_status_id;
                 let statusName: string = "";
                 switch (statusId) {
                     case 1:
@@ -139,7 +158,7 @@ export async function compileGradeViewData(user: User, sectionPreview: SectionPr
                 }
             
                 const studentPointDto: StudentPointDto = {
-                    student_point_id: studentPoint?.student_point_id ?? -1, // or null if you prefer
+                    student_point_id: studentPoint.student_point_id,
                     point_id: point.point_id,
                     topic_id: topics[i].topic_id,
                     concept_id: concepts[j].concept_id,
