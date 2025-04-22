@@ -9,6 +9,15 @@ import StudentSectionDetailsScreen from './code/screens/student/StudentSectionDe
 import TeacherGradeView from './code/screens/teacher/TeacherGradeView';
 import type { RootStackParamList } from './code/utils/navigation.types';
 import ProfileScreen from './code/screens/ProfileScreen'; // or wherever you put it
+import ResetPasswordScreen from './code/screens/ResetPasswordScreen';
+import 'react-native-url-polyfill/auto';
+import { useRef } from 'react';
+import { createNavigationContainerRef } from '@react-navigation/native';
+import * as Linking from 'expo-linking';
+import { useEffect } from 'react';
+
+
+
 
 /*
 {} are used to import NAMED exports. the name inside brackets must match the name of export variable
@@ -16,12 +25,62 @@ import ProfileScreen from './code/screens/ProfileScreen'; // or wherever you put
 */
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const linking = {
+  prefixes: ['myapp://', 'https://myapp.com'], // Add your domain or Expo link if using Expo Go
+  config: {
+    screens: {
+      Login: 'login',
+      SignUp: 'signup',
+      StudentDashboard: 'student',
+      TeacherDashboard: 'teacher',
+      Profile: 'profile',
+      ResetPassword: {
+        path: 'reset-password',
+        parse: {
+          token: (token: string) => `${token}`,
+        },
+      },
+    },
+  }
+}
+export const navigationRef = createNavigationContainerRef<RootStackParamList>();
+
 
 export default function App() {
 
   const shouldHeaderBeShown = false;
+  useEffect(() => {
+    const handleDeepLink = ({ url }: Linking.EventType | { url: string }) => {
+      try {
+        const parsedUrl = new URL(url);
+        const hashParams = new URLSearchParams(parsedUrl.hash.substring(1));
+        const type = hashParams.get('type');
+        const token = hashParams.get('access_token');
+  
+        if (type === 'recovery' && token && navigationRef.isReady()) {
+          navigationRef.navigate('ResetPassword', { token });
+        }
+      } catch (err) {
+        console.warn('Error handling deep link:', err);
+      }
+    };
+  
+    const checkInitialUrl = async () => {
+      const initialUrl = await Linking.getInitialURL();
+      if (initialUrl) {
+        handleDeepLink({ url: initialUrl });
+      }
+    };
+  
+    checkInitialUrl(); // Cold-start link handling
+  
+    const subscription = Linking.addEventListener('url', handleDeepLink); // Runtime link handling
+    return () => subscription.remove();
+  }, []);
   return (
-    <NavigationContainer>
+<NavigationContainer linking={linking} ref={navigationRef}>
+
+
       <Stack.Navigator>
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: shouldHeaderBeShown }} />       
         <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: shouldHeaderBeShown }} />
@@ -31,6 +90,7 @@ export default function App() {
         <Stack.Screen name="StudentSectionDetails" component={StudentSectionDetailsScreen} options={{ headerShown: shouldHeaderBeShown}} />
         <Stack.Screen name="TeacherGradeView" component={TeacherGradeView} options={{headerShown: shouldHeaderBeShown}} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: shouldHeaderBeShown }} />
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} />
 
       </Stack.Navigator>
     </NavigationContainer>

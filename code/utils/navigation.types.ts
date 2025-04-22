@@ -10,4 +10,5 @@ export type RootStackParamList = {
     StudentSectionDetails: {user: User, sectionPreview: SectionPreviewDto};
     TeacherGradeView: {user: User, sectionPreview: SectionPreviewDto, student: User};
     StudentGradeView: {user: User, sectionPreview: SectionPreviewDto}
+    ResetPassword: { token: string }; //
   };

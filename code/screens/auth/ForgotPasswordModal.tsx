@@ -11,7 +11,10 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ visible, onCl
   const [email, setEmail] = useState('');
 
   const handleSendResetLink = async () => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'myapp://reset-password'
+    });
+  
     if (error) {
       Alert.alert('Error', error.message);
     } else {
@@ -20,6 +23,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ visible, onCl
       onClose();
     }
   };
+  
 
   return (
     <Modal transparent visible={visible} animationType="fade">
