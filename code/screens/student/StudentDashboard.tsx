@@ -8,7 +8,6 @@ import {
     Modal
 } from "react-native";
 import { styles } from "../../components/StudentDashboard/StudentDashboardStyle"; 
-import { styles } from "../../components/StudentDashboard/StudentDashboardStyle"; 
 import { getStudentData, enrollInSection } from "../../service/supabaseService"; 
 import type {
     User,
