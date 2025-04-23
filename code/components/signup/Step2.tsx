@@ -113,6 +113,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
           onValueChange={(value) => handleChange("schoolType", value)}
           items={schoolTypeOptions}
           placeholder="Select School Type"
+          placeholderTextColor="#4F4F4F"
         />
         <SchoolPicker
           selectedValue={formData.schoolName}
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter",
     fontSize: 16,
     borderBottomWidth: 1,
-    width: 115,
+    width: 100,
   },
   lastName: {
     borderBottomColor: Colors.secondary,
@@ -159,13 +160,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginHorizontal: 30,
     marginTop: 5,
+    gap: 15,
   },
   halfInput: {
     borderBottomColor: Colors.secondary,
     fontFamily: "Inter",
     fontSize: 16,
     borderBottomWidth: 1,
-    width: "48%",
+    width: "45%",
   },
 });
 

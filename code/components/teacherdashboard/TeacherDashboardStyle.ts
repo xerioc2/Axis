@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { Colors } from "../../theme";
+import { useFonts } from "expo-font";
 
 export const styles = StyleSheet.create({
   container: {
@@ -17,17 +18,24 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#005824",
+    color: Colors.primary,
     textAlign: "center",
     marginBottom: 10,
-    marginTop: 20, // Adjust if you have a separate header later
+    marginTop: 50, // Adjust if you have a separate header later
   },
   card: {
-    backgroundColor: "white",
-    borderRadius: 10,
+    backgroundColor: Colors.white,
+    borderRadius: 15,
     padding: 10,
-    marginVertical: 8,
+    marginVertical: 18,
     elevation: 3,
+    width: 299,
+    height: 152,
+    alignSelf: "center",
+    shadowColor: "rgba(0, 0, 0, 0.25)",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 2,
+    shadowRadius: 5.3,
   },
   image: {
     width: "100%",
@@ -35,15 +43,19 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
   },
   courseTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 5,
+    alignSelf: "center",
+    fontSize: 13,
+    fontWeight: 700,
+    top: 19,
   },
   courseCode: {
     fontSize: 14,
-    color: "gray",
+    top: 4,
+    fontWeight: 600,
   },
-
+  cardContent: {
+    padding: 10,
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
@@ -114,7 +126,10 @@ export const styles = StyleSheet.create({
     position: "relative", // Needed for absolute positioning of editButton relative to footer
     borderTopWidth: 1, // Optional: Add a subtle top border
     borderTopColor: "#ddd", // Optional: Border color
-    // Removed padding, alignItems, justifyContent
+    shadowColor: "rgba(0, 0, 0, 0.25)",
+    shadowOffset: { width: 0, height: -2 }, // upward direction
+    shadowOpacity: 1, // since rgba is already semi-transparent
+    shadowRadius: 4,
   },
   footerButtonContainer: {
     flex: 1, // Take full available space within footer
@@ -133,11 +148,14 @@ export const styles = StyleSheet.create({
   },
   footerButtonText: {
     fontSize: 16, // Adjusted font size
-    fontWeight: "600", // Slightly bolder
-    color: "#333", // Darker text color
+    fontWeight: "500", // Slightly bolder
+    color: "#555555", // Darker text color
   },
   cardImage: {
-    width: "75%",
-    height: 95,
+    alignSelf: "center",
+    width: 262,
+    height: 93,
+    top: 6,
+    borderRadius: 15,
   },
 });
