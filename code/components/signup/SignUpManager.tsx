@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Step1 from './Step1';
-import Step2 from './Step2';
-import ErrorMessage from '../ErrorMessage';
-import { RootStackParamList } from '@/code/utils/navigation.types';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { signup } from '@/code/service/supabaseService';
-import { Colors } from '../../theme';
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Step1 from "./Step1";
+import Step2 from "./Step2";
+import ErrorMessage from "../ErrorMessage";
+import { RootStackParamList } from "@/code/utils/navigation.types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { signup } from "@/code/service/supabaseService";
+import { Colors } from "../../theme";
 
-type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
+type NavigationProps = NativeStackNavigationProp<RootStackParamList, "SignUp">;
 
 const StepManager: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -25,7 +25,7 @@ const StepManager: React.FC = () => {
     confirmPassword: "",
     schoolType: "",
     state: "",
-    schoolName: ""
+    schoolName: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -53,7 +53,9 @@ const StepManager: React.FC = () => {
 
   const handleSignUpSubmission = async () => {
     if (formData.password !== formData.confirmPassword) {
-      setErrorMessage("Password and confirmation do not match. Double check your password and try again.");
+      setErrorMessage(
+        "Password and confirmation do not match. Double check your password and try again."
+      );
       return;
     }
 
@@ -63,7 +65,9 @@ const StepManager: React.FC = () => {
     } else if (role === "Teacher") {
       userTypeId = 2;
     } else {
-      setErrorMessage("No role selected. Please go back and select your role and try again.");
+      setErrorMessage(
+        "No role selected. Please go back and select your role and try again."
+      );
       return;
     }
 
@@ -77,7 +81,9 @@ const StepManager: React.FC = () => {
     );
 
     if (!singupResponse) {
-      setErrorMessage("There was an error signing up, please close the app and try again.");
+      setErrorMessage(
+        "There was an error signing up, please close the app and try again."
+      );
       return;
     }
 
@@ -88,29 +94,22 @@ const StepManager: React.FC = () => {
   return (
     <>
       <View style={styles.stepContainer}>
-
         {currentStep === 1 && (
-          <Step1
-            setRole={setRole}
-            setIsRoleSelected={setIsRoleSelected}
-          />
+          <Step1 setRole={setRole} setIsRoleSelected={setIsRoleSelected} />
         )}
 
         {currentStep === 1 && (
           <TouchableOpacity
-          style={isRoleSelected ? styles.button : styles.disabledButton}
-          disabled={!isRoleSelected}
-          onPress={() => setCurrentStep(2)}
-        >
-          <Text style={styles.buttonText}>NEXT</Text>
-        </TouchableOpacity>
+            style={isRoleSelected ? styles.button : styles.disabledButton}
+            disabled={!isRoleSelected}
+            onPress={() => setCurrentStep(2)}
+          >
+            <Text style={styles.buttonText}>NEXT</Text>
+          </TouchableOpacity>
         )}
 
         {currentStep === 2 && (
-          <Step2
-            formData={formData}
-            setFormData={setFormData}
-          />
+          <Step2 formData={formData} setFormData={setFormData} />
         )}
 
         {currentStep === 2 && (
@@ -128,7 +127,7 @@ const StepManager: React.FC = () => {
         )}
 
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.backButton}>
+          <Text style={[styles.backButton, { bottom: 5 }]}>
             ALREADY HAVE AN ACCOUNT?
           </Text>
         </TouchableOpacity>
@@ -144,7 +143,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 100,
     marginHorizontal: 25,
-    alignItems: 'center',
+    alignItems: "center",
   },
   button: {
     backgroundColor: Colors.secondary,
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     width: 255,
     height: 43,
-    alignItems: 'center',
+    alignItems: "center",
     shadowRadius: 3.84,
     elevation: 5,
     marginTop: 20,
@@ -161,9 +160,9 @@ const styles = StyleSheet.create({
   buttonText: {
     marginTop: -5,
     color: Colors.white,
-    fontFamily: 'Inter',
-    fontWeight: '600',
-    textAlign: 'center',
+    fontFamily: "Inter",
+    fontWeight: "600",
+    textAlign: "center",
     fontSize: 16,
     lineHeight: 22,
   },
@@ -173,20 +172,19 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     width: 255,
     height: 43,
-    alignItems: 'center',
+    alignItems: "center",
     elevation: 5,
     marginTop: 20,
     marginBottom: 15,
   },
   backButton: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.grey,
-    fontFamily: 'SF Pro',
-    textDecorationLine: 'underline',
+    fontFamily: "SF Pro",
   },
   loginContainer: {
     marginBottom: 100,
-    alignItems: 'center',
+    alignItems: "center",
   },
 });
