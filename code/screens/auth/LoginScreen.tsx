@@ -38,7 +38,7 @@ const LoginScreen: React.FC = () => {
     const user: User | null = await login(formData.email, formData.password);
     if (!user) {
       setErrorMessage(
-        "Unable to login with those credentials. Double check your info and try again, or sign up instead if you don't have an account."
+        "Login failed. Please check your email and password, then try again."
       );
       return;
     }
