@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from "react-native";
 import supabase from "../../utils/supabase";
+import { Colors } from "../../theme";
 
 type ForgotPasswordModalProps = {
   visible: boolean;
@@ -47,12 +48,13 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
+            placeholderTextColor="#4F4F4F"
           />
           <TouchableOpacity style={styles.button} onPress={handleSendResetLink}>
             <Text style={styles.buttonText}>Send Reset Link</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: "#ccc" }]}
+            style={[styles.button, { backgroundColor: "#6F6F6F" }]}
             onPress={onClose}
           >
             <Text style={styles.buttonText}>Cancel</Text>
@@ -85,14 +87,14 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    borderColor: "gray",
+    borderColor: "#4F4F4F",
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
   button: {
-    backgroundColor: "green",
+    backgroundColor: Colors.secondary,
     padding: 15,
     marginVertical: 5,
     borderRadius: 10,

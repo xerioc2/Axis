@@ -124,11 +124,11 @@ const LoginScreen: React.FC = () => {
               style={{
                 color: Colors.grey,
                 fontWeight: "600",
-                fontSize: 13,
+                fontSize: 12,
                 bottom: 30,
               }}
             >
-              FORGOT PASSWORD?
+              FORGOT PASSWORD
             </Text>
           </TouchableOpacity>
         </View>
