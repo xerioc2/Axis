@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableWithoutFeedback, Modal, Platform } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableWithoutFeedback,
+  Modal,
+  Platform,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
 
 type CustomPickerProps = {
   selectedValue: string;
@@ -9,16 +16,16 @@ type CustomPickerProps = {
   placeholder?: string;
 };
 
-const CustomPicker: React.FC<CustomPickerProps> = ({ 
-  selectedValue, 
-  onValueChange, 
+const CustomPicker: React.FC<CustomPickerProps> = ({
+  selectedValue,
+  onValueChange,
   items,
-  placeholder = "Select an option" 
+  placeholder = "Select an option",
 }) => {
   const [isPickerVisible, setPickerVisible] = useState(false);
 
   // For iOS, we'll use a modal approach
-  if (Platform.OS === 'ios') {
+  if (Platform.OS === "ios") {
     return (
       <View style={styles.container}>
         <TouchableWithoutFeedback onPress={() => setPickerVisible(true)}>
@@ -26,17 +33,22 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
             <Picker
               selectedValue={selectedValue}
               enabled={false}
-              style={{opacity: 0, height: 1, position: 'absolute'}}
+              style={{ opacity: 0, height: 1, position: "absolute" }}
             >
-              {items.map(item => (
-                <Picker.Item key={item.value} label={item.label} value={item.value} />
+              {items.map((item) => (
+                <Picker.Item
+                  key={item.value}
+                  label={item.label}
+                  value={item.value}
+                />
               ))}
             </Picker>
             <View style={styles.pickerTrigger}>
               <Text style={styles.pickerLabel}>
-                {selectedValue ? 
-                  items.find(item => item.value === selectedValue)?.label || placeholder :
-                  placeholder}
+                {selectedValue
+                  ? items.find((item) => item.value === selectedValue)?.label ||
+                    placeholder
+                  : placeholder}
               </Text>
             </View>
           </View>
@@ -52,7 +64,7 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
               <TouchableWithoutFeedback onPress={() => setPickerVisible(false)}>
                 <View style={styles.modalOverlay} />
               </TouchableWithoutFeedback>
-              
+
               <View style={styles.pickerContainer}>
                 <Picker
                   selectedValue={selectedValue}
@@ -61,8 +73,12 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
                     setPickerVisible(false);
                   }}
                 >
-                  {items.map(item => (
-                    <Picker.Item key={item.value} label={item.label} value={item.value} />
+                  {items.map((item) => (
+                    <Picker.Item
+                      key={item.value}
+                      label={item.label}
+                      value={item.value}
+                    />
                   ))}
                 </Picker>
               </View>
@@ -72,7 +88,7 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
       </View>
     );
   }
-  
+
   // For Android, we'll use a simpler approach with an overlay
   return (
     <View style={styles.container}>
@@ -81,7 +97,7 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
           <View style={styles.overlay} />
         </TouchableWithoutFeedback>
       )}
-      
+
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={selectedValue}
@@ -93,8 +109,12 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
           mode="dropdown"
           style={styles.picker}
         >
-          {items.map(item => (
-            <Picker.Item key={item.value} label={item.label} value={item.value} />
+          {items.map((item) => (
+            <Picker.Item
+              key={item.value}
+              label={item.label}
+              value={item.value}
+            />
           ))}
         </Picker>
       </View>
@@ -104,68 +124,68 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    position: 'relative',
+    width: "100%",
+    position: "relative",
   },
   pickerContainer: {
-    width: '100%',
+    width: "100%",
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingBottom: 5,
     marginBottom: 1,
     zIndex: 10,
     elevation: 3,
   },
   picker: {
-    width: '100%',
+    width: "100%",
     height: 25,
   },
   overlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: "rgba(0,0,0,0.5)",
     zIndex: 9,
     elevation: 2,
   },
   // iOS specific styles
   modalContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: 'white',
-    height: '50%',
+    backgroundColor: "white",
+    height: "50%",
   },
   modalOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: -1000,
     left: 0,
     right: 0,
-    bottom: '50%',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    bottom: "50%",
+    backgroundColor: "rgba(0,0,0,0.5)",
     zIndex: 9,
   },
   pickerButton: {
-    width: '100%',
+    width: "100%",
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 12,
   },
   pickerTrigger: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   pickerLabel: {
     fontSize: 16,
-  }
+  },
 });
 
 export default CustomPicker;
