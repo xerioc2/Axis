@@ -118,7 +118,7 @@ const StepManager: React.FC = () => {
             disabled={!areAllFieldsEdited}
             onPress={handleSignUpSubmission}
           >
-            <Text>Sign Up</Text>
+            <Text style={styles.buttonText}>FINISH</Text>
           </TouchableOpacity>
         )}
 

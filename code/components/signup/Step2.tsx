@@ -84,6 +84,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
           value={formData.email}
           onChangeText={(text) => handleChange("email", text)}
           placeholderTextColor="#4F4F4F"
+          autoCapitalize="none"
         />
 
         <TextInput
@@ -93,6 +94,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
           onChangeText={(text) => handleChange("password", text)}
           placeholderTextColor="#4F4F4F"
           secureTextEntry={true}
+          autoCapitalize="none"
         />
 
         <TextInput
@@ -102,6 +104,7 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
           onChangeText={(text) => handleChange("confirmPassword", text)}
           placeholderTextColor="#4F4F4F"
           secureTextEntry={true}
+          autoCapitalize="none"
         />
         <StatePicker
           selectedValue={formData.state}
@@ -138,6 +141,7 @@ const styles = StyleSheet.create({
     width: 230,
     margin: 5,
     alignSelf: "center",
+    paddingBottom: 5,
   },
   firstName: {
     borderBottomColor: Colors.secondary,
@@ -168,6 +172,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderBottomWidth: 1,
     width: "45%",
+    paddingBottom: 5,
   },
 });
 

@@ -39,6 +39,8 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
                 color: selectedValue ? "#000" : placeholderTextColor,
                 fontSize: 16,
                 fontFamily: "Inter",
+                paddingBottom: 8,
+                paddingTop: 2,
               }}
             >
               {selectedLabel || placeholder}
