@@ -46,12 +46,14 @@ export const styles = StyleSheet.create({
     alignSelf: "center",
     fontSize: 13,
     fontWeight: 700,
-    top: 19,
+    top: 2,
   },
   courseCode: {
+    alignSelf: "center",
     fontSize: 14,
     top: 4,
     fontWeight: 600,
+    right: 67,
   },
   cardContent: {
     padding: 10,
