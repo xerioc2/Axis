@@ -516,7 +516,8 @@ export async function getEnrollmentsBySectionId(sectionId: number){
         const { data: enrollmentData, error: enrollmentError } = await supabase
             .from("enrollments")
             .select("*")
-            .eq("section_id", sectionId);
+            .eq("section_id", sectionId)
+            .is("date_disenrolled", null);
         if (enrollmentError){
             console.log(`Error getting enrollment data from section ${sectionId}: ${enrollmentError}`);
         }
@@ -663,100 +664,106 @@ export async function getSectionsByStudentId(studentId: string){
     return null;
 }
 
-export async function enrollInSection(enrollmentCode: string, studentId: string){
-    //need section_id where enrollmentCode == section.enrollment_code
-    console.log("starting enrollment...");
-    try{
+export async function enrollInSection(enrollmentCode: string, studentId: string) {
+    console.log("🔍 Starting enrollment process...");
+    try {
+        // 1. Get the section for the given enrollment code
         const { data: sectionData, error: sectionError } = await supabase
             .from('sections')
             .select("*")
             .eq("enrollment_code", enrollmentCode);
-        if (sectionError){
-            console.log("Error joining section by enrollment code: could not fetch section with that enrollment code: ", sectionError);
+
+        if (sectionError) {
+            console.log("❌ Error fetching section:", sectionError);
             return null;
         }
-        if (sectionData && sectionData.length === 0){
-            console.log("No section has the enrollment code: ", enrollmentCode);
+
+        if (!sectionData || sectionData.length === 0) {
+            console.log("⚠️ No section found with enrollment code:", enrollmentCode);
             return undefined;
         }
-        if (sectionData && sectionData.length > 0){
-            console.log("successfully retrieved the section... section_id=", sectionData[0].section_id);
-            const section: Section = sectionData[0];
-            const section_id: number = section.section_id;
-            
-            console.log("checking if there are previous enrollments by this student for this section");
-            // Check if enrollment already exists
-            const { data: existingEnrollment, error: checkError } = await supabase
-                .from('enrollments')
-                .select()
-                .eq('student_id', studentId)
-                .eq('section_id', section_id);
-                
-            if (checkError) {
-                console.log("Error checking for existing enrollment: ", checkError);
-                return null;
-            }
-            
-            // If enrollment exists, return false
-            if (existingEnrollment && existingEnrollment.length > 0) {
-                console.log("Student is already enrolled in this section");
-                return null;
-            }
-            console.log("successfully checked enrollment records, this student has not previously enrolled in this section...");
-            console.log("inserting the enrollment record...");
-            // Insert the enrollment record
-            const { data, error } = await supabase
-                .from('enrollments')
-                .insert({student_id: studentId, section_id: section_id});
-            
-            if(error){
-                console.log("Error joining section by enrollment code: could not insert enrollment record: ", error);
-                return null;
-            }
-            
-            console.log("successfully inserted enrollment record");
-            
-            // NEW CODE: Create student points for this student
-            console.log("Creating student points for this enrollment...");
-            const success = await createStudentPoints(studentId, section_id);
-            if (!success) {
-                console.log("Warning: Failed to create student points. Student points will need to be created manually.");
-            }
-            
-            // Get course data for the section
-            const potentialCourse: Course[] | null = await getCoursesByIds([section.course_id]);
-            if (!potentialCourse || potentialCourse.length === 0) {
-                console.log("Error getting course data for enrolled section");
-                return null;
-            }
-            
-            // Get semester data for the section
-            const potentialSemester: Semester[] | null = await getSemestersByIds([section.semester_id]);
-            if (!potentialSemester || potentialSemester.length === 0) {
-                console.log("Error getting semester data for enrolled section");
-                return null;
-            }
-            
-            // Create and return the SectionPreviewDto
-            const sectionPreview: SectionPreviewDto = {
-                section_id: section.section_id,
-                section_identifier: section.section_identifier,
-                enrollment_code: section.enrollment_code,
-                season: potentialSemester[0].season,
-                year: potentialSemester[0].year,
-                course_id: potentialCourse[0].course_id,
-                course_name: potentialCourse[0].course_name,
-                course_identifier: potentialCourse[0].course_identifier,
-                course_subject: potentialCourse[0].course_subject
-            };
-            
-            return sectionPreview;
+
+        const section = sectionData[0];
+        const section_id = section.section_id;
+
+        // 2. Check if an enrollment already exists
+        const { data: existingEnrollment, error: checkError } = await supabase
+            .from('enrollments')
+            .select("*")
+            .eq('student_id', studentId)
+            .eq('section_id', section_id);
+
+        if (checkError) {
+            console.log("❌ Error checking enrollment:", checkError);
+            return null;
         }
+
+        if (existingEnrollment && existingEnrollment.length > 0) {
+            const enrollment = existingEnrollment[0];
+
+            if (enrollment.date_disenrolled === null) {
+                console.log("⚠️ Student is already enrolled and active in this section.");
+                return null;
+            } else {
+                // ✅ Case: Re-enrolling student (previously disenrolled)
+                const { error: updateError } = await supabase
+                    .from('enrollments')
+                    .update({ date_disenrolled: null })
+                    .eq('student_id', studentId)
+                    .eq('section_id', section_id);
+
+                if (updateError) {
+                    console.log("❌ Error re-enrolling student:", updateError);
+                    return null;
+                }
+
+                console.log("🔄 Student successfully re-enrolled.");
+            }
+        } else {
+            // ✅ Case: Brand-new enrollment
+            const { error: insertError } = await supabase
+                .from('enrollments')
+                .insert({ student_id: studentId, section_id });
+
+            if (insertError) {
+                console.log("❌ Error inserting new enrollment:", insertError);
+                return null;
+            }
+
+            console.log("✅ Student enrolled successfully.");
+        }
+
+        // 3. Create student points if needed
+        const success = await createStudentPoints(studentId, section_id);
+        if (!success) {
+            console.log("⚠️ Warning: Failed to create student points.");
+        }
+
+        // 4. Create SectionPreviewDto to return
+        const [course] = await getCoursesByIds([section.course_id]) ?? [];
+        const [semester] = await getSemestersByIds([section.semester_id]) ?? [];
+
+        if (!course || !semester) {
+            console.log("❌ Error loading course/semester for section preview.");
+            return null;
+        }
+
+        return {
+            section_id: section.section_id,
+            section_identifier: section.section_identifier,
+            enrollment_code: section.enrollment_code,
+            season: semester.season,
+            year: semester.year,
+            course_id: course.course_id,
+            course_name: course.course_name,
+            course_identifier: course.course_identifier,
+            course_subject: course.course_subject
+        } as SectionPreviewDto;
+
+    } catch (err) {
+        console.log("❌ Exception thrown in enrollInSection:", err);
+        return null;
     }
-    catch(err){
-        console.log("Exception thrown in enrollInSection: ", err);
-    }
-    return null;
 }
 
 
@@ -944,7 +951,7 @@ export async function getSchoolById(schoolId: number) {
       return null;
     }
   }
-// In supabaseService.ts
+
 export async function disenrollStudent(studentId: string, sectionId: number): Promise<boolean> {
     try {
       const { error } = await supabase
@@ -954,14 +961,14 @@ export async function disenrollStudent(studentId: string, sectionId: number): Pr
         .eq('section_id', sectionId);
   
       if (error) {
-        console.log("❌ Error disenrolling:", error);
+        console.log("Error disenrolling:", error);
         return false;
       }
   
-      console.log("✅ Student successfully disenrolled");
+      console.log("Student successfully disenrolled");
       return true;
     } catch (err) {
-      console.error("❌ Exception in disenrollStudent:", err);
+      console.error("Exception in disenrollStudent:", err);
       return false;
     }
   }
