@@ -159,4 +159,18 @@ export const styles = StyleSheet.create({
         borderColor: 'white',
         borderWidth: 4,
     },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        textAlign: 'center',
+        color: '#005824',
+      },
+      modalText: {
+        fontSize: 16,
+        marginBottom: 20,
+        textAlign: 'center',
+        color: '#333',
+      },
+      
 });

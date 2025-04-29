@@ -944,7 +944,8 @@ export async function getSchoolById(schoolId: number) {
       return null;
     }
   }
-  export async function disenrollStudent(studentId: string, sectionId: number) {
+// In supabaseService.ts
+export async function disenrollStudent(studentId: string, sectionId: number): Promise<boolean> {
     try {
       const { error } = await supabase
         .from('enrollments')
@@ -953,14 +954,17 @@ export async function getSchoolById(schoolId: number) {
         .eq('section_id', sectionId);
   
       if (error) {
-        console.log('Error disenrolling student:', error);
+        console.log("❌ Error disenrolling:", error);
         return false;
       }
-      console.log('Successfully disenrolled student from section');
+  
+      console.log("✅ Student successfully disenrolled");
       return true;
     } catch (err) {
-      console.log('Exception thrown while disenrolling:', err);
+      console.error("❌ Exception in disenrollStudent:", err);
       return false;
     }
   }
+  
+  
   
