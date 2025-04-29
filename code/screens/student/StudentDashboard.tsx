@@ -24,7 +24,7 @@ import StudentSectionCardList from "../../components/StudentDashboard/StudentSec
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../utils/navigation.types';
-
+import { SafeAreaView, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 
 
 type StudentDashboardRouteProp = RouteProp<
@@ -73,71 +73,83 @@ const StudentDashboard: React.FC = () => {
         fetchStudentData(student);
     }, [student]);
 
+
     return (
-        <View style={styles.container}>
-{!showJoinModal && (
-  <TouchableOpacity
-    onPress={() => navigation.navigate('Profile', { user: student })}
-    style={{
-      position: 'absolute',
-      top: 20,
-      right: 20,
-      zIndex: 10,
-      padding: 10,
-    }}
-  >
-    <Ionicons name="person-circle-outline" size={28} color="#005824" />
-  </TouchableOpacity>
-)}
-
-
-            <View style={styles.content}>
-                <Text style={styles.title}>Welcome, {student.first_name}</Text>
-                <StudentSectionCardList sectionPreviews={sectionPreviews} student={student} />
-                {errorMessage !== "" && !sectionPreviews.length && (
-                    <ErrorMessage message={errorMessage} />
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#F2FFED' }}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={{ flex: 1 }}
+          >
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+              <View style={styles.container}>
+                
+                {!showJoinModal && (
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Profile', { user: student })}
+                    style={{
+                      position: 'absolute',
+                      top: 20,
+                      right: 20,
+                      zIndex: 10,
+                      padding: 10,
+                    }}
+                  >
+                    <Ionicons name="person-circle-outline" size={28} color="#005824" />
+                  </TouchableOpacity>
                 )}
-            </View>
-
-            <TouchableOpacity
-                style={styles.floatingJoinButton}
-                onPress={() => setShowJoinModal(true)}
-            >
-                <Text style={styles.fabText}>+</Text>
-            </TouchableOpacity>
-
-            <Modal transparent animationType="fade" visible={showJoinModal}>
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.formTitle}>Join Section by Code</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter enrollment code"
-                            value={joinCode}
-                            onChangeText={setJoinCode}
-                        />
-                        <TouchableOpacity
-                            style={styles.modalButton}
-                            onPress={async () => {
-                                await joinSectionByCode(joinCode);
-                                setShowJoinModal(false);
-                            }}
-                        >
-                            <Text style={styles.modalButtonText}>Join</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.modalButton, { backgroundColor: '#ccc' }]}
-                            onPress={() => setShowJoinModal(false)}
-                        >
-                            <Text style={styles.modalButtonText}>Cancel</Text>
-                        </TouchableOpacity>
-                    </View>
+      
+                <View style={styles.content}>
+                  <Text style={styles.title}>Welcome, {student.first_name}</Text>
+      
+                  <StudentSectionCardList 
+                    sectionPreviews={sectionPreviews} 
+                    student={student} 
+                    setSectionPreviews={setSectionPreviews}
+                  />
                 </View>
-            </Modal>
-
-            <View style={styles.footer} />
-        </View>
-    );
-};
-
+      
+                <TouchableOpacity
+                  style={styles.floatingJoinButton}
+                  onPress={() => setShowJoinModal(true)}
+                >
+                  <Text style={styles.fabText}>+</Text>
+                </TouchableOpacity>
+      
+                <Modal transparent animationType="fade" visible={showJoinModal}>
+                  <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                      <Text style={styles.formTitle}>Join Section by Code</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Enter enrollment code"
+                        value={joinCode}
+                        onChangeText={setJoinCode}
+                      />
+                      <TouchableOpacity
+                        style={styles.modalButton}
+                        onPress={async () => {
+                          await joinSectionByCode(joinCode);
+                          setShowJoinModal(false);
+                        }}
+                      >
+                        <Text style={styles.modalButtonText}>Join</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.modalButton, { backgroundColor: '#ccc' }]}
+                        onPress={() => setShowJoinModal(false)}
+                      >
+                        <Text style={styles.modalButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </Modal>
+      
+                <View style={styles.footer} />
+      
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      );
+    }
 export default StudentDashboard;

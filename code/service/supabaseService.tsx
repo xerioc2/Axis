@@ -944,4 +944,23 @@ export async function getSchoolById(schoolId: number) {
       return null;
     }
   }
+  export async function disenrollStudent(studentId: string, sectionId: number) {
+    try {
+      const { error } = await supabase
+        .from('enrollments')
+        .update({ date_disenrolled: new Date().toISOString() })
+        .eq('student_id', studentId)
+        .eq('section_id', sectionId);
+  
+      if (error) {
+        console.log('Error disenrolling student:', error);
+        return false;
+      }
+      console.log('Successfully disenrolled student from section');
+      return true;
+    } catch (err) {
+      console.log('Exception thrown while disenrolling:', err);
+      return false;
+    }
+  }
   
