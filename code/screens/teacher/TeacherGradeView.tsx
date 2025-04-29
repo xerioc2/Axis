@@ -44,6 +44,22 @@ const TeacherGradeView: React.FC = () => {
         
         loadGradeViewData();
     }, []);
+    const countStatuses = (): Record<number, number> => {
+        const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      
+        if (!gradeViewData) return counts;
+      
+        for (const concept of gradeViewData.conceptsToPoints) {
+          for (const point of concept.points) {
+            counts[point.point_status_id] = (counts[point.point_status_id] || 0) + 1;
+          }
+        }
+      
+        return counts;
+      };
+      
+      const statusCounts = countStatuses();
+      
 
     // Find points for a given concept
     const getPointsForConcept = (conceptId: number) => {
@@ -141,7 +157,8 @@ const TeacherGradeView: React.FC = () => {
                 break;
         }
         const backgroundColor = statusColors[statusColorKey] || '#FFFFFF';
-        
+
+          
         return (
             <TouchableOpacity
                 key={pointDto.point_id}
@@ -325,8 +342,16 @@ const TeacherGradeView: React.FC = () => {
                     ))}
                 </View>
             </ScrollView>
-            
-            {renderStatusPicker()}
+
+
+<View style={styles.summaryContainer}>
+  <Text style={styles.summaryText}>✅ Passed: {statusCounts[4]}</Text>
+  <Text style={styles.summaryText}>🟡 Needs Revision: {statusCounts[3]}</Text>
+  <Text style={styles.summaryText}>❌ Failed: {statusCounts[2]}</Text>
+  <Text style={styles.summaryText}>⬜ Not Attempted: {statusCounts[1]}</Text>
+</View>
+
+{renderStatusPicker()}
 
             {/* Footer */}
             <View style={styles.footer}>
@@ -593,6 +618,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#005824',
     },
+    summaryContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        marginVertical: 12,
+        gap: 12,
+      },
+      summaryText: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#333',
+      },
+      
 });
 
 export default TeacherGradeView;

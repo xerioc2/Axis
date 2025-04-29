@@ -53,7 +53,22 @@ const StudentGradeView: React.FC = () => {
       </View>
     );
   }
-
+  const countStatuses = (): Record<number, number> => {
+    const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  
+    if (!gradeViewData) return counts;
+  
+    for (const concept of gradeViewData.conceptsToPoints) {
+      for (const point of concept.points) {
+        counts[point.point_status_id] = (counts[point.point_status_id] || 0) + 1;
+      }
+    }
+  
+    return counts;
+  };
+  
+  const statusCounts = countStatuses(); // ✅ ADD THIS
+  
   return (
     <View style={styles.container}>
       <ScrollView style={styles.content}>
@@ -111,6 +126,13 @@ const StudentGradeView: React.FC = () => {
       <View style={styles.footer}>
         <Text style={styles.footerTitle}>Student Grades</Text>
       </View>
+      <View style={styles.summaryContainer}>
+  <Text style={styles.summaryText}>✅ Passed: {statusCounts[4]}</Text>
+  <Text style={styles.summaryText}>🟡 Needs Revision: {statusCounts[3]}</Text>
+  <Text style={styles.summaryText}>❌ Failed: {statusCounts[2]}</Text>
+  <Text style={styles.summaryText}>⬜ Not Attempted: {statusCounts[1]}</Text>
+</View>
+
     </View>
   );
 };
@@ -145,8 +167,21 @@ const styles = StyleSheet.create({
   columnHeaderText: {
     fontWeight: 'bold',
     fontSize: 14,
-    color: '#555',
+    color: '#333',
   },
+  summaryContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginVertical: 12,
+    gap: 12,
+  },
+  summaryText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+  },
+  
   
   footerTitle: { fontSize: 18, fontWeight: 'bold', color: '#005824' },
 });
