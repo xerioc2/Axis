@@ -554,6 +554,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
+    modalContainer: {
+        position: 'absolute',
+        zIndex: 9999,
+        backgroundColor: 'white',
+        borderRadius: 12,
+        padding: 20,
+        width: '100%',
+        maxHeight: '80%',
+        elevation: 10, // Android
+      },
+      
     modalContent: {
         position: 'absolute',
         width: 200,

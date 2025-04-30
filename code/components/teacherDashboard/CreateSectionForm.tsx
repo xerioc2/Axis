@@ -828,13 +828,9 @@ const CreateSectionForm: React.FC<{
       </ScrollView>
 
       {/* Course Selection Modal */}
-      <Modal
-        visible={showCourseModal}
-        transparent={true}
-        animationType="slide"
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+      <Modal visible={showCourseModal} transparent={true} animationType="slide">
+  <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
+    <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select a Course</Text>
             
             <ScrollView style={styles.modalScrollView}>
@@ -880,13 +876,9 @@ const CreateSectionForm: React.FC<{
       </Modal>
 
       {/* Semester Selection Modal */}
-      <Modal
-        visible={showSemesterModal}
-        transparent={true}
-        animationType="slide"
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+      <Modal visible={showSemesterModal} transparent={true} animationType="slide">
+  <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
+    <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select a Semester</Text>
             
             <ScrollView style={styles.modalScrollView}>
@@ -924,13 +916,9 @@ const CreateSectionForm: React.FC<{
       </Modal>
 
       {/* Topic Selection Modal */}
-      <Modal
-        visible={showTopicModal}
-        transparent={true}
-        animationType="slide"
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+      <Modal visible={showTopicModal} transparent={true} animationType="slide">
+  <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
+    <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select a Topic</Text>
             
             <ScrollView style={styles.modalScrollView}>
@@ -1341,12 +1329,16 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    position: 'absolute',
+    zIndex: 9999,
+    backgroundColor: 'white',
+    borderRadius: 12,
     padding: 20,
+    width: '100%',
+    maxHeight: '80%',
+    elevation: 10, // Android
   },
+  
   modalContent: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -1415,6 +1407,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  
 });
 
 export default CreateSectionForm;
