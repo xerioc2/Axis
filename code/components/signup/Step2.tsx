@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import CustomPicker from "../buttons/CustomPicker";
-import { Colors } from "../../theme";
 import StatePicker from "../buttons/StatePicker";
 import SchoolPicker from "../buttons/SchoolPicker";
-import type { School } from "../../../App";
+import { Colors } from "../../theme";
 
 type Step2Props = {
   formData: {
@@ -21,19 +20,15 @@ type Step2Props = {
 };
 
 const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
-  const [schoolTypeId, setSchoolTypeId] = useState(3); //defaults to colleges
-  const [schoolState, setSchoolState] = useState("");
-  const [possibleSchools, setPossibleSchools] = useState<School[] | null>(null);
+  const [schoolTypeId, setSchoolTypeId] = useState(3);
 
   const handleChange = (key: string, value: string) => {
-    console.log("✍️ handleChange", key, value);
     const newFormData: any = { ...formData, [key]: value };
     if (key === "schoolType" || key === "state") {
       newFormData.schoolName = "";
     }
     setFormData(newFormData);
 
-    // Also update schoolTypeId logic if needed
     if (key === "schoolType") {
       switch (value) {
         case "Middle School":
@@ -59,121 +54,112 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
   ];
 
   return (
-    <View>
-      <View style={styles.container}>
-        <View style={styles.row}>
-          <TextInput
-            style={[styles.halfInput, { bottom: 60 }]}
-            placeholder="First Name"
-            value={formData.firstName}
-            onChangeText={(text) => handleChange("firstName", text)}
-            placeholderTextColor="#4F4F4F"
-          />
-          <TextInput
-            style={[styles.halfInput, { bottom: 60 }]}
-            placeholder="Last Name"
-            value={formData.lastName}
-            onChangeText={(text) => handleChange("lastName", text)}
-            placeholderTextColor="#4F4F4F"
-          />
-        </View>
-
+    <View style={styles.container}>
+      <View style={styles.row}>
         <TextInput
-          style={[styles.textInput, { bottom: 40, width: 280 }]}
-          placeholder="Email"
-          value={formData.email}
-          onChangeText={(text) => handleChange("email", text)}
-          placeholderTextColor="#4F4F4F"
-          autoCapitalize="none"
+          style={styles.halfInput}
+          placeholder="First Name"
+          value={formData.firstName}
+          onChangeText={(text) => handleChange("firstName", text)}
+          placeholderTextColor={Colors.textInput}
         />
-
         <TextInput
-          style={[styles.textInput, { bottom: 25, width: 280 }]}
-          placeholder="Password"
-          value={formData.password}
-          onChangeText={(text) => handleChange("password", text)}
-          placeholderTextColor="#4F4F4F"
-          secureTextEntry={true}
-          autoCapitalize="none"
-        />
-
-        <TextInput
-          style={[styles.textInput, { bottom: 10, width: 280 }]}
-          placeholder="Confrim Password"
-          value={formData.confirmPassword}
-          onChangeText={(text) => handleChange("confirmPassword", text)}
-          placeholderTextColor="#4F4F4F"
-          secureTextEntry={true}
-          autoCapitalize="none"
-        />
-        <StatePicker
-          selectedValue={formData.state}
-          onValueChange={(value) => handleChange("state", value)}
-        />
-
-        <CustomPicker
-          selectedValue={formData.schoolType}
-          onValueChange={(value) => handleChange("schoolType", value)}
-          items={schoolTypeOptions}
-          placeholder="Select School Type"
-          placeholderTextColor="#4F4F4F"
-        />
-        <SchoolPicker
-          selectedValue={formData.schoolName}
-          onValueChange={(value) => handleChange("schoolName", value)}
-          selectedState={formData.state}
-          selectedSchoolType={formData.schoolType}
+          style={styles.halfInput}
+          placeholder="Last Name"
+          value={formData.lastName}
+          onChangeText={(text) => handleChange("lastName", text)}
+          placeholderTextColor={Colors.textInput}
         />
       </View>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={formData.email}
+        onChangeText={(text) => handleChange("email", text)}
+        placeholderTextColor={Colors.textInput}
+        autoCapitalize="none"
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={formData.password}
+        onChangeText={(text) => handleChange("password", text)}
+        placeholderTextColor={Colors.textInput}
+        secureTextEntry
+        autoCapitalize="none"
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        value={formData.confirmPassword}
+        onChangeText={(text) => handleChange("confirmPassword", text)}
+        placeholderTextColor={Colors.textInput}
+        secureTextEntry
+        autoCapitalize="none"
+      />
+
+      <StatePicker
+        selectedValue={formData.state}
+        onValueChange={(value) => handleChange("state", value)}
+      />
+
+      <CustomPicker
+        selectedValue={formData.schoolType}
+        onValueChange={(value) => handleChange("schoolType", value)}
+        items={schoolTypeOptions}
+        placeholder="Select School Type"
+        placeholderTextColor={Colors.textInput}
+      />
+
+      <SchoolPicker
+        selectedValue={formData.schoolName}
+        onValueChange={(value) => handleChange("schoolName", value)}
+        selectedState={formData.state}
+        selectedSchoolType={formData.schoolType}
+      />
     </View>
   );
 };
 
+export default Step2;
+
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.background,
-  },
-  textInput: {
-    borderBottomColor: Colors.secondary,
-    fontFamily: "Inter",
-    fontSize: 16,
-    borderBottomWidth: 1,
-    width: 230,
-    margin: 5,
-    alignSelf: "center",
-    paddingBottom: 5,
-  },
-  firstName: {
-    borderBottomColor: Colors.secondary,
-    fontFamily: "Inter",
-    fontSize: 16,
-    borderBottomWidth: 1,
-    width: 100,
-  },
-  lastName: {
-    borderBottomColor: Colors.secondary,
-    fontFamily: "Inter",
-    fontSize: 16,
-    borderBottomWidth: 1,
-    width: 115,
-    left: 140,
-    bottom: 20,
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    bottom: 50
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginHorizontal: 30,
-    marginTop: 5,
-    gap: 15,
+    width: "100%",
+    marginBottom: 15,
   },
   halfInput: {
-    borderBottomColor: Colors.secondary,
+    width: "48%",
+    borderColor: Colors.bottomBorder,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     fontFamily: "Inter",
-    fontSize: 16,
-    borderBottomWidth: 1,
-    width: "45%",
-    paddingBottom: 5,
+    fontSize: 14,
+    backgroundColor: "#fff",
+  },
+  input: {
+    width: "100%",
+    borderColor: Colors.bottomBorder,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 15,
+    fontFamily: "Inter",
+    fontSize: 14,
+    backgroundColor: "#fff",
   },
 });
-
-export default Step2;

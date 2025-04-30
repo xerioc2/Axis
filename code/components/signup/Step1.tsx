@@ -48,10 +48,12 @@ const styles = StyleSheet.create({
     color: "#2F7D32",
     marginBottom: 30,
     fontSize: 28,
+    bottom: 35
   },
   radioContainer: {
     width: "100%",
     paddingHorizontal: 10,
+    bottom: 35
   },
 });
 
