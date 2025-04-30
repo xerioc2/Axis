@@ -9,6 +9,8 @@ import { useEffect, useState, useRef } from 'react';
 import ErrorMessage from '../../components/ErrorMessage';
 import { getStudentsBySectionId, getTeachersBySectionId } from '../../service/supabaseService';
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 type SectionDetailsRouteProp = RouteProp<RootStackParamList, 'TeacherSectionDetails'>;
 
@@ -154,7 +156,7 @@ const TeacherSectionDetailsScreen: React.FC = () => {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             {/* Content Area */}
             <ScrollView style={styles.content}>
                 {/* Back button */}
@@ -254,18 +256,18 @@ const TeacherSectionDetailsScreen: React.FC = () => {
             <TouchableOpacity style={styles.footer} onPress={openModal}>
                 <Text style={styles.footerTitle}>Section Details</Text>
             </TouchableOpacity>
-        </View>
-    );
+            </SafeAreaView>
+)
 };
 
 const styles = StyleSheet.create({
     container: { 
-        height: '100%',
-        display: 'flex',
+        flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
         backgroundColor: "#F2FFED",
     },
+    
     content: {
         flex: 1,
         padding: 20,
@@ -284,8 +286,10 @@ const styles = StyleSheet.create({
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 15,           // 👈 Add this line
         marginBottom: 15,
-    },
+      },
+      
     backButtonText: {
         fontSize: 16,
         color: "#005824",

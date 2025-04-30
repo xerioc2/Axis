@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/code/utils/navigation.types';
 import { compileGradeViewData } from '../../service/dataConverterService';
 import type { GradeViewDto, StudentPointDto } from '../../../App';
-import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const StudentGradeView: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'StudentSectionDetails'>>();
@@ -53,25 +53,26 @@ const StudentGradeView: React.FC = () => {
       </View>
     );
   }
+
   const countStatuses = (): Record<number, number> => {
     const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
-  
     if (!gradeViewData) return counts;
-  
     for (const concept of gradeViewData.conceptsToPoints) {
       for (const point of concept.points) {
         counts[point.point_status_id] = (counts[point.point_status_id] || 0) + 1;
       }
     }
-  
     return counts;
   };
-  
-  const statusCounts = countStatuses(); // ✅ ADD THIS
-  
+
+  const statusCounts = countStatuses();
+
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.content}>
+    <SafeAreaView style={styles.container}>
+<ScrollView
+  style={styles.content}
+  contentContainerStyle={[styles.scrollContent, { minHeight: '100%' } ]} // adjust as needed
+>
 
         <View style={styles.gradesContainer}>
           <Text style={styles.header}>Your Progress</Text>
@@ -84,20 +85,18 @@ const StudentGradeView: React.FC = () => {
           </View>
 
           <View style={styles.columnLabels}>
-          <Text style={styles.conceptLabel}>Concept</Text>
-  <View style={{ flex: 4, alignItems: 'center' }}>
-    <Text style={styles.columnHeaderText}>Check Points</Text>
-  </View>
-  <View style={{ flex: 5, alignItems: 'center' }}>
-    <Text style={styles.columnHeaderText}>Test Points</Text>
-  </View>
-</View>
-
+            <Text style={styles.conceptLabel}>Concept</Text>
+            <View style={{ flex: 4, alignItems: 'center' }}>
+              <Text style={styles.columnHeaderText}>Check Points</Text>
+            </View>
+            <View style={{ flex: 5, alignItems: 'center' }}>
+              <Text style={styles.columnHeaderText}>Test Points</Text>
+            </View>
+          </View>
 
           {gradeViewData?.topicsToConcepts.map((topicToConcepts, topicIndex) => (
             <View key={topicIndex} style={styles.topicContainer}>
               <Text style={styles.topicTitle}>{topicToConcepts.topic.topic_title}</Text>
-
               {topicToConcepts.concepts.map(concept => {
                 const { checkPoints, testPoints } = getPointsForConcept(concept.concept_id);
                 return (
@@ -120,39 +119,33 @@ const StudentGradeView: React.FC = () => {
               })}
             </View>
           ))}
+
+          <View style={styles.summaryContainer}>
+            <Text style={styles.summaryText}>✅ Passed: {statusCounts[4]}</Text>
+            <Text style={styles.summaryText}>🟡 Needs Revision: {statusCounts[3]}</Text>
+            <Text style={styles.summaryText}>❌ Failed: {statusCounts[2]}</Text>
+            <Text style={styles.summaryText}>⬜ Not Attempted: {statusCounts[1]}</Text>
+          </View>
         </View>
-
       </ScrollView>
-      <View style={styles.footer}>
-        <Text style={styles.footerTitle}>Student Grades</Text>
-      </View>
-      <View style={styles.summaryContainer}>
-  <Text style={styles.summaryText}>✅ Passed: {statusCounts[4]}</Text>
-  <Text style={styles.summaryText}>🟡 Needs Revision: {statusCounts[3]}</Text>
-  <Text style={styles.summaryText}>❌ Failed: {statusCounts[2]}</Text>
-  <Text style={styles.summaryText}>⬜ Not Attempted: {statusCounts[1]}</Text>
-</View>
-
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2FFED' },
   content: { flex: 1, padding: 20 },
+  scrollContent: { paddingBottom: 40 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F2FFED' },
   loadingText: { marginTop: 10, color: '#005824', fontSize: 16 },
-  backButton: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-  backButtonText: { fontSize: 16, color: '#005824', marginLeft: 5 },
   gradesContainer: { backgroundColor: '#FFFFFF', borderRadius: 10, padding: 15, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
-  header: { fontSize: 20, fontWeight: 'bold', color: '#005824', marginBottom: 15 },
+  header: { fontSize: 40, fontWeight: 'bold', color: '#005824', marginBottom: 15 },
   legendContainer: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginBottom: 16, gap: 8 },
   legendItem: { width: 16, height: 16, borderRadius: 3, marginRight: 4, borderColor: '#DDD', borderWidth: 1 },
   legendText: { fontSize: 12, marginRight: 8 },
   columnLabels: { flexDirection: 'row', paddingBottom: 10, marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#EEEEEE' },
   conceptLabel: { flex: 3, fontWeight: 'bold', color: '#555' },
-  checkPointsLabel: { flex: 2, fontWeight: 'bold', textAlign: 'center', color: '#555' },
-  testPointsLabel: { flex: 2, fontWeight: 'bold', textAlign: 'center', color: '#555' },
+  columnHeaderText: { fontWeight: 'bold', fontSize: 14, color: '#333' },
   topicContainer: { marginBottom: 20 },
   topicTitle: { fontSize: 16, fontWeight: 'bold', backgroundColor: '#EEEEEE', padding: 10, borderRadius: 5, marginBottom: 10, color: '#005824' },
   conceptRow: { flexDirection: 'row', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#EEEEEE', alignItems: 'center' },
@@ -163,27 +156,8 @@ const styles = StyleSheet.create({
   pointBoxRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
   pointBox: { width: 18, height: 18, borderRadius: 3, borderWidth: 1, borderColor: '#DDDDDD' },
   noPointsText: { fontSize: 12, color: '#AAAAAA', textAlign: 'center', fontStyle: 'italic' },
-  footer: { height: 60, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', borderTopWidth: 1, borderTopColor: '#ddd' },
-  columnHeaderText: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    color: '#333',
-  },
-  summaryContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginVertical: 12,
-    gap: 12,
-  },
-  summaryText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  
-  
-  footerTitle: { fontSize: 18, fontWeight: 'bold', color: '#005824' },
+  summaryContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 20, gap: 12 },
+  summaryText: { fontSize: 14, fontWeight: '500', color: '#333' },
 });
 
 export default StudentGradeView;

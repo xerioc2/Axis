@@ -7,6 +7,8 @@ import type { GradeViewDto, StudentPointDto } from '../../../App';
 import { compileGradeViewData } from '../../service/dataConverterService';
 import { updateStudentPoint } from '../../service/supabaseService';
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 type TeacherGradeViewRouteProp = RouteProp<RootStackParamList, 'TeacherGradeView'>;
 
@@ -256,7 +258,7 @@ const TeacherGradeView: React.FC = () => {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <ScrollView style={styles.content}>
                 {/* Back button */}
                 <TouchableOpacity 
@@ -357,18 +359,16 @@ const TeacherGradeView: React.FC = () => {
             <View style={styles.footer}>
                 <Text style={styles.footerTitle}>Student Grades</Text>
             </View>
-        </View>
+            </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: { 
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
+        flex: 1,
         backgroundColor: "#F2FFED",
     },
+    
     content: {
         flex: 1,
         padding: 20,
