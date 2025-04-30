@@ -24,44 +24,54 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
   if (!fontsLoaded) return null;
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={require("../../assets/images/axis_lettering.png")}
-        style={styles.logo}
-      />
+    <View style={styles.pageWrapper}>
+      <View style={styles.card}>
+        <Image
+          source={require("../../assets/images/axis_lettering.png")}
+          style={styles.logo}
+        />
 
-      <Text style={styles.slogan}>WHERE LEARNING{"\n"}MEETS MASTERY</Text>
+        <Text style={styles.slogan}>WHERE LEARNING MEETS MASTERY</Text>
 
-      <SignUpManager />
+        <SignUpManager />
+      </View>
     </View>
   );
 };
+
 export default SignUpScreen;
 
 const styles = StyleSheet.create({
-  container: {
+  pageWrapper: {
     flex: 1,
     backgroundColor: Colors.background,
+    justifyContent: "center",
     alignItems: "center",
-    paddingTop: 67,
+    padding: 20,
+  },
+  card: {
+    width: 400,
+    padding: 30,
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 8,
+    alignItems: "center",
   },
   logo: {
+    width: 400,
+    height: 125,
+    resizeMode: "contain",
     marginBottom: 10,
   },
   slogan: {
-    position: "absolute",
+    color: Colors.secondary,
     fontFamily: "Rexton Bold",
-    fontSize: 12,
-    lineHeight: 22,
-    color: Colors.primary,
+    fontSize: 14,
     textAlign: "center",
-    marginTop: 230,
-  },
-  link: {
-    color: Colors.primary,
-    fontSize: 16,
-    fontWeight: "600",
-    fontFamily: "SF Pro",
-    marginTop: 2,
+    marginBottom: 30,
   },
 });
