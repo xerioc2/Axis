@@ -23,7 +23,7 @@ const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
   closeModal,
   slideAnim,
   setCreatingSection,
-  setCreatingCourse
+  setCreatingCourse,
 }) => {
   const handleAddSection = () => {
     // First set the state to show the section form
@@ -43,7 +43,10 @@ const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.modalOverlay}>
         <Animated.View
-          style={[styles.modalContainer, { transform: [{ translateY: slideAnim }] }]}
+          style={[
+            styles.modalContainer,
+            { transform: [{ translateY: slideAnim }] },
+          ]}
         >
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -53,20 +56,19 @@ const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
               contentContainerStyle={{ paddingBottom: 100 }}
               keyboardShouldPersistTaps="handled"
             >
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={handleAddSection}
                 style={styles.modalButton}
               >
                 <Text style={styles.modalButtonText}>Add Section</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={handleAddCourse}
                 style={styles.modalButton}
               >
                 <Text style={styles.modalButtonText}>Add Course</Text>
               </TouchableOpacity>
-
 
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: "#ccc" }]}
