@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
+  
   View,
   Text,
   TouchableOpacity,
@@ -16,7 +17,7 @@ import type {
   TeacherDataDto,
   SectionPreviewDto,
 } from "../../../App";
-import { useRoute, RouteProp } from "@react-navigation/native";
+import { useFocusEffect, useRoute, RouteProp } from "@react-navigation/native";
 import type { RootStackParamList } from "../../utils/navigation.types";
 import ErrorMessage from "../../components/ErrorMessage";
 import TeacherDashboardMenu from "../../components/teacherDashboard/TeacherDashboardMenu";
@@ -41,21 +42,29 @@ const TeacherDashboard: React.FC = () => {
   const route = useRoute<TeacherDashboardRouteProp>();
   const teacher = route.params;
 
+  const navigation = useNavigation<NavigationProps>();
   const slideAnim = useRef(new Animated.Value(500)).current;
 
-  const [sectionPreviews, setSectionPreviews] = useState<SectionPreviewDto[]>(
-    []
-  );
+  const [sectionPreviews, setSectionPreviews] = useState<SectionPreviewDto[]>([]);
   const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
-  // Default to sections view
-  const [selectedMenuOption, setSelectedMenuOption] = useState<
-    "sections" | "courses"
-  >("sections");
+  const [selectedMenuOption, setSelectedMenuOption] = useState<"sections" | "courses">("sections");
   const [modalVisible, setModalVisible] = useState(false);
   const [creatingSection, setCreatingSection] = useState(false);
   const [creatingCourse, setCreatingCourse] = useState(false);
-  const navigation = useNavigation<NavigationProps>();
+
+  // 🧠 Reset all modal/creation states on screen focus
+  useFocusEffect(
+    React.useCallback(() => {
+      setModalVisible(false);
+      setCreatingSection(false);
+      setCreatingCourse(false);
+
+      return () => {
+        // Optional cleanup
+      };
+    }, [])
+  );
 
   // Function to refresh data after creating a new course or section
   const refreshData = async () => {

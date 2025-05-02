@@ -1,9 +1,12 @@
+// Import statements
 import React, { useState, useEffect } from "react";
 import {
+  SafeAreaView,
   View,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
@@ -11,6 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  FlatList
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Calendar, DateData } from "react-native-calendars";
@@ -28,13 +32,12 @@ import {
   getSemesters
 } from "../../service/supabaseService";
 
-
 const CreateCourseForm: React.FC<{
   userId?: string;
   schoolId: number;
   onSuccess?: () => void;
   onCancel?: () => void;
-}> = ({ userId, onSuccess, onCancel }) => {
+}> = ({ userId, schoolId, onSuccess, onCancel }) => {
   // Section state
   const [sectionIdentifier, setSectionIdentifier] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
@@ -174,22 +177,14 @@ const CreateCourseForm: React.FC<{
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    if (showCourseModal) {
-      const timer = setTimeout(() => {
-        setShowCourseModal(false);
-        console.log("⏱️ Auto-closed course modal after 5 seconds");
-      }, 5000);
-  
-      return () => clearTimeout(timer); // Clean up if closed manually
-    }
-  }, [showCourseModal]);
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <ScrollView style={styles.scrollView}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         <View style={styles.header}>
           <Text style={styles.headerText}>Create New Section</Text>
           <TouchableOpacity style={styles.closeButton} onPress={onCancel}>
@@ -305,99 +300,175 @@ const CreateCourseForm: React.FC<{
         </View>
       </ScrollView>
 
-      {/* Course Selection Modal */}
+      {/* Course Selection Modal - New Implementation */}
       <Modal
         visible={showCourseModal}
         transparent={true}
-        animationType="slide"
+        animationType={Platform.OS === 'ios' ? 'slide' : 'fade'}
+        onRequestClose={() => setShowCourseModal(false)}
+        statusBarTranslucent={true}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select a Course</Text>
-            
-            <ScrollView style={styles.modalScrollView}>
-              {courses.length === 0 ? (
-                <Text style={styles.noItemsText}>No courses available. Create a course first.</Text>
-              ) : (
-                courses.map((course) => (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%'
+          }}
+          activeOpacity={1}
+          onPress={() => setShowCourseModal(false)}
+        >
+          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+            <View
+              style={{
+                backgroundColor: 'white',
+                width: '85%',
+                maxHeight: Platform.OS === 'ios' ? '70%' : '80%',
+                borderRadius: 10,
+                padding: 15,
+                elevation: 5,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+              }}
+            >
+              <Text style={styles.modalTitle}>Select a Course</Text>
+              
+              <FlatList
+                data={courses}
+                style={{ maxHeight: 300 }}
+                keyExtractor={(item) => item.course_id.toString()}
+                renderItem={({ item }) => (
                   <TouchableOpacity
-                    key={course.course_id}
                     style={[
                       styles.modalItem,
-                      selectedCourseId === course.course_id && styles.selectedModalItem
+                      selectedCourseId === item.course_id && styles.selectedModalItem
                     ]}
                     onPress={() => {
-                      setSelectedCourseId(course.course_id);
+                      setSelectedCourseId(item.course_id);
                       setShowCourseModal(false);
                     }}
                   >
-                    <Text style={styles.courseItemText}>
-                      {course.course_name}
-                    </Text>
-                    {course.course_identifier && (
+                    <Text style={styles.courseItemText}>{item.course_name}</Text>
+                    {item.course_identifier && (
                       <Text style={styles.courseIdentifierText}>
-                        {course.course_identifier}
+                        {item.course_identifier}
                       </Text>
                     )}
                   </TouchableOpacity>
-                ))
-              )}
-            </ScrollView>
-            
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setShowCourseModal(false)}
-            >
-              <Text style={styles.modalCloseButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+                )}
+                ListEmptyComponent={
+                  <Text style={styles.noItemsText}>
+                    No courses available. Create a course first.
+                  </Text>
+                }
+              />
 
-      {/* Semester Selection Modal */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#eee',
+                  padding: 12,
+                  borderRadius: 8,
+                  alignItems: 'center',
+                  marginTop: 15
+                }}
+                onPress={() => setShowCourseModal(false)}
+              >
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
+                  Close
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableWithoutFeedback>
+        </TouchableOpacity>
+      </Modal>
+      
+      {/* Semester Selection Modal - New Implementation */}
       <Modal
         visible={showSemesterModal}
         transparent={true}
-        animationType="slide"
+        animationType={Platform.OS === 'ios' ? 'slide' : 'fade'}
+        onRequestClose={() => setShowSemesterModal(false)}
+        statusBarTranslucent={true}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select a Semester</Text>
-            
-            <ScrollView style={styles.modalScrollView}>
-              {semesters.length === 0 ? (
-                <Text style={styles.noItemsText}>No semesters available.</Text>
-              ) : (
-                semesters.map((semester) => (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%'
+          }}
+          activeOpacity={1}
+          onPress={() => setShowSemesterModal(false)}
+        >
+          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+            <View
+              style={{
+                backgroundColor: 'white',
+                width: '85%',
+                maxHeight: Platform.OS === 'ios' ? '70%' : '80%',
+                borderRadius: 10,
+                padding: 15,
+                elevation: 5,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+              }}
+            >
+              <Text style={styles.modalTitle}>Select a Semester</Text>
+              
+              <FlatList
+                data={semesters}
+                style={{ maxHeight: 300 }}
+                keyExtractor={(item) => item.semester_id.toString()}
+                renderItem={({ item }) => (
                   <TouchableOpacity
-                    key={semester.semester_id}
                     style={[
                       styles.modalItem,
-                      selectedSemesterId === semester.semester_id && styles.selectedModalItem
+                      selectedSemesterId === item.semester_id && styles.selectedModalItem
                     ]}
                     onPress={() => {
-                      setSelectedSemesterId(semester.semester_id);
+                      setSelectedSemesterId(item.semester_id);
                       setShowSemesterModal(false);
                     }}
                   >
                     <Text style={styles.semesterItemText}>
-                      {semester.season} {semester.year}
+                      {item.season} {item.year}
                     </Text>
                   </TouchableOpacity>
-                ))
-              )}
-            </ScrollView>
-            
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setShowSemesterModal(false)}
-            >
-              <Text style={styles.modalCloseButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+                )}
+                ListEmptyComponent={
+                  <Text style={styles.noItemsText}>
+                    No semesters available.
+                  </Text>
+                }
+              />
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#eee',
+                  padding: 12,
+                  borderRadius: 8,
+                  alignItems: 'center',
+                  marginTop: 15
+                }}
+                onPress={() => setShowSemesterModal(false)}
+              >
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
+                  Close
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableWithoutFeedback>
+        </TouchableOpacity>
       </Modal>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -527,29 +598,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    width: "100%",
-    maxHeight: "80%",
-  },
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 16,
     color: "#005824",
     textAlign: "center",
-  },
-  modalScrollView: {
-    maxHeight: 300,
   },
   modalItem: {
     padding: 16,
