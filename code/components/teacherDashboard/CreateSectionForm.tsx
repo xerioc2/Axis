@@ -1,13 +1,9 @@
-// IMPROVED CREATE SECTION FORM WITH CLEARER POINT CONFIGURATION
-// CreateSectionForm.tsx
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
@@ -15,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
-  FlatList,
+  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -26,7 +22,6 @@ import type {
   Semester,
   Topic,
   Concept,
-  Point
 } from "../../../App";
 import { 
   createSection, 
@@ -55,6 +50,14 @@ type ConceptWithPoints = {
   testPoints: number;
 };
 
+// Modal type enum - using string values to ensure proper TypeScript comparison
+enum ModalType {
+  None = 'None',
+  Course = 'Course',
+  Semester = 'Semester', 
+  Topic = 'Topic'
+}
+
 const CreateSectionForm: React.FC<{
   userId?: string;
   onSuccess?: () => void;
@@ -75,7 +78,6 @@ const CreateSectionForm: React.FC<{
   const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
   const [allTopics, setAllTopics] = useState<Topic[]>([]);
   const [conceptsByTopic, setConceptsByTopic] = useState<Map<number, ConceptWithPoints[]>>(new Map());
-  const [showTopicModal, setShowTopicModal] = useState(false);
   
   // Default values for all concepts
   const [defaultCheckPoints, setDefaultCheckPoints] = useState(3);
@@ -87,12 +89,14 @@ const CreateSectionForm: React.FC<{
   // Dynamic data
   const [courses, setCourses] = useState<Course[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [showCourseModal, setShowCourseModal] = useState(false);
-  const [showSemesterModal, setShowSemesterModal] = useState(false);
+  
+  // Single modal state for all modals
+  const [activeModal, setActiveModal] = useState<ModalType>(ModalType.None);
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [createdSectionId, setCreatedSectionId] = useState<number | null>(null);
+  const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
 
   // Load courses and semesters
   useEffect(() => {
@@ -165,9 +169,10 @@ const CreateSectionForm: React.FC<{
     fetchTopics();
   }, [selectedCourseId, defaultCheckPoints, defaultTestPoints]);
 
-  // Handle date change
+  // Platform-specific date change handler
   const onDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
+    setShowDatePicker(Platform.OS === 'web'); // Only keep open on web
+    
     if (selectedDate) {
       setStartDate(selectedDate);
     }
@@ -351,11 +356,14 @@ const CreateSectionForm: React.FC<{
     setCurrentStep(prev => Math.max(1, prev - 1));
   };
 
-  // Create section and all configured points
-  const handleSubmit = async () => {
+  // Create section and all configured points with debounce
+  const handleSubmit = useCallback(async () => {
+    if (isSubmitButtonDisabled) return;
     if (!validateStep() || !userId) return;
 
+    setIsSubmitButtonDisabled(true);
     setIsLoading(true);
+    
     try {
       // 1. Create Section
       const sectionData: SectionInsertDto = {
@@ -408,10 +416,15 @@ const CreateSectionForm: React.FC<{
     } catch (err: any) {
       console.error("Error creating section:", err);
       setError(err.message || "Failed to create section");
+      setIsSubmitButtonDisabled(false);
     } finally {
       setIsLoading(false);
+      // Reset the button disable after a short delay
+      setTimeout(() => {
+        setIsSubmitButtonDisabled(false);
+      }, 500);
     }
-  };
+  }, [userId, sectionIdentifier, selectedCourseId, selectedSemesterId, startDate, pointsToCreate, isSubmitButtonDisabled, onSuccess]);
 
   // Calculate total points
   const calculateTotalPoints = () => {
@@ -446,6 +459,8 @@ const CreateSectionForm: React.FC<{
                 value={sectionIdentifier}
                 onChangeText={setSectionIdentifier}
                 placeholder="e.g., 03, W1, Period 3, etc..."
+                returnKeyType="next"
+                accessibilityLabel="Section identifier input"
               />
             </View>
 
@@ -453,7 +468,8 @@ const CreateSectionForm: React.FC<{
               <Text style={styles.label}>Course*</Text>
               <TouchableOpacity 
                 style={styles.pickerButton}
-                onPress={() => setShowCourseModal(true)}
+                onPress={() => setActiveModal(ModalType.Course)}
+                accessibilityLabel="Select course button"
               >
                 <Text style={styles.pickerButtonText}>
                   {getSelectedCourseName()}
@@ -466,7 +482,8 @@ const CreateSectionForm: React.FC<{
               <Text style={styles.label}>Semester*</Text>
               <TouchableOpacity 
                 style={styles.pickerButton}
-                onPress={() => setShowSemesterModal(true)}
+                onPress={() => setActiveModal(ModalType.Semester)}
+                accessibilityLabel="Select semester button"
               >
                 <Text style={styles.pickerButtonText}>
                   {getSelectedSemesterName()}
@@ -480,6 +497,7 @@ const CreateSectionForm: React.FC<{
               <TouchableOpacity 
                 style={styles.pickerButton}
                 onPress={() => setShowDatePicker(true)}
+                accessibilityLabel="Select date button"
               >
                 <Text style={styles.pickerButtonText}>
                   {formatDate(startDate)}
@@ -488,13 +506,23 @@ const CreateSectionForm: React.FC<{
               </TouchableOpacity>
             </View>
 
+            {/* Platform-specific date picker */}
             {showDatePicker && (
-              <DateTimePicker
-                value={startDate}
-                mode="date"
-                display="default"
-                onChange={onDateChange}
-              />
+              Platform.OS === 'ios' || Platform.OS === 'android' ? (
+                <DateTimePicker
+                  value={startDate}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={onDateChange}
+                />
+              ) : (
+                <DateTimePicker
+                  value={startDate}
+                  mode="date"
+                  display="default"
+                  onChange={onDateChange}
+                />
+              )
             )}
           </View>
         );
@@ -526,6 +554,7 @@ const CreateSectionForm: React.FC<{
                         <TouchableOpacity 
                           style={styles.countButton}
                           onPress={() => setDefaultCheckPoints(prev => Math.max(0, prev - 1))}
+                          accessibilityLabel="Decrease default check points"
                         >
                           <Text style={styles.countButtonText}>-</Text>
                         </TouchableOpacity>
@@ -533,6 +562,7 @@ const CreateSectionForm: React.FC<{
                         <TouchableOpacity 
                           style={styles.countButton}
                           onPress={() => setDefaultCheckPoints(prev => prev + 1)}
+                          accessibilityLabel="Increase default check points"
                         >
                           <Text style={styles.countButtonText}>+</Text>
                         </TouchableOpacity>
@@ -545,6 +575,7 @@ const CreateSectionForm: React.FC<{
                         <TouchableOpacity 
                           style={styles.countButton}
                           onPress={() => setDefaultTestPoints(prev => Math.max(0, prev - 1))}
+                          accessibilityLabel="Decrease default test points"
                         >
                           <Text style={styles.countButtonText}>-</Text>
                         </TouchableOpacity>
@@ -552,6 +583,7 @@ const CreateSectionForm: React.FC<{
                         <TouchableOpacity 
                           style={styles.countButton}
                           onPress={() => setDefaultTestPoints(prev => prev + 1)}
+                          accessibilityLabel="Increase default test points"
                         >
                           <Text style={styles.countButtonText}>+</Text>
                         </TouchableOpacity>
@@ -562,6 +594,7 @@ const CreateSectionForm: React.FC<{
                   <TouchableOpacity 
                     style={styles.applyDefaultsButton}
                     onPress={applyDefaultPointsToAll}
+                    accessibilityLabel="Apply to all concepts button"
                   >
                     <Text style={styles.applyDefaultsButtonText}>Apply to All Concepts</Text>
                   </TouchableOpacity>
@@ -574,7 +607,8 @@ const CreateSectionForm: React.FC<{
                   <Text style={styles.label}>Filter by Topic</Text>
                   <TouchableOpacity 
                     style={styles.pickerButton}
-                    onPress={() => setShowTopicModal(true)}
+                    onPress={() => setActiveModal(ModalType.Topic)}
+                    accessibilityLabel="Filter by topic button"
                   >
                     <Text style={styles.pickerButtonText}>
                       {getSelectedTopicName()}
@@ -610,6 +644,7 @@ const CreateSectionForm: React.FC<{
                                       Math.max(0, concept.checkPoints - 1), 
                                       concept.testPoints
                                     )}
+                                    accessibilityLabel={`Decrease check points for ${concept.concept_title}`}
                                   >
                                     <Text style={styles.countButtonText}>-</Text>
                                   </TouchableOpacity>
@@ -622,6 +657,7 @@ const CreateSectionForm: React.FC<{
                                       concept.checkPoints + 1, 
                                       concept.testPoints
                                     )}
+                                    accessibilityLabel={`Increase check points for ${concept.concept_title}`}
                                   >
                                     <Text style={styles.countButtonText}>+</Text>
                                   </TouchableOpacity>
@@ -639,6 +675,7 @@ const CreateSectionForm: React.FC<{
                                       concept.checkPoints, 
                                       Math.max(0, concept.testPoints - 1)
                                     )}
+                                    accessibilityLabel={`Decrease test points for ${concept.concept_title}`}
                                   >
                                     <Text style={styles.countButtonText}>-</Text>
                                   </TouchableOpacity>
@@ -651,6 +688,7 @@ const CreateSectionForm: React.FC<{
                                       concept.checkPoints, 
                                       concept.testPoints + 1
                                     )}
+                                    accessibilityLabel={`Increase test points for ${concept.concept_title}`}
                                   >
                                     <Text style={styles.countButtonText}>+</Text>
                                   </TouchableOpacity>
@@ -761,711 +799,677 @@ const CreateSectionForm: React.FC<{
     }
   };
 
+  // Render the selection modal with dynamic content based on active modal type
+  const renderSelectionModal = () => {
+    if (activeModal === ModalType.None) return null;
+    
+    let modalTitle = "";
+    let modalContent: JSX.Element | null = null;
+    
+    switch (activeModal) {
+      case ModalType.Course:
+        modalTitle = "Select a Course";
+        modalContent = (
+          <ScrollView style={styles.modalScrollView} keyboardShouldPersistTaps="handled">
+            {courses.length === 0 ? (
+              <Text style={styles.noItemsText}>No courses available. Create a course first.</Text>
+            ) : (
+              courses.map((course) => (
+                <TouchableOpacity
+                  key={course.course_id}
+                  style={[
+                    styles.modalItem,
+                    selectedCourseId === course.course_id && styles.selectedModalItem
+                  ]}
+                  onPress={() => {
+                    setSelectedCourseId(course.course_id);
+                    setActiveModal(ModalType.None);
+                    // Reset topic and concept selections when course changes
+                    setSelectedTopicId(null);
+                    setConceptsByTopic(new Map());
+                  }}
+                  accessibilityLabel={`Select course ${course.course_name}`}
+                >
+                  <Text style={styles.itemText}>{course.course_name}</Text>
+                  {course.course_identifier && (
+                    <Text style={styles.itemSubtext}>{course.course_identifier}</Text>
+                  )}
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+        );
+        break;
+        
+      case ModalType.Semester:
+        modalTitle = "Select a Semester";
+        modalContent = (
+          <ScrollView style={styles.modalScrollView} keyboardShouldPersistTaps="handled">
+          {semesters.length === 0 ? (
+            <Text style={styles.noItemsText}>No semesters available.</Text>
+          ) : (
+            semesters.map((semester) => (
+              <TouchableOpacity
+                key={semester.semester_id}
+                style={[
+                  styles.modalItem,
+                  selectedSemesterId === semester.semester_id && styles.selectedModalItem
+                ]}
+                onPress={() => {
+                  setSelectedSemesterId(semester.semester_id);
+                  setActiveModal(ModalType.None);
+                }}
+                accessibilityLabel={`Select semester ${semester.season} ${semester.year}`}
+              >
+                <Text style={styles.itemText}>{semester.season} {semester.year}</Text>
+              </TouchableOpacity>
+            ))
+          )}
+        </ScrollView>
+      );
+      break;
+      
+    case ModalType.Topic:
+      modalTitle = "Select a Topic";
+      modalContent = (
+        <ScrollView style={styles.modalScrollView} keyboardShouldPersistTaps="handled">
+          <TouchableOpacity
+            style={[
+              styles.modalItem,
+              selectedTopicId === null && styles.selectedModalItem
+            ]}
+            onPress={() => {
+              setSelectedTopicId(null);
+              setActiveModal(ModalType.None);
+            }}
+            accessibilityLabel="Select all topics"
+          >
+            <Text style={styles.itemText}>All Topics</Text>
+          </TouchableOpacity>
+          
+          {allTopics.length === 0 ? (
+            <Text style={styles.noItemsText}>No topics available for this course.</Text>
+          ) : (
+            allTopics.map((topic) => (
+              <TouchableOpacity
+                key={topic.topic_id}
+                style={[
+                  styles.modalItem,
+                  selectedTopicId === topic.topic_id && styles.selectedModalItem
+                ]}
+                onPress={() => {
+                  setSelectedTopicId(topic.topic_id);
+                  setActiveModal(ModalType.None);
+                }}
+                accessibilityLabel={`Select topic ${topic.topic_title}`}
+              >
+                <Text style={styles.itemText}>{topic.topic_title}</Text>
+                {topic.topic_description && (
+                  <Text style={styles.itemSubtext}>{topic.topic_description}</Text>
+                )}
+              </TouchableOpacity>
+            ))
+          )}
+        </ScrollView>
+      );
+      break;
+  }
+  
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Create New Section</Text>
-          <TouchableOpacity style={styles.closeButton} onPress={onCancel}>
-            <Ionicons name="close" size={24} color="#333" />
+<Modal
+  visible={activeModal === ModalType.Course || 
+           activeModal === ModalType.Semester || 
+           activeModal === ModalType.Topic}
+  transparent={true}
+  animationType={Platform.OS === 'android' ? 'slide' : 'fade'}
+  onRequestClose={() => setActiveModal(ModalType.None)}
+>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{modalTitle}</Text>
+          
+          {modalContent}
+          
+          <TouchableOpacity
+            style={styles.modalCloseButton}
+            onPress={() => setActiveModal(ModalType.None)}
+            accessibilityLabel="Close selection modal"
+          >
+            <Text style={styles.modalCloseButtonText}>Close</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Step indicator */}
-        <View style={styles.stepIndicator}>
-          {Array.from({ length: totalSteps }).map((_, index) => (
-            <View 
-              key={index} 
-              style={[
-                styles.stepDot,
-                currentStep === index + 1 ? styles.activeStepDot : {}
-              ]}
-            />
-          ))}
-        </View>
-
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-        {renderStepContent()}
-
-        <View style={styles.buttonContainer}>
-          {currentStep > 1 && (
-            <TouchableOpacity
-              style={[styles.button, styles.backButton]}
-              onPress={prevStep}
-              disabled={isLoading}
-            >
-              <Ionicons name="arrow-back" size={20} color="#333" />
-              <Text style={styles.backButtonText}>Back</Text>
-            </TouchableOpacity>
-          )}
-
-          {currentStep < totalSteps ? (
-            <TouchableOpacity
-              style={[styles.button, styles.nextButton]}
-              onPress={nextStep}
-              disabled={isLoading}
-            >
-              <Text style={styles.nextButtonText}>Next</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={[styles.button, styles.submitButton]}
-              onPress={handleSubmit}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Create Section</Text>
-              )}
-            </TouchableOpacity>
-          )}
-        </View>
-      </ScrollView>
-
- {/* Course Selection Modal */}
-<Modal
-  visible={showCourseModal}
-  transparent
-  animationType={Platform.OS === 'ios' ? 'slide' : 'fade'}
-  onRequestClose={() => setShowCourseModal(false)}
-  statusBarTranslucent
->
-  <TouchableOpacity
-    style={{
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-    activeOpacity={1}
-    onPress={() => setShowCourseModal(false)}
-  >
-    <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-      <View
-        style={{
-          backgroundColor: 'white',
-          width: '85%',
-          maxHeight: '75%',
-          borderRadius: 12,
-          padding: 20,
-        }}
-      >
-        <Text style={styles.modalTitle}>Select a Course</Text>
-        <FlatList
-          data={courses}
-          keyExtractor={(item) => item.course_id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.modalItem,
-                selectedCourseId === item.course_id && styles.selectedModalItem,
-              ]}
-              onPress={() => {
-                setSelectedCourseId(item.course_id);
-                setShowCourseModal(false);
-                setSelectedTopicId(null);
-                setConceptsByTopic(new Map());
-              }}
-            >
-              <Text style={styles.courseItemText}>{item.course_name}</Text>
-              {item.course_identifier && (
-                <Text style={styles.courseIdentifierText}>{item.course_identifier}</Text>
-              )}
-            </TouchableOpacity>
-          )}
-          ListEmptyComponent={
-            <Text style={styles.noItemsText}>No courses available. Create a course first.</Text>
-          }
-        />
-        <TouchableOpacity
-          style={styles.modalCloseButton}
-          onPress={() => setShowCourseModal(false)}
-        >
-          <Text style={styles.modalCloseButtonText}>Close</Text>
-        </TouchableOpacity>
       </View>
-    </TouchableWithoutFeedback>
-  </TouchableOpacity>
-</Modal>
-{/* Semester Selection Modal */}
-<Modal
-  visible={showSemesterModal}
-  transparent
-  animationType={Platform.OS === 'ios' ? 'slide' : 'fade'}
-  onRequestClose={() => setShowSemesterModal(false)}
-  statusBarTranslucent
->
-  <TouchableOpacity
-    style={{
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-    activeOpacity={1}
-    onPress={() => setShowSemesterModal(false)}
-  >
-    <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-      <View
-        style={{
-          backgroundColor: 'white',
-          width: '85%',
-          maxHeight: '75%',
-          borderRadius: 12,
-          padding: 20,
-        }}
-      >
-        <Text style={styles.modalTitle}>Select a Semester</Text>
-        <FlatList
-          data={semesters}
-          keyExtractor={(item) => item.semester_id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.modalItem,
-                selectedSemesterId === item.semester_id && styles.selectedModalItem,
-              ]}
-              onPress={() => {
-                setSelectedSemesterId(item.semester_id);
-                setShowSemesterModal(false);
-              }}
-            >
-              <Text style={styles.semesterItemText}>
-                {item.season} {item.year}
-              </Text>
-            </TouchableOpacity>
-          )}
-          ListEmptyComponent={
-            <Text style={styles.noItemsText}>No semesters available.</Text>
-          }
-        />
-        <TouchableOpacity
-          style={styles.modalCloseButton}
-          onPress={() => setShowSemesterModal(false)}
-        >
-          <Text style={styles.modalCloseButtonText}>Close</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableWithoutFeedback>
-  </TouchableOpacity>
-</Modal>
-{/* Topic Selection Modal */}
-<Modal
-  visible={showTopicModal}
-  transparent
-  animationType={Platform.OS === 'ios' ? 'slide' : 'fade'}
-  onRequestClose={() => setShowTopicModal(false)}
-  statusBarTranslucent
->
-  <TouchableOpacity
-    style={{
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-    activeOpacity={1}
-    onPress={() => setShowTopicModal(false)}
-  >
-    <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-      <View
-        style={{
-          backgroundColor: 'white',
-          width: '85%',
-          maxHeight: '75%',
-          borderRadius: 12,
-          padding: 20,
-        }}
-      >
-        <Text style={styles.modalTitle}>Select a Topic</Text>
-        <FlatList
-          data={[{ topic_id: null, topic_title: 'All Topics' }, ...allTopics] as any[]}
-          keyExtractor={(item) =>
-            item.topic_id !== null ? item.topic_id.toString() : 'all-topics'
-          }
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.modalItem,
-                (item.topic_id === null && selectedTopicId === null) ||
-                (item.topic_id !== null && item.topic_id === selectedTopicId)
-                  ? styles.selectedModalItem
-                  : null,
-              ]}
-              onPress={() => {
-                setSelectedTopicId(item.topic_id);
-                setShowTopicModal(false);
-              }}
-            >
-              <Text style={styles.topicItemText}>{item.topic_title}</Text>
-              {item.topic_description && item.topic_id !== null && (
-                <Text style={styles.topicDescriptionText}>{item.topic_description}</Text>
-              )}
-            </TouchableOpacity>
-          )}
-          ListEmptyComponent={
-            <Text style={styles.noItemsText}>No topics available for this course.</Text>
-          }
-        />
-        <TouchableOpacity
-          style={styles.modalCloseButton}
-          onPress={() => setShowTopicModal(false)}
-        >
-          <Text style={styles.modalCloseButtonText}>Close</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableWithoutFeedback>
-  </TouchableOpacity>
-</Modal>
-
-    </KeyboardAvoidingView>
+    </Modal>
   );
 };
 
+// Main content render
+const renderContent = () => (
+  <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={styles.container}
+    keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+  >
+    <ScrollView 
+      style={styles.scrollView} 
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={styles.scrollContent}
+    >
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Create New Section</Text>
+        <TouchableOpacity 
+          style={styles.closeButton} 
+          onPress={onCancel}
+          accessibilityLabel="Close form"
+        >
+          <Ionicons name="close" size={24} color="#333" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Step indicator */}
+      <View style={styles.stepIndicator}>
+        {Array.from({ length: totalSteps }).map((_, index) => (
+          <View 
+            key={index} 
+            style={[
+              styles.stepDot,
+              currentStep === index + 1 ? styles.activeStepDot : {}
+            ]}
+          />
+        ))}
+      </View>
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+      {renderStepContent()}
+
+      <View style={styles.buttonContainer}>
+        {currentStep > 1 && (
+          <TouchableOpacity
+            style={[styles.button, styles.backButton]}
+            onPress={prevStep}
+            disabled={isLoading || isSubmitButtonDisabled}
+            accessibilityLabel="Back to previous step"
+          >
+            <Ionicons name="arrow-back" size={20} color="#333" />
+            <Text style={styles.backButtonText}>Back</Text>
+          </TouchableOpacity>
+        )}
+
+        {currentStep < totalSteps ? (
+          <TouchableOpacity
+            style={[styles.button, styles.nextButton]}
+            onPress={nextStep}
+            disabled={isLoading || isSubmitButtonDisabled}
+            accessibilityLabel="Next step"
+          >
+            <Text style={styles.nextButtonText}>Next</Text>
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[
+              styles.button, 
+              styles.submitButton,
+              (isLoading || isSubmitButtonDisabled) && styles.disabledButton
+            ]}
+            onPress={handleSubmit}
+            disabled={isLoading || isSubmitButtonDisabled}
+            accessibilityLabel="Create section button"
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Create Section</Text>
+            )}
+          </TouchableOpacity>
+        )}
+      </View>
+    </ScrollView>
+
+    {/* Single Selection Modal instead of multiple modals */}
+    {renderSelectionModal()}
+  </KeyboardAvoidingView>
+);
+
+// For iOS, wrap in SafeAreaView
+if (Platform.OS === 'ios') {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      {renderContent()}
+    </SafeAreaView>
+  );
+}
+
+// For other platforms, return content directly
+return renderContent();
+};
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  scrollView: {
-    padding: 16,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#005824",
-  },
-  closeButton: {
-    padding: 8,
-  },
-  stepIndicator: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  stepDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#ccc",
-    marginHorizontal: 5,
-  },
-  activeStepDot: {
-    backgroundColor: "#005824",
-    width: 12,
-    height: 12,
-  },
-  errorText: {
-    color: "#ff4d4d",
-    marginBottom: 10,
-    fontSize: 16,
-  },
-  formSection: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#333",
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 16,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: "#444",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: "#fafafa",
-  },
-  pickerButton: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: "#fafafa",
-  },
-  pickerButtonText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#ddd",
-    marginVertical: 16,
-  },
-  defaultPointsContainer: {
-    backgroundColor: "#f0f8ff",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-  },
-  defaultPointsTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#0066cc",
-    marginBottom: 12,
-  },
-  defaultPointsControls: {
-    marginBottom: 10,
-  },
-  pointTypeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 8,
-  },
-  pointTypeLabel: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
-  pointCountControls: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  countButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#eee",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  countButtonText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  countText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#005824",
-    marginHorizontal: 16,
-    minWidth: 24,
-    textAlign: "center",
-  },
-  applyDefaultsButton: {
-    backgroundColor: "#0066cc",
-    padding: 10,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  applyDefaultsButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  subheader: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginVertical: 10,
-    color: "#555",
-  },
-  conceptListContainer: {
-    marginTop: 10,
-  },
-  conceptCard: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 12,
-    padding: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  conceptHeader: {
-    marginBottom: 12,
-  },
-  topicLabel: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 4,
-  },
-  conceptTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  pointControls: {
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    padding: 10,
-  },
-  pointRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 6,
-  },
-  pointRowLabel: {
-    fontSize: 14,
-    color: "#555",
-    width: 100,
-  },
-  pointsSummary: {
-    backgroundColor: "#e6f7ef",
-    borderRadius: 8,
-    padding: 16,
-    marginTop: 20,
-  },
-  pointsSummaryTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#005824",
-    marginBottom: 8,
-  },
-  pointsSummaryText: {
-    fontSize: 14,
-    color: "#333",
-    marginBottom: 4,
-  },
-  pointsSummaryTotal: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#005824",
-    marginTop: 8,
-  },
-  helpContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f0f8ff",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  helpText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: "#333",
-    flex: 1,
-  },
-  noteContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#e6f2ff",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  noteText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: "#333",
-    flex: 1,
-  },
-  reviewSection: {
-    marginBottom: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRadius: 8,
-    backgroundColor: "#fafafa",
-  },
-  reviewHeader: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#005824",
-  },
-  reviewItem: {
-    flexDirection: "row",
-    marginVertical: 4,
-  },
-  reviewLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#555",
-    width: 100,
-  },
-  reviewValue: {
-    fontSize: 14,
-    color: "#333",
-    flex: 1,
-  },
-  noDataContainer: {
-    padding: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    backgroundColor: "#f9f9f9",
-  },
-  noDataText: {
-    fontSize: 14,
-    color: "#666",
-    fontStyle: "italic",
-    textAlign: "center",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-    marginBottom: 32,
-  },
-  button: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-  },
-  backButton: {
-    backgroundColor: "#f0f0f0",
-    marginRight: 8,
-  },
-  nextButton: {
-    backgroundColor: "#005824",
-    marginLeft: 8,
-  },
-  submitButton: {
-    backgroundColor: "#005824",
-    marginLeft: 8,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  backButtonText: {
-    color: "#333",
-    fontSize: 16,
-    marginLeft: 5,
-  },
-  nextButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginRight: 5,
-  },
-  modalContainer: {
-    position: 'absolute',
-    zIndex: 9999,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    width: '100%',
-    maxHeight: '80%',
-    elevation: 10, 
-  },
-  
-  modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    width: "100%",
-    maxHeight: "80%",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "#005824",
-    textAlign: "center",
-  },
-  modalScrollView: {
-    maxHeight: 300,
-  },
-  modalItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  selectedModalItem: {
-    backgroundColor: "#e6f7ef",
-  },
-  courseItemText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-  },
-  courseIdentifierText: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
-  },
-  semesterItemText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-  },
-  topicItemText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-  },
-  topicDescriptionText: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
-  },
-  noItemsText: {
-    padding: 16,
-    textAlign: "center",
-    color: "#666",
-    fontStyle: "italic",
-  },
-  modalCloseButton: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: "#eee",
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  modalCloseButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  
+safeArea: {
+  flex: 1,
+  backgroundColor: "#f5f5f5",
+},
+container: {
+  flex: 1,
+  backgroundColor: "#f5f5f5",
+},
+scrollView: {
+  flex: 1,
+},
+scrollContent: {
+  padding: 16,
+  paddingBottom: 32, // Extra padding at bottom
+},
+header: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 10,
+  paddingTop: Platform.OS === 'android' ? 8 : 0,
+},
+headerText: {
+  fontSize: 24,
+  fontWeight: "bold",
+  color: "#005824",
+},
+closeButton: {
+  padding: 8,
+},
+stepIndicator: {
+  flexDirection: "row",
+  justifyContent: "center",
+  marginBottom: 20,
+},
+stepDot: {
+  width: 10,
+  height: 10,
+  borderRadius: 5,
+  backgroundColor: "#ccc",
+  marginHorizontal: 5,
+},
+activeStepDot: {
+  backgroundColor: "#005824",
+  width: 12,
+  height: 12,
+},
+errorText: {
+  color: "#ff4d4d",
+  marginBottom: 10,
+  fontSize: 16,
+},
+formSection: {
+  backgroundColor: "#fff",
+  borderRadius: 8,
+  padding: 16,
+  marginBottom: 16,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 2,
+},
+sectionTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  marginBottom: 8,
+  color: "#333",
+},
+sectionSubtitle: {
+  fontSize: 14,
+  color: "#666",
+  marginBottom: 16,
+},
+inputGroup: {
+  marginBottom: 16,
+},
+label: {
+  fontSize: 16,
+  marginBottom: 8,
+  color: "#444",
+},
+input: {
+  borderWidth: 1,
+  borderColor: "#ddd",
+  borderRadius: 8,
+  padding: 12,
+  fontSize: 16,
+  backgroundColor: "#fafafa",
+},
+pickerButton: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: "#ddd",
+  borderRadius: 8,
+  padding: 12,
+  backgroundColor: "#fafafa",
+},
+pickerButtonText: {
+  fontSize: 16,
+  color: "#333",
+},
+divider: {
+  height: 1,
+  backgroundColor: "#ddd",
+  marginVertical: 16,
+},
+defaultPointsContainer: {
+  backgroundColor: "#f0f8ff",
+  borderRadius: 8,
+  padding: 16,
+  marginBottom: 16,
+},
+defaultPointsTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#0066cc",
+  marginBottom: 12,
+},
+defaultPointsControls: {
+  marginBottom: 10,
+},
+pointTypeContainer: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginVertical: 8,
+},
+pointTypeLabel: {
+  fontSize: 16,
+  color: "#333",
+  fontWeight: "500",
+},
+pointCountControls: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+countButton: {
+  width: 36,
+  height: 36,
+  borderRadius: 18,
+  backgroundColor: "#eee",
+  justifyContent: "center",
+  alignItems: "center",
+},
+countButtonText: {
+  fontSize: 20,
+  fontWeight: "bold",
+  color: "#333",
+},
+countText: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#005824",
+  marginHorizontal: 16,
+  minWidth: 24,
+  textAlign: "center",
+},
+applyDefaultsButton: {
+  backgroundColor: "#0066cc",
+  padding: 10,
+  borderRadius: 8,
+  alignItems: "center",
+  marginTop: 10,
+},
+applyDefaultsButtonText: {
+  color: "#fff",
+  fontSize: 14,
+  fontWeight: "bold",
+},
+subheader: {
+  fontSize: 16,
+  fontWeight: "bold",
+  marginVertical: 10,
+  color: "#555",
+},
+conceptListContainer: {
+  marginTop: 10,
+},
+conceptCard: {
+  backgroundColor: "#fff",
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: "#ddd",
+  marginBottom: 12,
+  padding: 12,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+  elevation: 1,
+},
+conceptHeader: {
+  marginBottom: 12,
+},
+topicLabel: {
+  fontSize: 12,
+  color: "#666",
+  marginBottom: 4,
+},
+conceptTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#333",
+},
+pointControls: {
+  backgroundColor: "#f9f9f9",
+  borderRadius: 8,
+  padding: 10,
+},
+pointRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginVertical: 6,
+},
+pointRowLabel: {
+  fontSize: 14,
+  color: "#555",
+  width: 100,
+},
+pointsSummary: {
+  backgroundColor: "#e6f7ef",
+  borderRadius: 8,
+  padding: 16,
+  marginTop: 20,
+},
+pointsSummaryTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#005824",
+  marginBottom: 8,
+},
+pointsSummaryText: {
+  fontSize: 14,
+  color: "#333",
+  marginBottom: 4,
+},
+pointsSummaryTotal: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#005824",
+  marginTop: 8,
+},
+helpContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#f0f8ff",
+  padding: 12,
+  borderRadius: 8,
+  marginTop: 16,
+},
+helpText: {
+  marginLeft: 8,
+  fontSize: 14,
+  color: "#333",
+  flex: 1,
+},
+noteContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#e6f2ff",
+  padding: 12,
+  borderRadius: 8,
+  marginBottom: 20,
+},
+noteText: {
+  marginLeft: 8,
+  fontSize: 14,
+  color: "#333",
+  flex: 1,
+},
+reviewSection: {
+  marginBottom: 16,
+  padding: 12,
+  borderWidth: 1,
+  borderColor: "#eee",
+  borderRadius: 8,
+  backgroundColor: "#fafafa",
+},
+reviewHeader: {
+  fontSize: 16,
+  fontWeight: "bold",
+  marginBottom: 10,
+  color: "#005824",
+},
+reviewItem: {
+  flexDirection: "row",
+  marginVertical: 4,
+},
+reviewLabel: {
+  fontSize: 14,
+  fontWeight: "500",
+  color: "#555",
+  width: 100,
+},
+reviewValue: {
+  fontSize: 14,
+  color: "#333",
+  flex: 1,
+},
+noDataContainer: {
+  padding: 16,
+  alignItems: "center",
+  justifyContent: "center",
+  borderWidth: 1,
+  borderColor: "#ddd",
+  borderRadius: 8,
+  backgroundColor: "#f9f9f9",
+},
+noDataText: {
+  fontSize: 14,
+  color: "#666",
+  fontStyle: "italic",
+  textAlign: "center",
+},
+buttonContainer: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: 8,
+  marginBottom: 32,
+},
+button: {
+  flex: 1,
+  padding: 16,
+  borderRadius: 8,
+  alignItems: "center",
+  justifyContent: "center",
+  flexDirection: "row",
+},
+backButton: {
+  backgroundColor: "#f0f0f0",
+  marginRight: 8,
+},
+nextButton: {
+  backgroundColor: "#005824",
+  marginLeft: 8,
+},
+submitButton: {
+  backgroundColor: "#005824",
+  marginLeft: 8,
+},
+disabledButton: {
+  backgroundColor: "#7fad97", // Lighter green when disabled
+  opacity: 0.8,
+},
+buttonText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "bold",
+},
+backButtonText: {
+  color: "#333",
+  fontSize: 16,
+  marginLeft: 5,
+},
+nextButtonText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "bold",
+  marginRight: 5,
+},
+modalContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  padding: 20,
+},
+modalContent: {
+  backgroundColor: "#fff",
+  borderRadius: 12,
+  padding: 20,
+  width: "100%",
+  maxHeight: "80%",
+},
+modalTitle: {
+  fontSize: 20,
+  fontWeight: "bold",
+  marginBottom: 16,
+  color: "#005824",
+  textAlign: "center",
+},
+modalScrollView: {
+  flexGrow: 1, // Use flexGrow instead of maxHeight
+},
+modalItem: {
+  padding: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: "#eee",
+},
+selectedModalItem: {
+  backgroundColor: "#e6f7ef",
+},
+itemText: {
+  fontSize: 16,
+  fontWeight: "500",
+  color: "#333",
+},
+itemSubtext: {
+  fontSize: 14,
+  color: "#666",
+  marginTop: 4,
+},
+noItemsText: {
+  padding: 16,
+  textAlign: "center",
+  color: "#666",
+  fontStyle: "italic",
+},
+modalCloseButton: {
+  marginTop: 16,
+  padding: 12,
+  backgroundColor: "#eee",
+  borderRadius: 8,
+  alignItems: "center",
+},
+modalCloseButtonText: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#333",
+},
 });
 
 export default CreateSectionForm;

@@ -1,12 +1,9 @@
-// Import statements
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  SafeAreaView,
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
@@ -14,23 +11,25 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
-  FlatList
+  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Calendar, DateData } from "react-native-calendars";
 import type { 
-  SectionInsertDto, 
-  Course, 
-  SectionTeacherInsertDto,
+  CourseInsertDto,
   Semester
 } from "../../../App";
 import { 
-  createSection, 
-  createSectionTeacher, 
-  getCoursesByCreatorId, 
-  getCoursesByIds,
+  createCourse,
   getSemesters
 } from "../../service/supabaseService";
+
+// Modal type enum - using string values to ensure proper TypeScript comparison
+enum ModalType {
+  None = 'None',
+  Course = 'Course',
+  Semester = 'Semester', 
+  Topic = 'Topic'
+}
 
 const CreateCourseForm: React.FC<{
   userId?: string;
@@ -38,94 +37,41 @@ const CreateCourseForm: React.FC<{
   onSuccess?: () => void;
   onCancel?: () => void;
 }> = ({ userId, schoolId, onSuccess, onCancel }) => {
-  // Section state
-  const [sectionIdentifier, setSectionIdentifier] = useState("");
-  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
-  const [selectedSemesterId, setSelectedSemesterId] = useState<number | null>(null);
-  const [startDate, setStartDate] = useState(new Date());
-  const [showCalendar, setShowCalendar] = useState(false);
+  // Course state
+  const [courseName, setCourseName] = useState("");
+  const [courseSubject, setCourseSubject] = useState("");
+  const [courseIdentifier, setCourseIdentifier] = useState("");
   
   // Dynamic data
-  const [courses, setCourses] = useState<Course[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [showCourseModal, setShowCourseModal] = useState(false);
-  const [showSemesterModal, setShowSemesterModal] = useState(false);
+  
+  // Single modal state
+  const [activeModal, setActiveModal] = useState<ModalType>(ModalType.None);
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
 
-  // Load courses and semesters
+  // Load semesters
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch courses created by this user
-        if (userId) {
-          const coursesData = await getCoursesByCreatorId(userId);
-          setCourses(coursesData || []);
-        } else {
-          // If no userId, fetch all courses
-          const coursesData = await getCoursesByIds([]);
-          setCourses(coursesData || []);
-        }
-        
-        // Fetch semesters using the service method
+        // Fetch semesters
         const semestersData = await getSemesters();
         setSemesters(semestersData || []);
-        
       } catch (err: any) {
-        console.error("Error fetching data:", err);
+        console.error("Error fetching semesters:", err);
         setError("Failed to load necessary data");
       }
     };
     
     fetchData();
-  }, [userId]);
-
-  // Format date for display
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0]; // YYYY-MM-DD
-  };
-
-  // Format date for calendar marking
-  const getMarkedDates = () => {
-    const formattedDate = formatDate(startDate);
-    return {
-      [formattedDate]: { selected: true, selectedColor: '#005824' }
-    };
-  };
-
-  // Get selected course name
-  const getSelectedCourseName = () => {
-    if (!selectedCourseId) return "Select a course";
-    const course = courses.find(c => c.course_id === selectedCourseId);
-    if (!course) return "Select a course";
-    
-    const identifier = course.course_identifier ? `${course.course_identifier} - ` : "";
-    return `${identifier}${course.course_name}`;
-  };
-
-  // Get selected semester name
-  const getSelectedSemesterName = () => {
-    if (!selectedSemesterId) return "Select a semester";
-    const semester = semesters.find(s => s.semester_id === selectedSemesterId);
-    if (!semester) return "Select a semester";
-    return `${semester.season} ${semester.year}`;
-  };
+  }, []);
 
   // Validate the form
   const validateForm = () => {
-    if (!sectionIdentifier.trim()) {
-      setError("Section identifier is required");
-      return false;
-    }
-    
-    if (!selectedCourseId) {
-      setError("Please select a course");
-      return false;
-    }
-    
-    if (!selectedSemesterId) {
-      setError("Please select a semester");
+    if (!courseName.trim()) {
+      setError("Course name is required");
       return false;
     }
     
@@ -133,61 +79,67 @@ const CreateCourseForm: React.FC<{
     return true;
   };
 
-  // Submit form data
-  const handleSubmit = async () => {
+  // Submit form data with debounce
+  const handleSubmit = useCallback(async () => {
+    if (isSubmitButtonDisabled) return;
     if (!validateForm() || !userId) return;
 
+    setIsSubmitButtonDisabled(true);
     setIsLoading(true);
+    
     try {
-      // 1. Create Section using the imported function
-      const sectionData: SectionInsertDto = {
-        section_identifier: sectionIdentifier,
-        semester_id: selectedSemesterId!,
-        course_id: selectedCourseId!,
-        date_created: new Date().toISOString().split('T')[0], // Format: YYYY-MM-DD
-        start_date: formatDate(startDate)
+      // Create Course using the imported function
+      const courseData: CourseInsertDto = {
+        course_name: courseName,
+        course_subject: courseSubject || null,
+        course_identifier: courseIdentifier || null,
+        creator_id: userId,
+        school_id: schoolId
       };
 
-      const sectionResult = await createSection(sectionData);
-      if (!sectionResult) {
-        throw new Error("Failed to create section");
-      }
-      
-      // 2. Create Section Teacher association using the imported function
-      const sectionTeacherData: SectionTeacherInsertDto = {
-        teacher_id: userId,
-        section_id: sectionResult.section_id
-      };
-
-      const sectionTeacherResult = await createSectionTeacher(sectionTeacherData);
-      if (!sectionTeacherResult) {
-        throw new Error("Failed to create section teacher association");
+      const result = await createCourse(courseData);
+      if (!result) {
+        throw new Error("Failed to create course");
       }
 
       Alert.alert(
         "Success", 
-        "Section created successfully!"
+        "Course created successfully!"
       );
       
       if (onSuccess) onSuccess();
     } catch (err: any) {
-      console.error("Error creating section:", err);
-      setError(err.message || "Failed to create section");
+      console.error("Error creating course:", err);
+      setError(err.message || "Failed to create course");
+      setIsSubmitButtonDisabled(false);
     } finally {
       setIsLoading(false);
+      // Reset the button disable after a short delay
+      setTimeout(() => {
+        setIsSubmitButtonDisabled(false);
+      }, 500);
     }
-  };
+  }, [userId, schoolId, courseName, courseSubject, courseIdentifier, isSubmitButtonDisabled, onSuccess]);
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
+  // Main content render
+  const renderContent = () => (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+    >
+      <ScrollView 
+        style={styles.scrollView} 
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.header}>
-          <Text style={styles.headerText}>Create New Section</Text>
-          <TouchableOpacity style={styles.closeButton} onPress={onCancel}>
+          <Text style={styles.headerText}>Create New Course</Text>
+          <TouchableOpacity 
+            style={styles.closeButton} 
+            onPress={onCancel}
+            accessibilityLabel="Close form"
+          >
             <Ionicons name="close" size={24} color="#333" />
           </TouchableOpacity>
         </View>
@@ -195,86 +147,58 @@ const CreateCourseForm: React.FC<{
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <View style={styles.formSection}>
-          <Text style={styles.sectionTitle}>Section Details</Text>
+          <Text style={styles.sectionTitle}>Course Details</Text>
           <Text style={styles.sectionSubtitle}>
-            A section is an instance of a course for a specific semester
+            A course contains the overall subject matter and topics
           </Text>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Section Identifier*</Text>
+            <Text style={styles.label}>Course Name*</Text>
             <TextInput
               style={styles.input}
-              value={sectionIdentifier}
-              onChangeText={setSectionIdentifier}
-              placeholder="e.g., 03, W1, Period 3, etc..."
+              value={courseName}
+              onChangeText={setCourseName}
+              placeholder="e.g., Introduction to Computer Science"
+              returnKeyType="next"
+              accessibilityLabel="Course name input"
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Course*</Text>
-            <TouchableOpacity 
-              style={styles.pickerButton}
-              onPress={() => setShowCourseModal(true)}
-            >
-              <Text style={styles.pickerButtonText}>
-                {getSelectedCourseName()}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
-            </TouchableOpacity>
+            <Text style={styles.label}>Course Subject (optional)</Text>
+            <TextInput
+              style={styles.input}
+              value={courseSubject}
+              onChangeText={setCourseSubject}
+              placeholder="e.g., CS, MATH, ENG"
+              returnKeyType="next"
+              accessibilityLabel="Course subject input"
+            />
+            <Text style={styles.helperText}>
+              A short subject code for your course
+            </Text>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Semester*</Text>
-            <TouchableOpacity 
-              style={styles.pickerButton}
-              onPress={() => setShowSemesterModal(true)}
-            >
-              <Text style={styles.pickerButtonText}>
-                {getSelectedSemesterName()}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Start Date</Text>
-            <TouchableOpacity 
-              style={styles.pickerButton}
-              onPress={() => setShowCalendar(!showCalendar)}
-            >
-              <Text style={styles.pickerButtonText}>
-                {formatDate(startDate)}
-              </Text>
-              <Ionicons name={showCalendar ? "chevron-up" : "calendar"} size={20} color="#666" />
-            </TouchableOpacity>
-            
-            {/* Inline Calendar */}
-            {showCalendar && (
-              <View style={styles.calendarContainer}>
-                <Calendar
-                  onDayPress={(day: DateData) => {
-                    setStartDate(new Date(day.timestamp));
-                    setShowCalendar(false);
-                  }}
-                  markedDates={getMarkedDates()}
-                  theme={{
-                    selectedDayBackgroundColor: '#005824',
-                    todayTextColor: '#005824',
-                    arrowColor: '#005824',
-                    textMonthFontWeight: 'bold',
-                    textDayFontSize: 14,
-                    textMonthFontSize: 16,
-                  }}
-                />
-              </View>
-            )}
+            <Text style={styles.label}>Course Identifier (optional)</Text>
+            <TextInput
+              style={styles.input}
+              value={courseIdentifier}
+              onChangeText={setCourseIdentifier}
+              placeholder="e.g., 101, 2A, IX"
+              returnKeyType="done"
+              accessibilityLabel="Course identifier input"
+            />
+            <Text style={styles.helperText}>
+              A number or code that identifies this course
+            </Text>
           </View>
         </View>
 
         <View style={styles.noteContainer}>
           <Ionicons name="information-circle" size={20} color="#0066cc" />
           <Text style={styles.noteText}>
-            Students will be able to join this section with the enrollment code that will be generated.
+            After creating a course, you can add topics and concepts, then create sections for specific classes.
           </Text>
         </View>
 
@@ -283,208 +207,66 @@ const CreateCourseForm: React.FC<{
             style={[styles.button, styles.cancelButton]}
             onPress={onCancel}
             disabled={isLoading}
+            accessibilityLabel="Cancel button"
           >
-            <Text style={styles.buttonText}>Cancel</Text>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.button, styles.submitButton]}
+            style={[
+              styles.button, 
+              styles.submitButton,
+              (isLoading || isSubmitButtonDisabled) && styles.disabledButton
+            ]}
             onPress={handleSubmit}
-            disabled={isLoading}
+            disabled={isLoading || isSubmitButtonDisabled}
+            accessibilityLabel="Create course button"
           >
             {isLoading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Create Section</Text>
+              <Text style={styles.buttonText}>Create Course</Text>
             )}
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Course Selection Modal - New Implementation */}
-      <Modal
-        visible={showCourseModal}
-        transparent={true}
-        animationType={Platform.OS === 'ios' ? 'slide' : 'fade'}
-        onRequestClose={() => setShowCourseModal(false)}
-        statusBarTranslucent={true}
-      >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            height: '100%'
-          }}
-          activeOpacity={1}
-          onPress={() => setShowCourseModal(false)}
-        >
-          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-            <View
-              style={{
-                backgroundColor: 'white',
-                width: '85%',
-                maxHeight: Platform.OS === 'ios' ? '70%' : '80%',
-                borderRadius: 10,
-                padding: 15,
-                elevation: 5,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 3.84,
-              }}
-            >
-              <Text style={styles.modalTitle}>Select a Course</Text>
-              
-              <FlatList
-                data={courses}
-                style={{ maxHeight: 300 }}
-                keyExtractor={(item) => item.course_id.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.modalItem,
-                      selectedCourseId === item.course_id && styles.selectedModalItem
-                    ]}
-                    onPress={() => {
-                      setSelectedCourseId(item.course_id);
-                      setShowCourseModal(false);
-                    }}
-                  >
-                    <Text style={styles.courseItemText}>{item.course_name}</Text>
-                    {item.course_identifier && (
-                      <Text style={styles.courseIdentifierText}>
-                        {item.course_identifier}
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-                )}
-                ListEmptyComponent={
-                  <Text style={styles.noItemsText}>
-                    No courses available. Create a course first.
-                  </Text>
-                }
-              />
-
-              <TouchableOpacity
-                style={{
-                  backgroundColor: '#eee',
-                  padding: 12,
-                  borderRadius: 8,
-                  alignItems: 'center',
-                  marginTop: 15
-                }}
-                onPress={() => setShowCourseModal(false)}
-              >
-                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
-                  Close
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableWithoutFeedback>
-        </TouchableOpacity>
-      </Modal>
-      
-      {/* Semester Selection Modal - New Implementation */}
-      <Modal
-        visible={showSemesterModal}
-        transparent={true}
-        animationType={Platform.OS === 'ios' ? 'slide' : 'fade'}
-        onRequestClose={() => setShowSemesterModal(false)}
-        statusBarTranslucent={true}
-      >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            height: '100%'
-          }}
-          activeOpacity={1}
-          onPress={() => setShowSemesterModal(false)}
-        >
-          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-            <View
-              style={{
-                backgroundColor: 'white',
-                width: '85%',
-                maxHeight: Platform.OS === 'ios' ? '70%' : '80%',
-                borderRadius: 10,
-                padding: 15,
-                elevation: 5,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 3.84,
-              }}
-            >
-              <Text style={styles.modalTitle}>Select a Semester</Text>
-              
-              <FlatList
-                data={semesters}
-                style={{ maxHeight: 300 }}
-                keyExtractor={(item) => item.semester_id.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.modalItem,
-                      selectedSemesterId === item.semester_id && styles.selectedModalItem
-                    ]}
-                    onPress={() => {
-                      setSelectedSemesterId(item.semester_id);
-                      setShowSemesterModal(false);
-                    }}
-                  >
-                    <Text style={styles.semesterItemText}>
-                      {item.season} {item.year}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                ListEmptyComponent={
-                  <Text style={styles.noItemsText}>
-                    No semesters available.
-                  </Text>
-                }
-              />
-
-              <TouchableOpacity
-                style={{
-                  backgroundColor: '#eee',
-                  padding: 12,
-                  borderRadius: 8,
-                  alignItems: 'center',
-                  marginTop: 15
-                }}
-                onPress={() => setShowSemesterModal(false)}
-              >
-                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
-                  Close
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableWithoutFeedback>
-        </TouchableOpacity>
-      </Modal>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
+
+  // For iOS, wrap in SafeAreaView
+  if (Platform.OS === 'ios') {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        {renderContent()}
+      </SafeAreaView>
+    );
+  }
+
+  // For other platforms, return content directly
+  return renderContent();
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
   scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     padding: 16,
+    paddingBottom: 32, // Extra padding at bottom
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
+    paddingTop: Platform.OS === 'android' ? 8 : 0,
   },
   headerText: {
     fontSize: 24,
@@ -537,26 +319,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#fafafa",
   },
-  pickerButton: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: "#fafafa",
-  },
-  pickerButtonText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  calendarContainer: {
-    marginTop: 8,
-    borderRadius: 8,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: "#ddd",
+  helperText: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 4,
   },
   noteContainer: {
     flexDirection: "row",
@@ -593,10 +359,33 @@ const styles = StyleSheet.create({
     backgroundColor: "#005824",
     marginLeft: 8,
   },
+  disabledButton: {
+    backgroundColor: "#7fad97", // Lighter green when disabled
+    opacity: 0.8,
+  },
   buttonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  cancelButtonText: {
+    color: "#333",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    width: "100%",
+    maxHeight: "80%",
   },
   modalTitle: {
     fontSize: 20,
@@ -604,6 +393,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: "#005824",
     textAlign: "center",
+  },
+  modalScrollView: {
+    flexGrow: 1, // Use flexGrow instead of maxHeight
   },
   modalItem: {
     padding: 16,
@@ -613,20 +405,15 @@ const styles = StyleSheet.create({
   selectedModalItem: {
     backgroundColor: "#e6f7ef",
   },
-  courseItemText: {
+  itemText: {
     fontSize: 16,
     fontWeight: "500",
     color: "#333",
   },
-  courseIdentifierText: {
+  itemSubtext: {
     fontSize: 14,
     color: "#666",
     marginTop: 4,
-  },
-  semesterItemText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
   },
   noItemsText: {
     padding: 16,
