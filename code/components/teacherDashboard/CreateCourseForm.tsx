@@ -174,7 +174,16 @@ const CreateCourseForm: React.FC<{
       setIsLoading(false);
     }
   };
-
+  useEffect(() => {
+    if (showCourseModal) {
+      const timer = setTimeout(() => {
+        setShowCourseModal(false);
+        console.log("⏱️ Auto-closed course modal after 5 seconds");
+      }, 5000);
+  
+      return () => clearTimeout(timer); // Clean up if closed manually
+    }
+  }, [showCourseModal]);
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
