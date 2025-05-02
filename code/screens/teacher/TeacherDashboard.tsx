@@ -233,10 +233,10 @@ const TeacherDashboard: React.FC = () => {
     }, 350);
   };
 
-  // Handle successful form submission
-  const handleFormSuccess = async () => {
+  // Handle successful form submission with explicit createdType parameter
+  // instead of relying on stale state values
+  const handleFormSuccess = async (createdType: "course" | "section") => {
     // Set both form states to false to ensure proper cleanup
-    // These updates are event-triggered, so they're safe
     setSectionFormVisible(false);
     setCourseFormVisible(false);
     
@@ -250,12 +250,8 @@ const TeacherDashboard: React.FC = () => {
       // Check again after async operation
       if (!isMounted.current) return;
       
-      // Auto-switch to the relevant tab based on what was created
-      if (courseFormVisible) {
-        setSelectedMenuOption("courses");
-      } else if (sectionFormVisible) {
-        setSelectedMenuOption("sections");
-      }
+      // Use the parameter instead of checking potentially stale state
+      setSelectedMenuOption(createdType === "course" ? "courses" : "sections");
     }, 100);
   };
 
@@ -383,7 +379,7 @@ const TeacherDashboard: React.FC = () => {
         >
           <CreateSectionForm
             userId={teacher.user_id}
-            onSuccess={handleFormSuccess}
+            onSuccess={() => handleFormSuccess("section")}
             onCancel={handleCancelSection}
           />
         </Modal>
@@ -399,7 +395,7 @@ const TeacherDashboard: React.FC = () => {
           <CreateCourseForm
             userId={teacher.user_id}
             schoolId={teacher.school_id}
-            onSuccess={handleFormSuccess}
+            onSuccess={() => handleFormSuccess("course")}
             onCancel={handleCancelCourse}
           />
         </Modal>
