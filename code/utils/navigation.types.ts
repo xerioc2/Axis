@@ -16,6 +16,12 @@ export type RootStackParamList = {
   
   // Profile screen
   Profile: { user: User };
+
+  RealTimeGradeView: {
+    user: User;
+    sectionPreview: SectionPreviewDto;
+    student: any; // or Student type if defined
+  };
   
   // Section details screens
   TeacherSectionDetails: {

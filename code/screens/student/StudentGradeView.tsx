@@ -6,6 +6,10 @@ import { RootStackParamList } from '@/code/utils/navigation.types';
 import { compileGradeViewData } from '../../service/dataConverterService';
 import type { GradeViewDto, StudentPointDto } from '../../../App';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import supabase from '../../utils/supabase';
+
+
+
 
 const StudentGradeView: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'StudentSectionDetails'>>();
@@ -22,14 +26,38 @@ const StudentGradeView: React.FC = () => {
     4: '#4CAF50'
   };
 
+  // ✅ Extracted for reuse
+  const loadGradeViewData = async () => {
+    const data = await compileGradeViewData(user, sectionPreview, user);
+    setGradeViewData(data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const loadGradeViewData = async () => {
-      const data = await compileGradeViewData(user, sectionPreview, user);
-      setGradeViewData(data);
-      setLoading(false);
-    };
-    loadGradeViewData();
+    loadGradeViewData(); // Initial load
   }, []);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('student-grade-refresh')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'student_points',
+        filter: `student_id=eq.${user.user_id}`,
+      }, async (payload) => {
+        console.log("📡 Real-time update received in StudentGradeView:", payload.new);
+        const refreshedData = await compileGradeViewData(user, sectionPreview, user);
+        setGradeViewData(refreshedData);
+      })
+      .subscribe();
+  
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user.user_id]);
+  
+  
 
   const getPointsForConcept = (conceptId: number) => {
     if (!gradeViewData) return { checkPoints: [], testPoints: [] };
@@ -69,11 +97,10 @@ const StudentGradeView: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-<ScrollView
-  style={styles.content}
-  contentContainerStyle={[styles.scrollContent, { minHeight: '100%' } ]} // adjust as needed
->
-
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={[styles.scrollContent, { minHeight: '100%' }]}
+      >
         <View style={styles.gradesContainer}>
           <Text style={styles.header}>Your Progress</Text>
 
@@ -131,6 +158,7 @@ const StudentGradeView: React.FC = () => {
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2FFED' },

@@ -8,7 +8,7 @@ import { compileGradeViewData } from '../../service/dataConverterService';
 import { updateStudentPoint } from '../../service/supabaseService';
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import supabase from '../../utils/supabase';
 
 type TeacherGradeViewRouteProp = RouteProp<RootStackParamList, 'TeacherGradeView'>;
 
@@ -22,7 +22,8 @@ const TeacherGradeView: React.FC = () => {
     const [selectedPointId, setSelectedPointId] = useState<number | null>(null);
     const [isPickerVisible, setIsPickerVisible] = useState<boolean>(false);
     const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
-
+    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+    
     // Colors for different point statuses
     const statusColors: { [key: number]: string } = {
         1: '#808080', // Not Attempted - Gray
@@ -46,6 +47,27 @@ const TeacherGradeView: React.FC = () => {
         
         loadGradeViewData();
     }, []);
+    useEffect(() => {
+        const channel = supabase
+          .channel('teacher-grade-refresh')
+          .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'student_points',
+            filter: `student_id=eq.${student.user_id}`,
+          }, async (payload: any) => {
+            console.log("📡 Real-time update received:", payload.new);
+            const updatedData = await compileGradeViewData(user, sectionPreview, student);
+            setGradeViewData(updatedData);
+          })
+          .subscribe();
+      
+        return () => {
+          supabase.removeChannel(channel);
+        };
+      }, [student.user_id]);
+      
+      
     const countStatuses = (): Record<number, number> => {
         const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
       
