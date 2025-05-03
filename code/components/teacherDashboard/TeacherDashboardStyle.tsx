@@ -160,4 +160,18 @@ export const styles = StyleSheet.create({
     top: 6,
     borderRadius: 15,
   },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f8f8f8',
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 10,
+  }
+  
 });
