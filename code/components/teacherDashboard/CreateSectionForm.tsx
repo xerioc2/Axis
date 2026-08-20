@@ -804,7 +804,7 @@ const CreateSectionForm: React.FC<{
     if (activeModal === ModalType.None) return null;
     
     let modalTitle = "";
-    let modalContent: JSX.Element | null = null;
+    let modalContent: React.ReactElement | null = null;
     
     switch (activeModal) {
       case ModalType.Course:

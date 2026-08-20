@@ -46,7 +46,6 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           <TextInput
             style={[
               styles.input,
-              isFocused && styles.inputFocused,
             ]}
             placeholder="Email"
             value={email}
@@ -114,8 +113,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     backgroundColor: "#fff",
     marginBottom: 15,
-    outlineStyle: "none",
-    outlineWidth: 0,
   },
   button: {
     backgroundColor: Colors.secondary,

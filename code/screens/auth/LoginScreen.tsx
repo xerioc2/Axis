@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -22,9 +22,8 @@ type NavigationProps = NativeStackNavigationProp<RootStackParamList, "Login">;
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [buttonEnabled, setButtonEnabled] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [fontsLoaded] = useFonts({
+  useFonts({
     "Rexton Bold": require("../../assets/fonts/rexton_bold.otf"),
     Inter: require("../../assets/fonts/antonio_semibold.ttf"),
   });
@@ -32,10 +31,7 @@ const LoginScreen: React.FC = () => {
 
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
-
-  useEffect(() => {
-    setButtonEnabled(formData.email !== "" && formData.password !== "");
-  }, [formData]);
+  const buttonEnabled = formData.email !== "" && formData.password !== "";
 
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -109,7 +105,7 @@ const LoginScreen: React.FC = () => {
         </TouchableOpacity>
 
         <View style={styles.footerTextWrapper}>
-          <Text style={styles.footerText}>Don't have an account?</Text>
+          <Text style={styles.footerText}>Don&apos;t have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
             <Text style={styles.signUpText}>Sign Up</Text>
           </TouchableOpacity>

@@ -8,7 +8,7 @@ export type RootStackParamList = {
   // Authentication screens
   SignUp: undefined; // SignUp screen takes no parameters
   Login: undefined; // Login screen takes no parameters
-  ResetPassword: { token: string }; // For password reset flow
+  ResetPassword: { accessToken: string; refreshToken: string }; // For password reset flow
   
   // Dashboard screens
   TeacherDashboard: User;

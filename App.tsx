@@ -1,4 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignUpScreen from './code/screens/auth/SignUpScreen';
 import LoginScreen from './code/screens/auth/LoginScreen';
@@ -12,7 +12,6 @@ import ProfileScreen from './code/screens/ProfileScreen';
 import ResetPasswordScreen from './code/screens/ResetPasswordScreen';
 import 'react-native-url-polyfill/auto';
 import { useEffect } from 'react';
-import { createNavigationContainerRef } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 import { StatusBar } from 'expo-status-bar';
 import { Platform, Text } from 'react-native';
@@ -49,10 +48,11 @@ export default function App() {
         const parsedUrl = new URL(url);
         const hashParams = new URLSearchParams(parsedUrl.hash.substring(1));
         const type = hashParams.get('type');
-        const token = hashParams.get('access_token');
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
 
-        if (type === 'recovery' && token && navigationRef.isReady()) {
-          navigationRef.navigate('ResetPassword', { token });
+        if (type === 'recovery' && accessToken && refreshToken && navigationRef.isReady()) {
+          navigationRef.navigate('ResetPassword', { accessToken, refreshToken });
         }
       } catch (err) {
         console.warn('Error handling deep link:', err);
