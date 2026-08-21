@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: -25,
-    fontFamily: "SF Pro",
+    fontFamily: "Inter",
     fontWeight: "700",
     color: "#2F7D32",
     marginBottom: 30,

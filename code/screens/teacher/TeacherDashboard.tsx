@@ -8,6 +8,7 @@ import {
   StyleSheet,
   BackHandler,
   LogBox,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "../../components/teacherDashboard/TeacherDashboardStyle";
@@ -55,6 +56,7 @@ const TeacherDashboard: React.FC = () => {
   const [sectionPreviews, setSectionPreviews] = useState<SectionPreviewDto[]>([]);
   const [coursesCreated, setCoursesCreated] = useState<Course[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [loading, setLoading] = useState(true);
   
   // Default to sections view
   const [selectedMenuOption, setSelectedMenuOption] = useState<"sections" | "courses">("sections");
@@ -107,6 +109,8 @@ const TeacherDashboard: React.FC = () => {
         setErrorMessage("Failed to load dashboard data. Please try again.");
         setSectionPreviews([]);
         setCoursesCreated([]);
+      } finally {
+        if (isMounted.current) setLoading(false);
       }
     };
     
@@ -259,6 +263,15 @@ const TeacherDashboard: React.FC = () => {
     setCourseFormVisible(false);
   };
 
+  if (loading) {
+    return (
+      <View style={inlineStyles.loadingContainer}>
+        <ActivityIndicator size="large" color="#005824" />
+        <Text style={inlineStyles.loadingText}>Loading dashboard...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Profile Button */}
@@ -401,6 +414,16 @@ const TeacherDashboard: React.FC = () => {
 
 // Inline styles for selected
 const inlineStyles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F2FFED",
+  },
+  loadingText: {
+    marginTop: 12,
+    color: "#005824",
+  },
   selectedFooterButton: {
     borderBottomWidth: 3,
     borderBottomColor: "#005824",

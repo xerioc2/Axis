@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Modal, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/code/utils/navigation.types';
@@ -9,6 +9,7 @@ import { updateStudentPoint } from '../../service/supabaseService';
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import supabase from '../../utils/supabase';
+import pointStatusMap, { PointStatusId } from '../../utils/pointStatusMap';
 
 type TeacherGradeViewRouteProp = RouteProp<RootStackParamList, 'TeacherGradeView'>;
 
@@ -22,6 +23,7 @@ const TeacherGradeView: React.FC = () => {
     const [selectedPointId, setSelectedPointId] = useState<number | null>(null);
     const [isPickerVisible, setIsPickerVisible] = useState<boolean>(false);
     const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+    const [updatingPointId, setUpdatingPointId] = useState<number | null>(null);
     
     // Colors for different point statuses
     const statusColors: { [key: number]: string } = {
@@ -103,61 +105,28 @@ const TeacherGradeView: React.FC = () => {
 
     // Handle updating a student point status
     const handleStatusChange = async (pointDto: StudentPointDto, newStatusId: number) => {
-        // Update locally first for immediate feedback
-        if (gradeViewData) {
-            const updatedGradeViewData = { ...gradeViewData };
-            
-            updatedGradeViewData.conceptsToPoints = updatedGradeViewData.conceptsToPoints.map(cp => {
-                if (cp.concept.concept_id === pointDto.concept_id) {
-                    return {
-                        ...cp,
-                        points: cp.points.map(p => {
-                            if (p.point_id === pointDto.point_id) {
-                                // Get status name using switch statement
-                                let statusName = "";
-                                switch (newStatusId) {
-                                    case 1:
-                                        statusName = "Not Attempted";
-                                        break;
-                                    case 2:
-                                        statusName = "Attempted: Failed";
-                                        break;
-                                    case 3:
-                                        statusName = "Attempted: Needs Revisions";
-                                        break;
-                                    case 4:
-                                        statusName = "Attempted: Passed";
-                                        break;
-                                    default:
-                                        statusName = "Unknown";
-                                }
-                                
-                                return {
-                                    ...p,
-                                    point_status_id: newStatusId,
-                                    point_status_name: statusName,
-                                    date_status_last_updated: new Date().toISOString()
-                                };
-                            }
-                            return p;
-                        })
-                    };
-                }
-                return cp;
-            });
-            
-            setGradeViewData(updatedGradeViewData);
+        if (updatingPointId !== null) return;
+        setUpdatingPointId(pointDto.point_id);
+        const updated = await updateStudentPoint(pointDto.student_point_id, newStatusId);
+        if (!updated) {
+            Alert.alert("Update failed", "The point status could not be saved. Please try again.");
+            setUpdatingPointId(null);
+            return;
         }
-        
-        // Update in the database
-        try {
-            await updateStudentPoint(pointDto.student_point_id, newStatusId);
-        } catch (error) {
-            console.log("Error updating student point:", error);
-            // Handle error - maybe show a toast or revert the local change
-        }
-        
-        // Close the picker
+
+        setGradeViewData(current => current ? ({
+            ...current,
+            conceptsToPoints: current.conceptsToPoints.map(cp => ({
+                ...cp,
+                points: cp.points.map(point => point.point_id === pointDto.point_id ? ({
+                    ...point,
+                    point_status_id: newStatusId,
+                    point_status_name: pointStatusMap[newStatusId as PointStatusId] ?? "Unknown",
+                    date_status_last_updated: new Date().toISOString()
+                }) : point)
+            }))
+        }) : current);
+        setUpdatingPointId(null);
         setIsPickerVisible(false);
         setSelectedPointId(null);
     };
@@ -241,24 +210,28 @@ const TeacherGradeView: React.FC = () => {
                             <TouchableOpacity 
                                 style={[styles.statusOption, { backgroundColor: statusColors[1] }]}
                                 onPress={() => handleStatusChange(selectedPoint!, 1)}
+                                disabled={updatingPointId !== null}
                             >
                                 <Text style={styles.statusText}>Not Attempted</Text>
                             </TouchableOpacity>
                             <TouchableOpacity 
                                 style={[styles.statusOption, { backgroundColor: statusColors[2] }]}
                                 onPress={() => handleStatusChange(selectedPoint!, 2)}
+                                disabled={updatingPointId !== null}
                             >
                                 <Text style={styles.statusText}>Failed</Text>
                             </TouchableOpacity>
                             <TouchableOpacity 
                                 style={[styles.statusOption, { backgroundColor: statusColors[3] }]}
                                 onPress={() => handleStatusChange(selectedPoint!, 3)}
+                                disabled={updatingPointId !== null}
                             >
                                 <Text style={styles.statusText}>Needs Revisions</Text>
                             </TouchableOpacity>
                             <TouchableOpacity 
                                 style={[styles.statusOption, { backgroundColor: statusColors[4] }]}
                                 onPress={() => handleStatusChange(selectedPoint!, 4)}
+                                disabled={updatingPointId !== null}
                             >
                                 <Text style={styles.statusText}>Passed</Text>
                             </TouchableOpacity>

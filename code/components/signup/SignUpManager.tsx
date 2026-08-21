@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     color: Colors.grey,
-    fontFamily: "SF Pro",
+    fontFamily: "Inter",
   },
   loginContainer: {
     marginBottom: 100,

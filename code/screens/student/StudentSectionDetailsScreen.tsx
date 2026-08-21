@@ -1,8 +1,7 @@
 import { useRoute , useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../utils/navigation.types';
-import { View, Text, TouchableOpacity , SafeAreaView, ScrollView } from 'react-native';
-import { useEffect } from 'react';
+import { View, Text, TouchableOpacity , SafeAreaView } from 'react-native';
 import StudentGradeView from '../student/StudentGradeView';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -17,17 +16,9 @@ const StudentSectionDetailsScreen: React.FC = () => {
     const navigation = useNavigation(); // <-- move it HERE
     const {user, sectionPreview} = route.params;
 
-
-    useEffect(() => {
-        const fetchGrades = async () => {
-
-        }
-        fetchGrades();
-    })
-
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#F2FFED' }}>
-          <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <View style={{ padding: 16 }}>
             <TouchableOpacity
               style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
               onPress={() => navigation.goBack()}
@@ -40,11 +31,8 @@ const StudentSectionDetailsScreen: React.FC = () => {
             <Text>{user.first_name} {user.last_name}</Text>
             <Text style={{ fontWeight: 'bold', marginVertical: 10 }}>Your Grades</Text>
       
-            {/* ✅ Ensure the StudentGradeView gets room to breathe */}
-            <View style={{ flex: 1 }}>
-              <StudentGradeView />
-            </View>
-          </ScrollView>
+          </View>
+          <StudentGradeView />
         </SafeAreaView>
       );
     }

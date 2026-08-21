@@ -21,7 +21,12 @@ fs.readdirSync(basePath).forEach(schoolType => {
       const key = `${state}_${schoolType}`;
 
       // ✅ Hardcoded static require path (DO NOT use variables in require)
-      const relPath = `../assets/schoolData/${schoolType}/${file}`;
+      // Middle-school and high-school datasets are currently byte-for-byte
+      // identical, so both keys share one bundled asset instead of shipping
+      // a duplicate copy of every statewide file.
+      const relPath = schoolType === 'Middle'
+        ? `../assets/schoolData/HS/${state}_HS.txt`
+        : `../assets/schoolData/${schoolType}/${file}`;
 
       mapContent += `  '${key}': require('${relPath}'),\n`;
 

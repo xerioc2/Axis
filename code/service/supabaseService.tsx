@@ -290,7 +290,7 @@ export async function signup(email: string, password: string, firstName: string,
                     first_name: firstName,
                     last_name: lastName,
                     user_type_id: userTypeId,
-                    school_id: 1
+                    school_id: schoolId
                 }
             }
         });
@@ -326,13 +326,16 @@ export async function login(email: string, password: string){
             } 
         }
         else if (data){
-            const { data: userData, error: userError } = await supabase.from('users').select("*").eq("user_id", data.user.id);
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select("*")
+                .eq("user_id", data.user.id)
+                .maybeSingle();
             if (userError){
                 console.log(`Unable to find that user in public.users... yet the user with email ${data.user.email} exists in auth.users...`);
             }
-            else if (userData && userData.length > 0){
-                const user: User = userData[0];
-                return user;
+            else if (userData){
+                return userData as User;
             }
             else{
                 console.log("Unexpected error occured while pulling the user from public.users... please contact support.")
@@ -441,6 +444,7 @@ export async function getStudentData(studentId: string){
 }
 
 export async function getSectionsByIds(section_ids: number[]){
+    if (section_ids.length === 0) return [];
     const { data: sectionData, error: sectionError } = await supabase
         .from("sections")
         .select("*")
@@ -477,6 +481,7 @@ export async function getCoursesByCreatorId(creator_id: string){
 }
 
 export async function getCoursesByIds(course_ids: number[]){
+    if (course_ids.length === 0) return [];
     const { data: courseTaughtData, error: courseTaughtError} = await supabase
         .from("courses")
         .select("*")
@@ -495,6 +500,7 @@ export async function getCoursesByIds(course_ids: number[]){
 }
 
 export async function getSemestersByIds(semester_ids: number[]){
+    if (semester_ids.length === 0) return [];
     const { data: semesterData, error: semesterError } = await supabase
         .from("semesters")
         .select("*")
@@ -523,7 +529,7 @@ export async function getEnrollmentsBySectionId(sectionId: number){
             console.log(`Error getting enrollment data from section ${sectionId}: ${enrollmentError}`);
         }
         else if (enrollmentData){
-            console.log(`retrieved enrollmentData successfully: ${enrollmentData.length} records, data[0]=${enrollmentData[0].student_id}`);
+            console.log(`Retrieved ${enrollmentData.length} active enrollments for section ${sectionId}`);
             return enrollmentData as Enrollment[];
         }
         else{
@@ -542,29 +548,17 @@ export async function getStudentsBySectionId(sectionId: number){
             console.log("Error getting students by section id, enrollments was null: ");
         }
         else if (potentialEnrollments){
-            const actualEnrollments: Enrollment[] = potentialEnrollments;
-            const studentIds = actualEnrollments.map(enrollment => (enrollment.student_id));
-            console.log(`mapped enrollmentData to studentIds: ${studentIds}`);
-            let enrolledStudents: User[] = []
-            for(let i = 0; i < studentIds.length; i++){
-                console.log(`attempting to get student with id ${studentIds[i]}`);
-                const { data: studentData, error: studentError} = await supabase
-                    .from("users")
-                    .select("*")
-                    .eq("user_id", studentIds[i]);
-                if (studentError){
-                    console.log(`Error getting student account for student id ${studentIds[i]}: ${studentError}`);
-                }
-                else if (studentData && studentData.length > 0){
-                    console.log(`Retrieved student with id ${studentIds[i]}, pushing to enrolledStudents`);
-                    const student: User = studentData[0] as User;
-                    enrolledStudents.push(student)
-                }
-                else{
-                    console.log(`Unexpected error getting student id ${studentIds[i]}`);
-                }
+            const studentIds = potentialEnrollments.map(enrollment => enrollment.student_id);
+            if (studentIds.length === 0) return [];
+            const { data: students, error } = await supabase
+                .from("users")
+                .select("*")
+                .in("user_id", studentIds);
+            if (error) {
+                console.error("Error getting students for section:", error);
+                return null;
             }
-            return enrolledStudents;
+            return (students ?? []) as User[];
         }
         else{
             console.log("Unexpected error getting enrollments");
@@ -587,25 +581,17 @@ export async function getTeachersBySectionId(sectionId: number){
         else if (sectionTeacherData){
             const sectionTeachers: SectionTeacher[] = sectionTeacherData as SectionTeacher[];
             //now get the actual teachers
-            const teacherIds: string[] = sectionTeachers.map(sectionTeacher => (sectionTeacher.teacher_id));
-            let teachers: User[] = [];
-            for (let i = 0; i < teacherIds.length; i++){
-                const { data: teacherData, error: teacherError } = await supabase
-                    .from("users")
-                    .select("*")
-                    .eq("user_id", teacherIds[i]);
-                if (teacherError){
-                    console.log(`Error getting teacher id ${teacherIds[i]}`);
-                }
-                else if (teacherData && teacherData.length===1){
-                    const teacher: User = teacherData[0] as User;
-                    teachers.push(teacher);
-                }
-                else{
-                    console.log(`Unexpected error getting teacher id ${teacherIds[i]} for section id ${sectionId}`);
-                }
+            const teacherIds = sectionTeachers.map(sectionTeacher => sectionTeacher.teacher_id);
+            if (teacherIds.length === 0) return [];
+            const { data: teachers, error } = await supabase
+                .from("users")
+                .select("*")
+                .in("user_id", teacherIds);
+            if (error) {
+                console.error("Error getting teachers for section:", error);
+                return null;
             }
-            return teachers;
+            return (teachers ?? []) as User[];
         }
         else{
             console.log("Unexpected error while getting section teachers for section id ", sectionId);
@@ -825,6 +811,35 @@ export async function getConceptsByTopicId(topicId: number) {
     return null;
 }
 
+export async function getCurrentUser(): Promise<User | null> {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session?.user) return null;
+
+    const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("user_id", sessionData.session.user.id)
+        .maybeSingle();
+    if (error) {
+        console.error("Unable to restore the signed-in user:", error);
+        return null;
+    }
+    return data as User | null;
+}
+
+export async function getConceptsByTopicIds(topicIds: number[]): Promise<Concept[] | null> {
+    if (topicIds.length === 0) return [];
+    const { data, error } = await supabase
+        .from("concepts")
+        .select("*")
+        .in("topic_id", topicIds);
+    if (error) {
+        console.error("Error getting concepts for topics:", error);
+        return null;
+    }
+    return (data ?? []) as Concept[];
+}
+
 
 export async function getPointsByConceptId(conceptId: number){
     try{
@@ -852,6 +867,18 @@ export async function getPointsByConceptId(conceptId: number){
     return null;
 }
 
+export async function getPointsForSection(sectionId: number): Promise<Point[] | null> {
+    const { data, error } = await supabase
+        .from("points")
+        .select("*")
+        .eq("section_id", sectionId);
+    if (error) {
+        console.error("Error getting points for section:", error);
+        return null;
+    }
+    return (data ?? []) as Point[];
+}
+
 export async function getStudentPointsByPointIds(pointIds: number[]){
     try{
         const { data: studentPointData, error: studentPointError } = await supabase
@@ -872,6 +899,23 @@ export async function getStudentPointsByPointIds(pointIds: number[]){
         console.log("Exception thrown while getting student points by point ids: ", err);
     }
     return null;
+}
+
+export async function getStudentPointsForStudent(
+    studentId: string,
+    pointIds: number[]
+): Promise<StudentPoint[] | null> {
+    if (pointIds.length === 0) return [];
+    const { data, error } = await supabase
+        .from("student_points")
+        .select("*")
+        .eq("student_id", studentId)
+        .in("point_id", pointIds);
+    if (error) {
+        console.error("Error getting student points:", error);
+        return null;
+    }
+    return (data ?? []) as StudentPoint[];
 }
 
 export async function updateStudentPoint(studentPointId: number, newStatusId: number) {
