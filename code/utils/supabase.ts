@@ -12,6 +12,8 @@ const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey ||
                        process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 
                        "";
 
+const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
+
 // Only log in development, not in production
 if (__DEV__) {
   console.log(`Supabase URL: ${supabaseUrl.slice(0, 20)}...`);
@@ -19,16 +21,20 @@ if (__DEV__) {
 }
 
 // Validate required configuration
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!hasSupabaseConfig) {
   console.error('Missing Supabase configuration. Please check your environment variables or app.config.js');
 }
 
 // Create and configure the Supabase client
-const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+const supabase = createClient(
+  supabaseUrl || "https://placeholder.supabase.co",
+  supabaseAnonKey || "missing-anon-key",
+  {
   auth: {
     persistSession: true,
     storage: Platform.OS === 'web' ? localStorage : AsyncStorage,
   }
-});
+  }
+);
 
 export default supabase;
