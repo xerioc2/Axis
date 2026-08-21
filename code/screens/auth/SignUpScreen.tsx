@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text, Image } from "react-native";
+import { StyleSheet, View, Text, Image, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useFonts } from "expo-font";
 import { StackNavigationProp } from "@react-navigation/stack";
 import SignUpManager from "../../components/signup/SignUpManager";
@@ -24,7 +24,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = () => {
   if (!fontsLoaded) return null;
 
   return (
-    <View style={styles.pageWrapper}>
+    <KeyboardAvoidingView style={styles.pageWrapper} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
       <View style={styles.card}>
         <Image
           source={require("../../assets/images/axis_lettering.png")}
@@ -35,7 +36,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = () => {
 
         <SignUpManager />
       </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -45,12 +47,16 @@ const styles = StyleSheet.create({
   pageWrapper: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
   card: {
-    width: 400,
+    width: "100%",
+    maxWidth: 400,
     padding: 30,
     backgroundColor: Colors.white,
     borderRadius: 12,
@@ -62,7 +68,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 400,
+    width: "100%",
     height: 125,
     resizeMode: "contain",
     marginBottom: 10,

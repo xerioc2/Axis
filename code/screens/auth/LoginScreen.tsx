@@ -6,6 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -23,6 +27,7 @@ const LoginScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   useFonts({
     "Rexton Bold": require("../../assets/fonts/rexton_bold.otf"),
     Inter: require("../../assets/fonts/antonio_semibold.ttf"),
@@ -31,30 +36,38 @@ const LoginScreen: React.FC = () => {
 
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
-  const buttonEnabled = formData.email !== "" && formData.password !== "";
+  const buttonEnabled = formData.email.trim() !== "" && formData.password !== "" && !isSubmitting;
 
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleLoginSubmission = async () => {
-    const user: User | null = await login(formData.email, formData.password);
-    if (!user) {
-      setErrorMessage(
-        "Login failed. Please check your email and password, then try again."
-      );
-      return;
-    }
+    if (!buttonEnabled) return;
+    setIsSubmitting(true);
+    setErrorMessage("");
+    try {
+      const user: User | null = await login(formData.email.trim(), formData.password);
+      if (!user) {
+        setErrorMessage("Login failed. Please check your email and password, then try again.");
+        return;
+      }
 
-    if (user.user_type_id === 1) {
-      navigation.navigate("StudentDashboard", user);
-    } else if (user.user_type_id === 2) {
-      navigation.navigate("TeacherDashboard", user);
+      if (user.user_type_id === 1) {
+        navigation.replace("StudentDashboard", user);
+      } else if (user.user_type_id === 2) {
+        navigation.replace("TeacherDashboard", user);
+      } else {
+        setErrorMessage("This account does not have a supported student or teacher role.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <View style={styles.pageWrapper}>
+    <KeyboardAvoidingView style={styles.pageWrapper} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
       <View style={styles.card}>
         <Image
           source={require("../../assets/images/axis_lettering.png")}
@@ -65,14 +78,15 @@ const LoginScreen: React.FC = () => {
         <TextInput
           style={[
             styles.input,
-            emailFocused,
-            { outlineStyle: "none" } as any,
+            emailFocused && styles.inputFocused,
           ]}
           placeholder="Email"
           value={formData.email}
           onChangeText={(text) => handleChange("email", text)}
           placeholderTextColor={Colors.textInput}
           autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
           onFocus={() => setEmailFocused(true)}
           onBlur={() => setEmailFocused(false)}
         />
@@ -80,14 +94,15 @@ const LoginScreen: React.FC = () => {
         <TextInput
           style={[
             styles.input,
-            passwordFocused,
-            { outlineStyle: "none" } as any,
+            passwordFocused && styles.inputFocused,
           ]}
           placeholder="Password"
           value={formData.password}
           onChangeText={(text) => handleChange("password", text)}
           placeholderTextColor={Colors.textInput}
           secureTextEntry
+          autoComplete="current-password"
+          onSubmitEditing={handleLoginSubmission}
           onFocus={() => setPasswordFocused(true)}
           onBlur={() => setPasswordFocused(false)}
         />
@@ -97,7 +112,7 @@ const LoginScreen: React.FC = () => {
           onPress={handleLoginSubmission}
           disabled={!buttonEnabled}
         >
-          <Text style={styles.buttonText}>Sign In</Text>
+          {isSubmitting ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.buttonText}>Sign In</Text>}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => setShowResetModal(true)}>
@@ -118,7 +133,8 @@ const LoginScreen: React.FC = () => {
         visible={showResetModal}
         onClose={() => setShowResetModal(false)}
       />
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -128,12 +144,16 @@ const styles = StyleSheet.create({
   pageWrapper: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
   card: {
-    width: 400,
+    width: "100%",
+    maxWidth: 400,
     padding: 30,
     backgroundColor: Colors.white,
     borderRadius: 12,
@@ -145,7 +165,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 400,
+    width: "100%",
     height: 125,
     resizeMode: "contain",
   },
@@ -167,6 +187,10 @@ const styles = StyleSheet.create({
     fontFamily: "Inter",
     fontSize: 14,
     backgroundColor: "#fff",
+  },
+  inputFocused: {
+    borderColor: Colors.primary,
+    borderWidth: 2,
   },
   button: {
     backgroundColor: Colors.secondary,

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import supabase from "../../utils/supabase";
 import { Colors } from "../../theme";
@@ -21,18 +22,28 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   onClose,
 }) => {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSendResetLink = async () => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "myapp://reset-password",
-    });
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: "myapp://reset-password",
+      });
 
-    if (error) {
-      Alert.alert("Error", error.message);
-    } else {
-      Alert.alert("Success", "Password reset link sent to your email.");
-      setEmail("");
-      onClose();
+      if (error) {
+        Alert.alert("Error", error.message);
+      } else {
+        Alert.alert("Success", "Password reset link sent to your email.");
+        setEmail("");
+        onClose();
+      }
+    } catch {
+      Alert.alert("Error", "Could not send the reset link. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -51,11 +62,16 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
+            autoComplete="email"
             placeholderTextColor={Colors.textInput}
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleSendResetLink}>
-            <Text style={styles.buttonText}>Send Reset Link</Text>
+          <TouchableOpacity
+            style={[styles.button, (!email.trim() || isSubmitting) && styles.disabledButton]}
+            onPress={handleSendResetLink}
+            disabled={!email.trim() || isSubmitting}
+          >
+            {isSubmitting ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.buttonText}>Send Reset Link</Text>}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -81,7 +97,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   card: {
-    width: 400,
+    width: "100%",
+    maxWidth: 400,
     backgroundColor: Colors.white,
     padding: 30,
     borderRadius: 12,
@@ -121,6 +138,9 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: Colors.grey,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   buttonText: {
     color: Colors.white,

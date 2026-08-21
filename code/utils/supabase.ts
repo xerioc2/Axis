@@ -16,8 +16,7 @@ const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
 
 // Only log in development, not in production
 if (__DEV__) {
-  console.log(`Supabase URL: ${supabaseUrl.slice(0, 20)}...`);
-  console.log(`Supabase key: ${supabaseAnonKey.slice(0, 5)}...`);
+  console.log(`Supabase configuration: ${hasSupabaseConfig ? 'loaded' : 'missing'}`);
 }
 
 // Validate required configuration

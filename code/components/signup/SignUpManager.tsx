@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import ErrorMessage from "../ErrorMessage";
 import { RootStackParamList } from "@/code/utils/navigation.types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { signup } from "@/code/service/supabaseService";
+import { getSchoolByDetails, signup } from "@/code/service/supabaseService";
 import { Colors } from "../../theme";
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, "SignUp">;
@@ -27,16 +27,22 @@ const StepManager: React.FC = () => {
     schoolName: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const areAllFieldsEdited = Object.values(formData).every(
     (value) => value.trim() !== ""
   );
 
   const handleSignUpSubmission = async () => {
+    if (isSubmitting) return;
     if (formData.password !== formData.confirmPassword) {
       setErrorMessage(
         "Password and confirmation do not match. Double check your password and try again."
       );
+      return;
+    }
+    if (formData.password.length < 8) {
+      setErrorMessage("Password must be at least 8 characters long.");
       return;
     }
 
@@ -52,14 +58,33 @@ const StepManager: React.FC = () => {
       return;
     }
 
-    const singupResponse: { user: any; session: any } | null = await signup(
-      formData.email,
-      formData.password,
-      formData.firstName,
-      formData.lastName,
-      userTypeId,
-      1 // change this school id to the actual school id
+    const schoolTypeId = formData.schoolType === "Middle School"
+      ? 1
+      : formData.schoolType === "High School"
+        ? 2
+        : 3;
+
+    setIsSubmitting(true);
+    setErrorMessage("");
+    const school = await getSchoolByDetails(
+      formData.schoolName,
+      formData.state,
+      schoolTypeId
     );
+    if (!school) {
+      setErrorMessage("We could not find the selected school. Please review your school details and try again.");
+      setIsSubmitting(false);
+      return;
+    }
+    const singupResponse: { user: any; session: any } | null = await signup(
+      formData.email.trim(),
+      formData.password,
+      formData.firstName.trim(),
+      formData.lastName.trim(),
+      userTypeId,
+      school.school_id
+    );
+    setIsSubmitting(false);
 
     if (!singupResponse) {
       setErrorMessage(
@@ -95,11 +120,11 @@ const StepManager: React.FC = () => {
 
         {currentStep === 2 && (
           <TouchableOpacity
-            style={areAllFieldsEdited ? styles.button : styles.disabledButton}
-            disabled={!areAllFieldsEdited}
+            style={areAllFieldsEdited && !isSubmitting ? styles.button : styles.disabledButton}
+            disabled={!areAllFieldsEdited || isSubmitting}
             onPress={handleSignUpSubmission}
           >
-            <Text style={styles.buttonText}>FINISH</Text>
+            {isSubmitting ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.buttonText}>FINISH</Text>}
           </TouchableOpacity>
         )}
 

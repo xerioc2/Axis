@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, TextInput, StyleSheet, Alert } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import type { RootStackParamList } from '../utils/navigation.types';
-import { updatePassword, updateSchool, getSchoolById } from '../service/supabaseService';
+import { updatePassword, updateSchool, getSchoolByDetails, getSchoolById } from '../service/supabaseService';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import StatePicker from '../components/buttons/StatePicker';
@@ -57,6 +57,10 @@ useEffect(() => {
       setError("Passwords do not match.");
       return;
     }
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
     const success = await updatePassword(newPassword);
     if (!success) {
       setError("Failed to update password. Please try again.");
@@ -72,9 +76,26 @@ useEffect(() => {
   
 
   const handleSaveSchool = async () => {
-    const updated = await updateSchool(user.user_id, Number(selectedSchool));
+    if (!selectedState || !selectedSchoolType || !selectedSchool) {
+      Alert.alert("Missing information", "Select a state, school type, and school first.");
+      return;
+    }
+    const selectedTypeId = selectedSchoolType === "Middle School"
+      ? 1
+      : selectedSchoolType === "High School"
+        ? 2
+        : 3;
+    const school = await getSchoolByDetails(selectedSchool, selectedState, selectedTypeId);
+    if (!school) {
+      Alert.alert("Error", "Could not find the selected school.");
+      return;
+    }
+    const updated = await updateSchool(user.user_id, school.school_id);
     if (updated) {
       Alert.alert("Success", "School updated!");
+      setSchoolName(school.school_name);
+      setSchoolState(school.state);
+      setSchoolType(mapTypeIdToName(school.school_type_id));
       setShowEditSchoolModal(false);
     } else {
       Alert.alert("Error", "Could not update school.");
@@ -88,7 +109,7 @@ useEffect(() => {
       return;
     }
 
-    navigation.navigate('Login');
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
   return (

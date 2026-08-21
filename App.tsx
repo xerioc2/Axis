@@ -11,7 +11,7 @@ import type { RootStackParamList } from './code/utils/navigation.types';
 import ProfileScreen from './code/screens/ProfileScreen';
 import ResetPasswordScreen from './code/screens/ResetPasswordScreen';
 import 'react-native-url-polyfill/auto';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import * as Linking from 'expo-linking';
 import { StatusBar } from 'expo-status-bar';
 import { Platform, Text } from 'react-native';
@@ -27,12 +27,6 @@ const linking = {
       StudentDashboard: 'student',
       TeacherDashboard: 'teacher',
       Profile: 'profile',
-      ResetPassword: {
-        path: 'reset-password',
-        parse: {
-          token: (token: string) => `${token}`,
-        },
-      },
     },
   },
 };
@@ -41,18 +35,28 @@ export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 export default function App() {
   const shouldHeaderBeShown = false;
+  const pendingRecovery = useRef<{ accessToken: string; refreshToken: string } | null>(null);
+
+  const openRecoveryScreen = useCallback((accessToken: string, refreshToken: string) => {
+    const params = { accessToken, refreshToken };
+    if (navigationRef.isReady()) {
+      navigationRef.navigate('ResetPassword', params);
+    } else {
+      pendingRecovery.current = params;
+    }
+  }, []);
 
   useEffect(() => {
     const handleDeepLink = ({ url }: Linking.EventType | { url: string }) => {
       try {
         const parsedUrl = new URL(url);
         const hashParams = new URLSearchParams(parsedUrl.hash.substring(1));
-        const type = hashParams.get('type');
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
+        const type = hashParams.get('type') ?? parsedUrl.searchParams.get('type');
+        const accessToken = hashParams.get('access_token') ?? parsedUrl.searchParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token') ?? parsedUrl.searchParams.get('refresh_token');
 
-        if (type === 'recovery' && accessToken && refreshToken && navigationRef.isReady()) {
-          navigationRef.navigate('ResetPassword', { accessToken, refreshToken });
+        if (type === 'recovery' && accessToken && refreshToken) {
+          openRecoveryScreen(accessToken, refreshToken);
         }
       } catch (err) {
         console.warn('Error handling deep link:', err);
@@ -70,12 +74,23 @@ export default function App() {
 
     const subscription = Linking.addEventListener('url', handleDeepLink);
     return () => subscription.remove();
-  }, []);
+  }, [openRecoveryScreen]);
 
   return (
     <>
       <StatusBar style={Platform.OS === 'ios' ? 'auto' : 'dark'} />
-      <NavigationContainer linking={linking} ref={navigationRef} fallback={<Text>Loading...</Text>}>
+      <NavigationContainer
+        linking={linking}
+        ref={navigationRef}
+        fallback={<Text>Loading...</Text>}
+        onReady={() => {
+          if (pendingRecovery.current) {
+            const params = pendingRecovery.current;
+            pendingRecovery.current = null;
+            navigationRef.navigate('ResetPassword', params);
+          }
+        }}
+      >
         <Stack.Navigator>
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: shouldHeaderBeShown }} />
           <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: shouldHeaderBeShown }} />
