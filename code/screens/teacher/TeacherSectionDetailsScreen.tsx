@@ -1,14 +1,16 @@
-import { useRoute } from '@react-navigation/native';
+import { useRoute , useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../utils/navigation.types';
-import { useNavigation } from '@react-navigation/native';
+
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { User } from '../../../App';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Modal, Animated } from 'react-native';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import ErrorMessage from '../../components/ErrorMessage';
 import { getStudentsBySectionId, getTeachersBySectionId } from '../../service/supabaseService';
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 type SectionDetailsRouteProp = RouteProp<RootStackParamList, 'TeacherSectionDetails'>;
 
@@ -23,7 +25,7 @@ const TeacherSectionDetailsScreen: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
     
-    const slideAnim = useRef(new Animated.Value(500)).current;
+    const [slideAnim] = useState(() => new Animated.Value(500));
 
     // Modal animation functions
     const openModal = () => {
@@ -75,7 +77,7 @@ const TeacherSectionDetailsScreen: React.FC = () => {
         };
 
         fetchData();
-    }, []);
+    }, [sectionPreview.section_id]);
 
     // Section details modal
     const renderSectionDetailsModal = () => {
@@ -154,7 +156,7 @@ const TeacherSectionDetailsScreen: React.FC = () => {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             {/* Content Area */}
             <ScrollView style={styles.content}>
                 {/* Back button */}
@@ -254,18 +256,18 @@ const TeacherSectionDetailsScreen: React.FC = () => {
             <TouchableOpacity style={styles.footer} onPress={openModal}>
                 <Text style={styles.footerTitle}>Section Details</Text>
             </TouchableOpacity>
-        </View>
-    );
+            </SafeAreaView>
+)
 };
 
 const styles = StyleSheet.create({
     container: { 
-        height: '100%',
-        display: 'flex',
+        flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
         backgroundColor: "#F2FFED",
     },
+    
     content: {
         flex: 1,
         padding: 20,
@@ -284,8 +286,10 @@ const styles = StyleSheet.create({
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 15,           // 👈 Add this line
         marginBottom: 15,
-    },
+      },
+      
     backButtonText: {
         fontSize: 16,
         color: "#005824",

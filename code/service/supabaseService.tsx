@@ -365,7 +365,7 @@ export async function getSectionPreviews(userId: string){
             console.log("Error getting section_teachers: ", sectionTeacherError.message);
         }
         else if (sectionTeacherData){
-            if (sectionTeacherData.length == 0){
+            if (sectionTeacherData.length === 0){
                 console.log("No section teachers entries for this teacher. This teacher has not taught any sections.");
                 return null;
             }
@@ -528,7 +528,7 @@ export async function getEnrollmentsBySectionId(sectionId: number){
         else{
             console.log("Unexpected error occurred while getting enrollments for section id ", sectionId);
         }
-    } catch(err){
+    } catch(err) {
         console.log("Exception thrown while getting enrollments for section id ", sectionId, ': ', err);
     }
     return null;
@@ -609,7 +609,7 @@ export async function getTeachersBySectionId(sectionId: number){
         else{
             console.log("Unexpected error while getting section teachers for section id ", sectionId);
         }
-    } catch(err){
+    } catch {
         console.log("Exception thrown while getting teachers for section ", sectionId);
     }
     return null;
@@ -875,7 +875,7 @@ export async function getStudentPointsByPointIds(pointIds: number[]){
 
 export async function updateStudentPoint(studentPointId: number, newStatusId: number) {
     try {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('student_points')
             .update({ 
                 point_status_id: newStatusId,

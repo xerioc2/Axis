@@ -1,21 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
-  TextInput,
   ImageBackground,
-  TouchableOpacity,
   StyleSheet,
 } from "react-native";
 
 export default function Header() {
-  const [showCourses, setShowCourses] = useState(false);
-  const [showCheckPoints, setShowCheckPoints] = useState(false);
-  const [showAddClass, setShowAddClass] = useState(false);
-  const [showSemester, setShowSemester] = useState(false);
-}
-
-const StudentHeader: React.FC = () => {
   return (
     <>
       <View style={styles.container}>
@@ -29,7 +20,7 @@ const StudentHeader: React.FC = () => {
       </View>
     </>
   );
-};
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

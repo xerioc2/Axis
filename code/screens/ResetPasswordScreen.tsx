@@ -18,7 +18,7 @@ type NavigationProps = NativeStackNavigationProp<RootStackParamList, 'ResetPassw
 const ResetPasswordScreen = () => {
   const route = useRoute<ResetPasswordRouteProp>();
   const navigation = useNavigation<NavigationProps>();
-  const { token } = route.params;
+  const { accessToken, refreshToken } = route.params;
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,8 +32,8 @@ const ResetPasswordScreen = () => {
     try {
       // Step 1: Set the session using the token from the URL
       const { error: sessionError } = await supabase.auth.setSession({
-        access_token: token,
-        refresh_token: token, // Required even if it's the same token
+        access_token: accessToken,
+        refresh_token: refreshToken,
       });
 
       if (sessionError) {

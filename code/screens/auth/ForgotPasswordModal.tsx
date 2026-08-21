@@ -21,7 +21,6 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   onClose,
 }) => {
   const [email, setEmail] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
 
   const handleSendResetLink = async () => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -46,13 +45,10 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           <TextInput
             style={[
               styles.input,
-              isFocused && styles.inputFocused,
             ]}
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
             autoCapitalize="none"
             keyboardType="email-address"
             placeholderTextColor={Colors.textInput}
@@ -114,8 +110,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     backgroundColor: "#fff",
     marginBottom: 15,
-    outlineStyle: "none",
-    outlineWidth: 0,
   },
   button: {
     backgroundColor: Colors.secondary,

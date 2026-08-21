@@ -7,6 +7,8 @@ import type { GradeViewDto, StudentPointDto } from '../../../App';
 import { compileGradeViewData } from '../../service/dataConverterService';
 import { updateStudentPoint } from '../../service/supabaseService';
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import supabase from '../../utils/supabase';
 
 type TeacherGradeViewRouteProp = RouteProp<RootStackParamList, 'TeacherGradeView'>;
 
@@ -20,7 +22,7 @@ const TeacherGradeView: React.FC = () => {
     const [selectedPointId, setSelectedPointId] = useState<number | null>(null);
     const [isPickerVisible, setIsPickerVisible] = useState<boolean>(false);
     const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
-
+    
     // Colors for different point statuses
     const statusColors: { [key: number]: string } = {
         1: '#808080', // Not Attempted - Gray
@@ -43,7 +45,28 @@ const TeacherGradeView: React.FC = () => {
         };
         
         loadGradeViewData();
-    }, []);
+    }, [sectionPreview, student, user]);
+    useEffect(() => {
+        const channel = supabase
+          .channel('teacher-grade-refresh')
+          .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'student_points',
+            filter: `student_id=eq.${student.user_id}`,
+          }, async (payload: any) => {
+            console.log("📡 Real-time update received:", payload.new);
+            const updatedData = await compileGradeViewData(user, sectionPreview, student);
+            setGradeViewData(updatedData);
+          })
+          .subscribe();
+      
+        return () => {
+          supabase.removeChannel(channel);
+        };
+      }, [sectionPreview, student, user]);
+      
+      
     const countStatuses = (): Record<number, number> => {
         const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
       
@@ -256,7 +279,7 @@ const TeacherGradeView: React.FC = () => {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <ScrollView style={styles.content}>
                 {/* Back button */}
                 <TouchableOpacity 
@@ -357,18 +380,16 @@ const TeacherGradeView: React.FC = () => {
             <View style={styles.footer}>
                 <Text style={styles.footerTitle}>Student Grades</Text>
             </View>
-        </View>
+            </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: { 
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
+        flex: 1,
         backgroundColor: "#F2FFED",
     },
+    
     content: {
         flex: 1,
         padding: 20,
@@ -554,6 +575,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
+    modalContainer: {
+        position: 'absolute',
+        zIndex: 9999,
+        backgroundColor: 'white',
+        borderRadius: 12,
+        padding: 20,
+        width: '100%',
+        maxHeight: '80%',
+        elevation: 10, // Android
+      },
+      
     modalContent: {
         position: 'absolute',
         width: 200,

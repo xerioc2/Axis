@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, Image } from "react-native";
 import { useFonts } from "expo-font";
 import { StackNavigationProp } from "@react-navigation/stack";
 import SignUpManager from "../../components/signup/SignUpManager";
@@ -15,7 +15,7 @@ type SignUpScreenProps = {
   navigation: SignUpScreenNavigationProp;
 };
 
-const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
+const SignUpScreen: React.FC<SignUpScreenProps> = () => {
   const [fontsLoaded] = useFonts({
     "SF Pro": require("../../assets/fonts/sf_pro.ttf"),
     "Rexton Bold": require("../../assets/fonts/rexton_bold.otf"),

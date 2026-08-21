@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import CustomPicker from "../buttons/CustomPicker";
 import StatePicker from "../buttons/StatePicker";
@@ -20,8 +20,6 @@ type Step2Props = {
 };
 
 const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
-  const [schoolTypeId, setSchoolTypeId] = useState(3);
-
   const handleChange = (key: string, value: string) => {
     const newFormData: any = { ...formData, [key]: value };
     if (key === "schoolType" || key === "state") {
@@ -29,21 +27,6 @@ const Step2: React.FC<Step2Props> = ({ formData, setFormData }) => {
     }
     setFormData(newFormData);
 
-    if (key === "schoolType") {
-      switch (value) {
-        case "Middle School":
-          setSchoolTypeId(1);
-          break;
-        case "High School":
-          setSchoolTypeId(2);
-          break;
-        case "College":
-          setSchoolTypeId(3);
-          break;
-        default:
-          setSchoolTypeId(3);
-      }
-    }
   };
 
   const schoolTypeOptions = [

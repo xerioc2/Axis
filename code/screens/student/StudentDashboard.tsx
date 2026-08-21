@@ -3,10 +3,9 @@ import {
     View,
     Text,
     TouchableOpacity,
-    StyleSheet,
     TextInput,
     Modal
-} from "react-native";
+, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { styles } from "../../components/StudentDashboard/StudentDashboardStyle"; 
 import { getStudentData, enrollInSection } from "../../service/supabaseService"; 
 import type {
@@ -24,7 +23,7 @@ import StudentSectionCardList from "../../components/StudentDashboard/StudentSec
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../utils/navigation.types';
-import { SafeAreaView, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+
 
 
 type StudentDashboardRouteProp = RouteProp<
@@ -65,7 +64,7 @@ const StudentDashboard: React.FC = () => {
                     return;
                 }
                 setSectionPreviews(potentialStudentData.sections);
-            } catch (error) {
+            } catch {
                 setErrorMessage("Failed to load dashboard data. Please try again.");
                 setSectionPreviews([]);
             }
@@ -82,6 +81,7 @@ const StudentDashboard: React.FC = () => {
           >
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
               <View style={styles.container}>
+                {errorMessage !== "" && <ErrorMessage message={errorMessage} />}
                 
                 {!showJoinModal && (
                   <TouchableOpacity

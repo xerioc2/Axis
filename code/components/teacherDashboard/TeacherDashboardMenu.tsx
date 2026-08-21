@@ -4,13 +4,11 @@ import {
   Text,
   TouchableOpacity,
   Animated,
-  KeyboardAvoidingView,
   Platform,
-  ScrollView,
   TouchableWithoutFeedback,
-  Keyboard,
+  BackHandler,
+  StyleSheet,
 } from "react-native";
-import { styles } from "./TeacherDashboardStyle";
 
 type TeacherDashboardMenuProps = {
   closeModal: () => void;
@@ -25,22 +23,53 @@ const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
   setCreatingSection,
   setCreatingCourse,
 }) => {
+  // Use React's effects to manage hardware back button on Android
+  React.useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        closeModal();
+        return true;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, [closeModal]);
+
+  // Handle actions with proper cleanup
   const handleAddSection = () => {
-    // First set the state to show the section form
-    setCreatingSection(true);
-    // Then close the modal
-    closeModal();
+    // First close the modal (animation)
+    Animated.timing(slideAnim, {
+      toValue: 500,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      // Then set the state to show the section form after animation completes
+      setCreatingSection(true);
+      closeModal();
+    });
   };
 
   const handleAddCourse = () => {
-    // First set the state to show the course form
-    setCreatingCourse(true);
-    // Then close the modal
+    // First close the modal (animation)
+    Animated.timing(slideAnim, {
+      toValue: 500,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      // Then set the state to show the course form after animation completes
+      setCreatingCourse(true);
+      closeModal();
+    });
+  };
+
+  const handleBackdropPress = () => {
+    // Close modal when backdrop is pressed
     closeModal();
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={handleBackdropPress}>
       <View style={styles.modalOverlay}>
         <Animated.View
           style={[
@@ -48,42 +77,85 @@ const TeacherDashboardMenu: React.FC<TeacherDashboardMenuProps> = ({
             { transform: [{ translateY: slideAnim }] },
           ]}
         >
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
-          >
-            <ScrollView
-              contentContainerStyle={{ paddingBottom: 100 }}
-              keyboardShouldPersistTaps="handled"
+          <View style={styles.handle} />
+          
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity
+              onPress={handleAddSection}
+              style={styles.menuButton}
+              accessibilityLabel="Add section button"
             >
-              <TouchableOpacity
-                onPress={handleAddSection}
-                style={styles.modalButton}
-              >
-                <Text style={styles.modalButtonText}>Add Section</Text>
-              </TouchableOpacity>
+              <Text style={styles.menuButtonText}>Add Section</Text>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={handleAddCourse}
-                style={styles.modalButton}
-              >
-                <Text style={styles.modalButtonText}>Add Course</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleAddCourse}
+              style={styles.menuButton}
+              accessibilityLabel="Add course button"
+            >
+              <Text style={styles.menuButtonText}>Add Course</Text>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: "#ccc" }]}
-                onPress={closeModal}
-              >
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <View style={{ height: 200 }} />
-            </ScrollView>
-          </KeyboardAvoidingView>
+            <TouchableOpacity
+              style={[styles.menuButton, styles.cancelButton]}
+              onPress={closeModal}
+              accessibilityLabel="Cancel button"
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       </View>
     </TouchableWithoutFeedback>
   );
 };
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    height: "auto", // Changed from fixed height to auto
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20, // Extra padding for iOS
+  },
+  handle: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginBottom: 15,
+  },
+  buttonsContainer: {
+    marginBottom: 20,
+  },
+  menuButton: {
+    backgroundColor: "#005824",
+    padding: 15,
+    marginVertical: 8,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  menuButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cancelButton: {
+    backgroundColor: "#ccc",
+    marginTop: 12,
+  },
+  cancelButtonText: {
+    color: "#333",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
 
 export default TeacherDashboardMenu;

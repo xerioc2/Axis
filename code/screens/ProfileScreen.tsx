@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, TextInput, StyleSheet, Alert } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import type { RootStackParamList } from '../utils/navigation.types';
-import type { User } from '@/App';
-import { updatePassword, updateSchool } from '../service/supabaseService';
+import { updatePassword, updateSchool, getSchoolById } from '../service/supabaseService';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import StatePicker from '../components/buttons/StatePicker';
 import CustomPicker from '../components/buttons/CustomPicker';
 import SchoolPicker from '../components/buttons/SchoolPicker';
-import { getSchoolById } from '../service/supabaseService';
+import supabase from '../utils/supabase';
 
 // Types
 type ProfileScreenRouteProp = RouteProp<RootStackParamList, 'Profile'>;
@@ -51,7 +50,7 @@ useEffect(() => {
   };
 
   fetchSchoolInfo();
-}, []);
+}, [user.school_id]);
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
@@ -82,6 +81,16 @@ useEffect(() => {
     }
   };
 
+  const handleLogout = async () => {
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) {
+      Alert.alert('Error', 'Could not log out. Please try again.');
+      return;
+    }
+
+    navigation.navigate('Login');
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -110,7 +119,7 @@ useEffect(() => {
         <Text style={styles.buttonText}>Change Password</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Login')} style={[styles.button, { backgroundColor: 'gray' }]}>
+      <TouchableOpacity onPress={handleLogout} style={[styles.button, { backgroundColor: 'gray' }]}>
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
 

@@ -1,10 +1,10 @@
-import { useRoute } from '@react-navigation/native';
+import { useRoute , useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../utils/navigation.types';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity , SafeAreaView, ScrollView } from 'react-native';
+import { useEffect } from 'react';
 import StudentGradeView from '../student/StudentGradeView';
-import { useNavigation } from '@react-navigation/native';
+
 import { Ionicons } from '@expo/vector-icons';
 
 
@@ -26,26 +26,26 @@ const StudentSectionDetailsScreen: React.FC = () => {
     })
 
     return (
-        <>
-            <View>
-                <View>
-                <TouchableOpacity 
-  style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
-  onPress={() => navigation.goBack()}
->
-  <Ionicons name="arrow-back" size={24} color="#005824" />
-  <Text style={{ fontSize: 16, color: "#005824", marginLeft: 5 }}>Back to Dashboard</Text>
-</TouchableOpacity>
-
-                    <Text>{sectionPreview.course_subject} {sectionPreview.course_identifier}-{sectionPreview.section_identifier} {sectionPreview.course_name}</Text>
-                    <Text>{user.first_name} {user.last_name}</Text>
-                    <Text>Your Grades</Text>
-                    <StudentGradeView />
-
-                </View>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#F2FFED' }}>
+          <ScrollView contentContainerStyle={{ padding: 16 }}>
+            <TouchableOpacity
+              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={24} color="#005824" />
+              <Text style={{ fontSize: 16, color: "#005824", marginLeft: 5 }}>Back to Dashboard</Text>
+            </TouchableOpacity>
+      
+            <Text>{sectionPreview.course_subject} {sectionPreview.course_identifier}-{sectionPreview.section_identifier} {sectionPreview.course_name}</Text>
+            <Text>{user.first_name} {user.last_name}</Text>
+            <Text style={{ fontWeight: 'bold', marginVertical: 10 }}>Your Grades</Text>
+      
+            {/* ✅ Ensure the StudentGradeView gets room to breathe */}
+            <View style={{ flex: 1 }}>
+              <StudentGradeView />
             </View>
-        </>
-    )
-}
-
+          </ScrollView>
+        </SafeAreaView>
+      );
+    }
 export default StudentSectionDetailsScreen;

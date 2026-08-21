@@ -1,7 +1,6 @@
 import RadioGroup from "../buttons/RadioGroup";
 import React, { Dispatch, SetStateAction } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
-import { useFonts } from "expo-font";
+import { View, Text, StyleSheet } from "react-native";
 
 type Step1Props = {
   setRole: Dispatch<SetStateAction<string>>;
@@ -13,10 +12,6 @@ const Step1: React.FC<Step1Props> = ({ setRole, setIsRoleSelected }) => {
     setRole(newRole);
     setIsRoleSelected(true);
   };
-
-  const [fontsLoaded] = useFonts({
-    "SF Pro": require("../../assets/fonts/sf_pro.ttf"),
-  });
 
   return (
     <View style={styles.container}>
