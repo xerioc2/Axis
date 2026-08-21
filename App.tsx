@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import * as Linking from 'expo-linking';
 import { StatusBar } from 'expo-status-bar';
 import { Platform, Text } from 'react-native';
+import { getCurrentUser } from './code/service/supabaseService';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -36,8 +37,11 @@ export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 export default function App() {
   const shouldHeaderBeShown = false;
   const pendingRecovery = useRef<{ accessToken: string; refreshToken: string } | null>(null);
+  const pendingUser = useRef<User | null>(null);
+  const recoveryHandled = useRef(false);
 
   const openRecoveryScreen = useCallback((accessToken: string, refreshToken: string) => {
+    recoveryHandled.current = true;
     const params = { accessToken, refreshToken };
     if (navigationRef.isReady()) {
       navigationRef.navigate('ResetPassword', params);
@@ -63,14 +67,27 @@ export default function App() {
       }
     };
 
-    const checkInitialUrl = async () => {
+    const bootstrap = async () => {
       const initialUrl = await Linking.getInitialURL();
       if (initialUrl) {
         handleDeepLink({ url: initialUrl });
       }
+      if (!recoveryHandled.current) {
+        const user = await getCurrentUser();
+        if (user) {
+          if (navigationRef.isReady()) {
+            navigationRef.reset({
+              index: 0,
+              routes: [{ name: user.user_type_id === 2 ? 'TeacherDashboard' : 'StudentDashboard', params: user }],
+            });
+          } else {
+            pendingUser.current = user;
+          }
+        }
+      }
     };
 
-    checkInitialUrl();
+    bootstrap();
 
     const subscription = Linking.addEventListener('url', handleDeepLink);
     return () => subscription.remove();
@@ -88,6 +105,13 @@ export default function App() {
             const params = pendingRecovery.current;
             pendingRecovery.current = null;
             navigationRef.navigate('ResetPassword', params);
+          } else if (pendingUser.current) {
+            const user = pendingUser.current;
+            pendingUser.current = null;
+            navigationRef.reset({
+              index: 0,
+              routes: [{ name: user.user_type_id === 2 ? 'TeacherDashboard' : 'StudentDashboard', params: user }],
+            });
           }
         }}
       >

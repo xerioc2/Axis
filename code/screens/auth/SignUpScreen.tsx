@@ -17,8 +17,8 @@ type SignUpScreenProps = {
 
 const SignUpScreen: React.FC<SignUpScreenProps> = () => {
   const [fontsLoaded] = useFonts({
-    "SF Pro": require("../../assets/fonts/sf_pro.ttf"),
     "Rexton Bold": require("../../assets/fonts/rexton_bold.otf"),
+    Inter: require("../../assets/fonts/antonio_semibold.ttf"),
   });
 
   if (!fontsLoaded) return null;

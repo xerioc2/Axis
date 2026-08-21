@@ -5,7 +5,7 @@ import {
     TouchableOpacity,
     TextInput,
     Modal
-, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
 import { styles } from "../../components/StudentDashboard/StudentDashboardStyle"; 
 import { getStudentData, enrollInSection } from "../../service/supabaseService"; 
 import type {
@@ -40,17 +40,28 @@ const StudentDashboard: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [joinCode, setJoinCode] = useState('');
+    const [isJoining, setIsJoining] = useState(false);
 
     const joinSectionByCode = async (code: string) => {
+        if (!code.trim() || isJoining) return;
+        setIsJoining(true);
+        setErrorMessage("");
         const potentialSectionPreview: SectionPreviewDto | null | undefined = await enrollInSection(code.trim().toUpperCase(), student.user_id);
         if (potentialSectionPreview === undefined) {
             setErrorMessage("That enrollment code is not associated with any sections... please double check the code and try again.");
+            setIsJoining(false);
             return;
         } else if (!potentialSectionPreview) {
             setErrorMessage("There was an error enrolling you in that course. Please try again.");
+            setIsJoining(false);
             return;
         }
-        setSectionPreviews(prev => [...prev, potentialSectionPreview]);
+        setSectionPreviews(prev => prev.some(section => section.section_id === potentialSectionPreview.section_id)
+          ? prev
+          : [...prev, potentialSectionPreview]);
+        setJoinCode('');
+        setShowJoinModal(false);
+        setIsJoining(false);
     };
 
     useEffect(() => {
@@ -124,15 +135,15 @@ const StudentDashboard: React.FC = () => {
                         placeholder="Enter enrollment code"
                         value={joinCode}
                         onChangeText={setJoinCode}
+                        autoCapitalize="characters"
+                        onSubmitEditing={() => joinSectionByCode(joinCode)}
                       />
                       <TouchableOpacity
                         style={styles.modalButton}
-                        onPress={async () => {
-                          await joinSectionByCode(joinCode);
-                          setShowJoinModal(false);
-                        }}
+                        onPress={() => joinSectionByCode(joinCode)}
+                        disabled={!joinCode.trim() || isJoining}
                       >
-                        <Text style={styles.modalButtonText}>Join</Text>
+                        {isJoining ? <ActivityIndicator color="white" /> : <Text style={styles.modalButtonText}>Join</Text>}
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.modalButton, { backgroundColor: '#ccc' }]}

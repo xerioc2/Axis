@@ -1,51 +1,47 @@
-# Welcome to your Expo app 👋
+# Axis
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Axis is an Expo/React Native mastery-learning app for teachers and students. Teachers create courses and sections, configure assessment points, and update student progress. Students join sections with enrollment codes and view their progress in real time.
 
-## Get started
+## Requirements
 
-1. Install dependencies
+- Node.js 24 or a current supported LTS release
+- npm
+- An Expo-compatible Android, iOS, or web environment
+- A Supabase project containing the application schema
 
-   ```bash
-   npm install
-   npx expo install expo-image-picker
-   ```
+## Local setup
 
-2. Start the app
+1. Install dependencies with `npm ci`.
+2. Copy `.env.example` to `.env`.
+3. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` in `.env`.
+4. Run `npm start`.
 
-   ```bash
-    npx expo start
-   ```
+The anonymous key is intended for client applications, but database Row Level Security must still be enabled and correctly configured. Never place a Supabase service-role key in this app.
 
-In the output, you'll find options to open the app in a
+## Quality checks
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+npm run lint
+npx tsc --noEmit
+npm test -- --runInBand
+npx expo-doctor
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+To verify the web production bundle, run `npx expo export --platform web`.
 
-## Learn more
+## Project structure
 
-To learn more about developing your project with Expo, look at the following resources:
+- `App.tsx` — navigation and shared domain types
+- `code/screens` — authentication, profile, teacher, and student screens
+- `code/components` — reusable UI and forms
+- `code/service` — Supabase access and data conversion
+- `code/utils` — navigation types, generated school asset map, and Supabase client
+- `code/assets/schoolData` — state-by-state school lists
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+`code/utils/fileMap.ts` is generated. After changing school data, run `node generateFileMap.js`.
 
-## Join the community
+Middle-school keys intentionally reuse the high-school datasets because the source files are byte-for-byte identical. This avoids bundling two copies of the same statewide data.
 
-Join our community of developers creating universal apps.
+## Password recovery
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The app handles recovery links through `myapp://reset-password`. Add that redirect URL to the Supabase authentication redirect allowlist.
