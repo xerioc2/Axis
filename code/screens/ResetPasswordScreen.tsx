@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../utils/navigation.types';
@@ -22,13 +23,20 @@ const ResetPasswordScreen = () => {
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleResetPassword = async () => {
+    if (isSubmitting) return;
     if (newPassword !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match.');
       return;
     }
+    if (newPassword.length < 8) {
+      Alert.alert('Error', 'Password must be at least 8 characters long.');
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
       // Step 1: Set the session using the token from the URL
       const { error: sessionError } = await supabase.auth.setSession({
@@ -50,11 +58,13 @@ const ResetPasswordScreen = () => {
         Alert.alert('Update Error', updateError.message);
       } else {
         Alert.alert('Success', 'Password updated successfully!');
-        navigation.navigate('Login');
+        navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
       }
     } catch (err) {
       console.error('Unexpected error:', err);
       Alert.alert('Unexpected Error', 'Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -66,6 +76,7 @@ const ResetPasswordScreen = () => {
         style={styles.input}
         placeholder="New Password"
         secureTextEntry
+        autoComplete="new-password"
         value={newPassword}
         onChangeText={setNewPassword}
       />
@@ -73,12 +84,17 @@ const ResetPasswordScreen = () => {
         style={styles.input}
         placeholder="Confirm Password"
         secureTextEntry
+        autoComplete="new-password"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
-        <Text style={styles.buttonText}>Submit</Text>
+      <TouchableOpacity
+        style={[styles.button, isSubmitting && styles.buttonDisabled]}
+        onPress={handleResetPassword}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? <ActivityIndicator color="white" /> : <Text style={styles.buttonText}>Submit</Text>}
       </TouchableOpacity>
     </View>
   );
@@ -124,5 +140,8 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
 });

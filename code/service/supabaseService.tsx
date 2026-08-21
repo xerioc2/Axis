@@ -1,6 +1,7 @@
 import supabase from "../utils/supabase";
 import type { 
     User, 
+    School,
     SectionTeacher, 
     Section, 
     SectionPreviewDto, 
@@ -951,6 +952,33 @@ export async function getSchoolById(schoolId: number) {
       return null;
     }
   }
+
+export async function getSchoolByDetails(
+  schoolName: string,
+  state: string,
+  schoolTypeId: number
+): Promise<School | null> {
+  try {
+    const { data, error } = await supabase
+      .from("schools")
+      .select("*")
+      .eq("school_name", schoolName)
+      .eq("state", state)
+      .eq("school_type_id", schoolTypeId)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error finding selected school:", error);
+      return null;
+    }
+
+    return data as School | null;
+  } catch (err) {
+    console.error("Exception finding selected school:", err);
+    return null;
+  }
+}
 
 export async function disenrollStudent(studentId: string, sectionId: number): Promise<boolean> {
     try {
