@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, FlatList, ListRenderItem } from 'react-native';
+import { View, Text, FlatList, ListRenderItem , Platform } from 'react-native';
 import type { Course } from '../../../App';
-import { Platform } from 'react-native';
+
 import { styles } from "./TeacherDashboardStyle";
 
 type CourseCardListProps = {

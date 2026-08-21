@@ -21,7 +21,6 @@ import type {
   SectionTeacherInsertDto,
   Semester,
   Topic,
-  Concept,
 } from "../../../App";
 import { 
   createSection, 
@@ -95,7 +94,6 @@ const CreateSectionForm: React.FC<{
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [createdSectionId, setCreatedSectionId] = useState<number | null>(null);
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
 
   // Load courses and semesters
@@ -253,7 +251,7 @@ const CreateSectionForm: React.FC<{
   };
 
   // Validate each step
-  const validateStep = () => {
+  const validateStep = useCallback(() => {
     switch (currentStep) {
       case 1:
         if (!sectionIdentifier.trim()) {
@@ -315,7 +313,7 @@ const CreateSectionForm: React.FC<{
     }
     
     return true;
-  };
+  }, [allTopics, conceptsByTopic, currentStep, sectionIdentifier, selectedCourseId, selectedSemesterId]);
 
   // Move to the next step
   const nextStep = () => {
@@ -380,7 +378,6 @@ const CreateSectionForm: React.FC<{
       }
       
       const sectionId = sectionResult.section_id;
-      setCreatedSectionId(sectionId);
       
       // 2. Create Section Teacher association
       const sectionTeacherData: SectionTeacherInsertDto = {
@@ -424,7 +421,7 @@ const CreateSectionForm: React.FC<{
         setIsSubmitButtonDisabled(false);
       }, 500);
     }
-  }, [userId, sectionIdentifier, selectedCourseId, selectedSemesterId, startDate, pointsToCreate, isSubmitButtonDisabled, onSuccess]);
+  }, [userId, sectionIdentifier, selectedCourseId, selectedSemesterId, startDate, pointsToCreate, isSubmitButtonDisabled, onSuccess, validateStep]);
 
   // Calculate total points
   const calculateTotalPoints = () => {

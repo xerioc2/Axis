@@ -1,6 +1,6 @@
 // Combined Real-Time Grade Update Setup for TeacherGradeView and StudentGradeView
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/code/utils/navigation.types';
 import { compileGradeViewData } from '../service/dataConverterService';
@@ -21,23 +21,13 @@ import { debounce } from 'lodash';
 const RealTimeGradeView: React.FC<{ isTeacher: boolean }> = ({ isTeacher }) => {
   const route = useRoute<RouteProp<RootStackParamList, 'RealTimeGradeView'>>();
 
-  const navigation = useNavigation();
   const { user, sectionPreview, student } = route.params;
   const targetUser = isTeacher ? student : user;
 
-  const [gradeViewData, setGradeViewData] = useState<GradeViewDto | null>(null);
+  const [, setGradeViewData] = useState<GradeViewDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const SUBSCRIPTION_ERROR = 'SUBSCRIPTION_ERROR';
-
-  const statusColors: { [key: number]: string } = {
-    1: '#808080',
-    2: '#FF6B6B',
-    3: '#FFD700',
-    4: '#4CAF50',
-  };
-
-  const loadGradeViewData = async () => {
+  const loadGradeViewData = useCallback(async () => {
     try {
       setLoading(true);
       const data = await compileGradeViewData(user, sectionPreview, targetUser);
@@ -47,9 +37,9 @@ const RealTimeGradeView: React.FC<{ isTeacher: boolean }> = ({ isTeacher }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sectionPreview, targetUser, user]);
 
-  const debouncedRefresh = debounce(async () => {
+  const debouncedRefresh = useMemo(() => debounce(async () => {
     try {
       const refreshedData = await compileGradeViewData(user, sectionPreview, targetUser);
       setGradeViewData(refreshedData);
@@ -58,7 +48,7 @@ const RealTimeGradeView: React.FC<{ isTeacher: boolean }> = ({ isTeacher }) => {
     } finally {
       setIsRefreshing(false);
     }
-  }, 500);
+  }, 500), [sectionPreview, targetUser, user]);
 
   const updateLocalGradeData = (currentData: GradeViewDto, updatedPoint: any): GradeViewDto => {
     const updated = { ...currentData };
@@ -88,8 +78,10 @@ const RealTimeGradeView: React.FC<{ isTeacher: boolean }> = ({ isTeacher }) => {
   };
 
   useEffect(() => {
+    // This starts an asynchronous load; state changes occur after the promise resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadGradeViewData();
-  }, []);
+  }, [loadGradeViewData]);
   type SubscriptionStatus =
   | 'SUBSCRIBED'
   | 'TIMED_OUT'
@@ -109,9 +101,10 @@ useEffect(() => {
       try {
         console.log(`📡 Real-time update:`, payload.new);
         setIsRefreshing(true);
-        if (gradeViewData && payload.new) {
-          const updated = updateLocalGradeData(gradeViewData, payload.new);
-          setGradeViewData(updated);
+        if (payload.new) {
+          setGradeViewData((currentData) =>
+            currentData ? updateLocalGradeData(currentData, payload.new) : currentData
+          );
         }
         debouncedRefresh();
       } catch (error) {
@@ -126,9 +119,10 @@ useEffect(() => {
     });
 
   return () => {
+    debouncedRefresh.cancel();
     supabase.removeChannel(channel);
   };
-}, [targetUser.user_id]);
+}, [debouncedRefresh, isTeacher, targetUser.user_id]);
 
   if (loading) {
     return (

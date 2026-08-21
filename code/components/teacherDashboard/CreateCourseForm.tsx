@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,26 +10,11 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Modal,
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import type { 
-  CourseInsertDto,
-  Semester
-} from "../../../App";
-import { 
-  createCourse,
-  getSemesters
-} from "../../service/supabaseService";
-
-// Modal type enum - using string values to ensure proper TypeScript comparison
-enum ModalType {
-  None = 'None',
-  Course = 'Course',
-  Semester = 'Semester', 
-  Topic = 'Topic'
-}
+import type { CourseInsertDto } from "../../../App";
+import { createCourse } from "../../service/supabaseService";
 
 const CreateCourseForm: React.FC<{
   userId?: string;
@@ -42,34 +27,12 @@ const CreateCourseForm: React.FC<{
   const [courseSubject, setCourseSubject] = useState("");
   const [courseIdentifier, setCourseIdentifier] = useState("");
   
-  // Dynamic data
-  const [semesters, setSemesters] = useState<Semester[]>([]);
-  
-  // Single modal state
-  const [activeModal, setActiveModal] = useState<ModalType>(ModalType.None);
-  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
 
-  // Load semesters
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch semesters
-        const semestersData = await getSemesters();
-        setSemesters(semestersData || []);
-      } catch (err: any) {
-        console.error("Error fetching semesters:", err);
-        setError("Failed to load necessary data");
-      }
-    };
-    
-    fetchData();
-  }, []);
-
   // Validate the form
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     if (!courseName.trim()) {
       setError("Course name is required");
       return false;
@@ -77,7 +40,7 @@ const CreateCourseForm: React.FC<{
     
     setError("");
     return true;
-  };
+  }, [courseName]);
 
   // Submit form data with debounce
   const handleSubmit = useCallback(async () => {
@@ -119,7 +82,7 @@ const CreateCourseForm: React.FC<{
         setIsSubmitButtonDisabled(false);
       }, 500);
     }
-  }, [userId, schoolId, courseName, courseSubject, courseIdentifier, isSubmitButtonDisabled, onSuccess]);
+  }, [userId, schoolId, courseName, courseSubject, courseIdentifier, isSubmitButtonDisabled, onSuccess, validateForm]);
 
   // Main content render
   const renderContent = () => (

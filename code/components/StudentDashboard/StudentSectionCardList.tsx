@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Modal, Alert, ScrollView } from 'react-native';
 import type { SectionPreviewDto, User } from '../../../App';
-import { useFonts } from 'expo-font';
 import { styles } from "./StudentDashboardStyle";
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,7 +16,6 @@ type SectionCardListProps = {
 
 const StudentSectionCardList: React.FC<SectionCardListProps> = ({ sectionPreviews, student, setSectionPreviews }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [fontsLoaded] = useFonts({ 'SF Pro': require('../../assets/fonts/sf_pro.ttf') });
   const [disenrollModalVisible, setDisenrollModalVisible] = useState(false);
   const [pendingSectionId, setPendingSectionId] = useState<number | null>(null);
 

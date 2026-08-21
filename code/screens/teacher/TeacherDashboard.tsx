@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   Modal,
   Animated,
   StyleSheet,
-  Platform,
   BackHandler,
   LogBox,
 } from "react-native";
@@ -14,12 +13,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { styles } from "../../components/teacherDashboard/TeacherDashboardStyle";
 import { getTeacherData } from "../../service/supabaseService";
 import type {
-  User,
   Course,
   TeacherDataDto,
   SectionPreviewDto,
 } from "../../../App";
-import { useRoute, RouteProp } from "@react-navigation/native";
+import { useRoute, RouteProp , useNavigation } from "@react-navigation/native";
 import type { RootStackParamList } from "../../utils/navigation.types";
 import ErrorMessage from "../../components/ErrorMessage";
 import TeacherDashboardMenu from "../../components/teacherDashboard/TeacherDashboardMenu";
@@ -27,7 +25,7 @@ import TeacherSectionCardList from "../../components/teacherDashboard/TeacherSec
 import CourseCardList from "../../components/teacherDashboard/CourseCardList";
 import CreateSectionForm from "../../components/teacherDashboard/CreateSectionForm";
 import CreateCourseForm from "../../components/teacherDashboard/CreateCourseForm";
-import { useNavigation } from "@react-navigation/native";
+
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 // Temporarily ignore the warning during development
@@ -51,7 +49,7 @@ const TeacherDashboard: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
 
   // Animation reference
-  const slideAnim = useRef(new Animated.Value(500)).current;
+  const [slideAnim] = useState(() => new Animated.Value(500));
 
   // State for teacher data
   const [sectionPreviews, setSectionPreviews] = useState<SectionPreviewDto[]>([]);
@@ -115,6 +113,17 @@ const TeacherDashboard: React.FC = () => {
     fetchTeacherData();
   }, [teacher]); // Re-fetch if teacher prop changes
 
+  const closeMenu = useCallback(() => {
+    Animated.timing(slideAnim, {
+      toValue: 500,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      if (!isMounted.current) return;
+      setMenuVisible(false);
+    });
+  }, [slideAnim]);
+
   // Handle Android back button
   useEffect(() => {
     const backAction = () => {
@@ -138,7 +147,7 @@ const TeacherDashboard: React.FC = () => {
     );
 
     return () => backHandler.remove();
-  }, [menuVisible, sectionFormVisible, courseFormVisible]);
+  }, [closeMenu, menuVisible, sectionFormVisible, courseFormVisible]);
 
   // Function to refresh data after creating a new course or section
   const refreshData = async () => {
@@ -191,20 +200,6 @@ const TeacherDashboard: React.FC = () => {
         }).start();
       });
     }, 0);
-  };
-
-  const closeMenu = () => {
-    Animated.timing(slideAnim, {
-      toValue: 500,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      // Check if component is still mounted before updating state
-      if (!isMounted.current) return;
-      
-      // Only update state after animation completes
-      setMenuVisible(false);
-    });
   };
 
   const handleCreateSection = () => {

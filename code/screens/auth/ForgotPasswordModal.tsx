@@ -21,7 +21,6 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   onClose,
 }) => {
   const [email, setEmail] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
 
   const handleSendResetLink = async () => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -50,8 +49,6 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
             autoCapitalize="none"
             keyboardType="email-address"
             placeholderTextColor={Colors.textInput}

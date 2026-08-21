@@ -5,7 +5,6 @@ import {
   Image, 
   FlatList, 
   TouchableOpacity, 
-  StyleSheet,
   Platform,
   ListRenderItem 
 } from "react-native";

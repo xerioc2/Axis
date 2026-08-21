@@ -22,7 +22,6 @@ const TeacherGradeView: React.FC = () => {
     const [selectedPointId, setSelectedPointId] = useState<number | null>(null);
     const [isPickerVisible, setIsPickerVisible] = useState<boolean>(false);
     const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
-    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     
     // Colors for different point statuses
     const statusColors: { [key: number]: string } = {
@@ -46,7 +45,7 @@ const TeacherGradeView: React.FC = () => {
         };
         
         loadGradeViewData();
-    }, []);
+    }, [sectionPreview, student, user]);
     useEffect(() => {
         const channel = supabase
           .channel('teacher-grade-refresh')
@@ -65,7 +64,7 @@ const TeacherGradeView: React.FC = () => {
         return () => {
           supabase.removeChannel(channel);
         };
-      }, [student.user_id]);
+      }, [sectionPreview, student, user]);
       
       
     const countStatuses = (): Record<number, number> => {

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/code/utils/navigation.types';
 import { compileGradeViewData } from '../../service/dataConverterService';
@@ -13,7 +13,6 @@ import supabase from '../../utils/supabase';
 
 const StudentGradeView: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'StudentSectionDetails'>>();
-  const navigation = useNavigation();
   const { user, sectionPreview } = route.params;
 
   const [gradeViewData, setGradeViewData] = useState<GradeViewDto | null>(null);
@@ -27,15 +26,17 @@ const StudentGradeView: React.FC = () => {
   };
 
   // ✅ Extracted for reuse
-  const loadGradeViewData = async () => {
+  const loadGradeViewData = useCallback(async () => {
     const data = await compileGradeViewData(user, sectionPreview, user);
     setGradeViewData(data);
     setLoading(false);
-  };
+  }, [sectionPreview, user]);
 
   useEffect(() => {
+    // This starts an asynchronous load; state changes occur after the promise resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadGradeViewData(); // Initial load
-  }, []);
+  }, [loadGradeViewData]);
 
   useEffect(() => {
     const channel = supabase
@@ -55,7 +56,7 @@ const StudentGradeView: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user.user_id]);
+  }, [sectionPreview, user]);
   
   
 

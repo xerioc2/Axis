@@ -1,12 +1,12 @@
-import { useRoute } from '@react-navigation/native';
+import { useRoute , useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../utils/navigation.types';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity , SafeAreaView, ScrollView } from 'react-native';
+import { useEffect } from 'react';
 import StudentGradeView from '../student/StudentGradeView';
-import { useNavigation } from '@react-navigation/native';
+
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView, ScrollView } from 'react-native';
+
 
 
 

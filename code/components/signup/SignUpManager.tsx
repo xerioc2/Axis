@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Step1 from "./Step1";
@@ -16,7 +16,6 @@ const StepManager: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [role, setRole] = useState("");
   const [isRoleSelected, setIsRoleSelected] = useState(false);
-  const [areAllFieldsEdited, setAreAllFieldsEdited] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -29,27 +28,9 @@ const StepManager: React.FC = () => {
   });
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    if (currentStep === 1) {
-      setRole("");
-      setIsRoleSelected(false);
-    }
-  }, [currentStep]);
-
-  useEffect(() => {
-    if (
-      formData.firstName !== "" &&
-      formData.lastName !== "" &&
-      formData.email !== "" &&
-      formData.password !== "" &&
-      formData.confirmPassword !== "" &&
-      formData.schoolType !== "" &&
-      formData.state !== "" &&
-      formData.schoolName !== ""
-    ) {
-      setAreAllFieldsEdited(true);
-    }
-  }, [formData]);
+  const areAllFieldsEdited = Object.values(formData).every(
+    (value) => value.trim() !== ""
+  );
 
   const handleSignUpSubmission = async () => {
     if (formData.password !== formData.confirmPassword) {

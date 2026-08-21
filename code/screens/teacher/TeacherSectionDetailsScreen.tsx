@@ -1,11 +1,11 @@
-import { useRoute } from '@react-navigation/native';
+import { useRoute , useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../utils/navigation.types';
-import { useNavigation } from '@react-navigation/native';
+
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { User } from '../../../App';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Modal, Animated } from 'react-native';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import ErrorMessage from '../../components/ErrorMessage';
 import { getStudentsBySectionId, getTeachersBySectionId } from '../../service/supabaseService';
 import { Ionicons } from "@expo/vector-icons";
@@ -25,7 +25,7 @@ const TeacherSectionDetailsScreen: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
     
-    const slideAnim = useRef(new Animated.Value(500)).current;
+    const [slideAnim] = useState(() => new Animated.Value(500));
 
     // Modal animation functions
     const openModal = () => {
@@ -77,7 +77,7 @@ const TeacherSectionDetailsScreen: React.FC = () => {
         };
 
         fetchData();
-    }, []);
+    }, [sectionPreview.section_id]);
 
     // Section details modal
     const renderSectionDetailsModal = () => {
